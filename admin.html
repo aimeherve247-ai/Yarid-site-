@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YARID | Dashboard Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 p-4 md:p-10 font-sans">
+
+    <div class="max-w-5xl mx-auto">
+        <div class="flex justify-between items-center mb-10">
+            <h1 class="text-2xl font-black italic uppercase tracking-tighter">YARID <span class="text-sky-500 underline">ADMIN</span></h1>
+            <a href="index.html" class="text-[10px] font-bold uppercase bg-white px-4 py-2 rounded-full border border-slate-200">Voir le site</a>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="md:col-span-1 bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 h-fit">
+                <h2 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6 text-center">Nouveau Produit</h2>
+                <form id="productForm" class="space-y-4">
+                    <input type="text" id="name" placeholder="Nom du produit" required class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-sky-500 border-none">
+                    
+                    <input type="number" id="price" placeholder="Prix (FCFA)" required class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-sky-500 border-none">
+                    
+                    <textarea id="description" placeholder="Description courte..." required class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-sky-500 border-none h-24"></textarea>
+                    
+                    <div class="space-y-1">
+                        <input type="text" id="categorie" list="categories-list" placeholder="Catégorie (ex: Parfums)" required class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-sky-500 border-none">
+                        <datalist id="categories-list"></datalist>
+                    </div>
+                    
+                    <input type="text" id="image_url" placeholder="Lien de l'image (URL)" required class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-sky-500 border-none">
+                    
+                    <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl">
+                        <input type="checkbox" id="is_star" class="w-4 h-4 accent-sky-500">
+                        <label for="is_star" class="text-[10px] font-black uppercase text-slate-500">Mettre en avant (Star)</label>
+                    </div>
+
+                    <button type="submit" id="btnSubmit" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-sky-500 transition-all shadow-lg shadow-slate-200">
+                        Ajouter au stock
+                    </button>
+                </form>
+            </div>
+
+            <div class="md:col-span-2 bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+                <h2 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Stock Actuel</h2>
+                <div id="stockList" class="space-y-3">
+                    <p class="text-center text-slate-300 animate-pulse text-xs">Chargement du stock...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://whcpugnkldbmuqzgqxbe.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk'; 
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const productForm = document.getElementById('productForm');
+        const stockList = document.getElementById('stockList');
+
+        async function fetchProducts() {
+            const { data, error } = await _supabase
+                .from('PRODUITS')
+                .select('*')
+                .order('id', { ascending: false });
+
+            if (error) {
+                stockList.innerHTML = `<p class="text-red-500 text-xs">Erreur : ${error.message}</p>`;
+                return;
+            }
+
+            // Mise à jour de la liste de suggestions de catégories
+            const uniqueCats = [...new Set(data.map(p => p.categorie))];
+            document.getElementById('categories-list').innerHTML = uniqueCats.map(c => `<option value="${c}">`).join('');
+
+            stockList.innerHTML = '';
+            if (data.length === 0) {
+                stockList.innerHTML = '<p class="text-slate-300 text-center text-xs">Aucun produit en stock.</p>';
+            }
+
+            data.forEach(item => {
+                stockList.innerHTML += `
+                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200">
+                        <div class="flex items-center gap-4">
+                            <img src="${item.image_url}" class="w-12 h-12 object-cover rounded-xl shadow-sm">
+                            <div>
+                                <h4 class="font-bold text-[11px] uppercase text-slate-900">
+                                    ${item.name} ${item.is_star ? '<span class="text-sky-500 text-[8px]">★</span>' : ''}
+                                </h4>
+                                <p class="text-[10px] font-bold text-sky-500">${item.price.toLocaleString()} FCFA <span class="text-slate-300 ml-2">${item.categorie}</span></p>
+                            </div>
+                        </div>
+                        <button onclick="deleteProduct(${item.id})" class="p-3 bg-white text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                            </svg>
+                        </button>
+                    </div>`;
+            });
+        }
+
+        productForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            btn.innerText = "AJOUT EN COURS...";
+            btn.disabled = true;
+
+            const newProduct = {
+                name: document.getElementById('name').value,
+                price: parseInt(document.getElementById('price').value),
+                description: document.getElementById('description').value,
+                categorie: document.getElementById('categorie').value.toLowerCase().trim(), // Nettoyage auto
+                image_url: document.getElementById('image_url').value,
+                is_star: document.getElementById('is_star').checked // Nouvelle donnée envoyée
+            };
+
+            const { error } = await _supabase.from('PRODUITS').insert([newProduct]);
+
+            if (error) {
+                alert("Erreur lors de l'ajout : " + error.message);
+            } else {
+                alert("Produit ajouté avec succès !");
+                productForm.reset();
+                fetchProducts();
+            }
+            btn.innerText = "Ajouter au stock";
+            btn.disabled = false;
+        };
+
+        window.deleteProduct = async (id) => {
+            if (confirm("Voulez-vous vraiment supprimer ce produit ?")) {
+                const { error } = await _supabase
+                    .from('PRODUITS')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    alert("Erreur de suppression : " + error.message);
+                } else {
+                    fetchProducts();
+                }
+            }
+        };
+
+        fetchProducts();
+    </script>
+</body>
+</html>
