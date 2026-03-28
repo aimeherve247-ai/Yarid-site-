@@ -1,240 +1,1435 @@
 <!DOCTYPE html>
-<html lang="fr" class="scroll-smooth">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yarid | Boutique Premium & Services</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>YARID | Boutique Premium</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('YARID PWA : Prête !'))
+            .catch(err => console.log('Erreur PWA :', err));
+        });
+      }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .yarid-blue { color: #0ea5e9; }
-        .bg-yarid { background-color: #0ea5e9; }
-        .swiper-pagination-bullet-active { background: #0ea5e9 !important; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        /* Animation d'apparition douce */
-        .fade-in { animation: fadeIn 0.8s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        :root {
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+        }
+        
+        body { 
+            background: #f8fafc; 
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+        }
+        
+        .btn-primary { 
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); 
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+        
+        .btn-whatsapp { 
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); 
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+        
+        .category-pill { 
+            background: white; 
+            border: 1px solid #e2e8f0; 
+            transition: all 0.3s ease;
+        }
+        
+        .category-pill.active { 
+            background: #0f172a; 
+            color: white; 
+            border-color: #0f172a;
+        }
+        
+        .category-scroll { 
+            display: flex; 
+            gap: 0.75rem; 
+            overflow-x: auto; 
+            padding: 0 1rem 1rem; 
+            scrollbar-width: none;
+        }
+        
+        .category-scroll::-webkit-scrollbar { display: none; }
+        
+        .product-card { 
+            background: white; 
+            border-radius: 1.5rem; 
+            overflow: hidden; 
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .product-card:hover { 
+            transform: translateY(-4px); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .skeleton { 
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); 
+            background-size: 200% 100%; 
+            animation: shimmer 1.5s infinite;
+        }
+        
+        @keyframes shimmer { 
+            0% { background-position: 200% 0; } 
+            100% { background-position: -200% 0; } 
+        }
+        
+        .hero-swiper { 
+            height: 380px; 
+            border-radius: 0 0 2rem 2rem;
+        }
+        
+        .hero-swiper .swiper-slide { 
+            border-radius: 0 0 2rem 2rem; 
+            overflow: hidden;
+        }
+        
+        .modal { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.5); 
+            z-index: 1000; 
+            display: none; 
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal.active { display: flex; }
+        
+        .modal-content { 
+            background: white; 
+            border-radius: 2rem 2rem 0 0; 
+            max-height: 90vh; 
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp { 
+            from { transform: translateY(100%); } 
+            to { transform: translateY(0); } 
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .promo-card {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .promo-badge {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            padding-bottom: var(--safe-bottom);
+            z-index: 100;
+        }
+        
+        .nav-item.active { color: #0ea5e9; }
+        
+        .cart-drawer {
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            z-index: 1100;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .cart-drawer.open { transform: translateX(0); }
+        
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1050;
+            display: none;
+        }
+        
+        .overlay.active { display: block; }
     </style>
 </head>
-<body class="bg-white text-slate-900 antialiased pt-20">
+<body class="antialiased text-slate-900 pb-20">
 
-    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-[100] border-b border-slate-100">
-        <div class="container mx-auto px-4 h-16 flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-black italic tracking-tighter uppercase">YARID<span class="text-sky-500">.</span></a>
-            <div class="hidden md:flex space-x-8 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                <a href="index.html" class="text-sky-500 border-b-2 border-sky-500 pb-1">Boutique</a>
-                <a href="services.html" class="hover:text-sky-500 transition">Services Pro</a>
-                <a href="contact.html" class="hover:text-sky-500 transition">Contact</a>
-            </div>
-            <div class="flex items-center gap-5">
-                <a href="cart.html" class="relative p-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md z-50 border-b border-slate-100">
+        <div class="flex items-center justify-between px-4 h-14">
+            <a href="index.html" class="text-xl font-black italic tracking-tighter uppercase">YARID<span class="text-sky-500">.</span></a>
+            <div class="flex items-center gap-3">
+                <button onclick="openAccountModal()" class="p-2 rounded-full hover:bg-slate-100 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>
-                    <span id="cart-count" class="absolute top-0 right-0 bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">0</span>
-                </a>
+                </button>
+                <button onclick="toggleCart()" class="relative p-2 rounded-full hover:bg-slate-100 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-sky-500 text-white text-[9px] font-black rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                </button>
             </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-14">
+        
+        <!-- Hero Carousel -->
+        <section class="pt-4 mb-6">
+            <div class="swiper hero-swiper" id="hero-swiper">
+                <div class="swiper-wrapper" id="hero-wrapper">
+                    <!-- Slides injectés dynamiquement -->
+                    <div class="swiper-slide relative bg-slate-900">
+                        <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80" class="w-full h-full object-cover opacity-60">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent p-6 flex flex-col justify-end">
+                            <span class="text-sky-400 text-xs font-bold uppercase tracking-wider mb-2">Programme Elite</span>
+                            <h2 class="text-white text-3xl font-black italic uppercase leading-none mb-3">Parrainez<br>& Gagnez</h2>
+                            <p class="text-slate-300 text-sm mb-4">2000 FCFA par ami parrainé</p>
+                            <button onclick="openParrainage()" class="btn-primary text-white px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider w-fit">
+                                Participer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-pagination !bottom-4"></div>
+            </div>
+        </section>
+
+        <!-- Trust Badges -->
+        <section class="px-4 mb-6">
+            <div class="flex justify-between gap-2">
+                <div class="flex-1 bg-white rounded-2xl p-3 text-center shadow-sm">
+                    <svg class="w-6 h-6 mx-auto mb-1 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-[10px] font-bold text-slate-600">Paiement sécurisé</p>
+                </div>
+                <div class="flex-1 bg-white rounded-2xl p-3 text-center shadow-sm">
+                    <svg class="w-6 h-6 mx-auto mb-1 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    <p class="text-[10px] font-bold text-slate-600">Livraison rapide</p>
+                </div>
+                <div class="flex-1 bg-white rounded-2xl p-3 text-center shadow-sm">
+                    <svg class="w-6 h-6 mx-auto mb-1 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    <p class="text-[10px] font-bold text-slate-600">Support 24/7</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories -->
+        <section class="mb-6">
+            <div class="category-scroll" id="categories">
+                <button class="category-pill active px-5 py-2.5 rounded-full text-sm font-semibold" onclick="filterCategory('all', this)">Tout</button>
+                <button class="category-pill px-5 py-2.5 rounded-full text-sm font-semibold text-slate-600" onclick="filterCategory('parfums', this)">Parfums</button>
+                <button class="category-pill px-5 py-2.5 rounded-full text-sm font-semibold text-slate-600" onclick="filterCategory('tech', this)">Tech</button>
+                <button class="category-pill px-5 py-2.5 rounded-full text-sm font-semibold text-slate-600" onclick="filterCategory('mode', this)">Mode</button>
+                <button class="category-pill px-5 py-2.5 rounded-full text-sm font-semibold text-slate-600" onclick="filterCategory('services', this)">Services Pro</button>
+            </div>
+        </section>
+
+        <!-- Promotions Carousel Section -->
+        <section class="px-4 mb-8" id="promotions-section">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold flex items-center gap-2">
+                    <span class="text-2xl">🔥</span> Promos du moment
+                </h3>
+                <span class="text-xs text-slate-400 font-medium" id="promo-countdown">Expire dans 04:23:15</span>
+            </div>
+            <div class="swiper promo-swiper" id="promo-swiper">
+                <div class="swiper-wrapper" id="promos-container">
+                    <!-- Promos injectées dynamiquement -->
+                    <div class="swiper-slide">
+                        <div class="skeleton h-48 rounded-2xl"></div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="skeleton h-48 rounded-2xl"></div>
+                    </div>
+                </div>
+                <div class="swiper-pagination mt-4"></div>
+            </div>
+        </section>
+
+        <!-- Products Grid -->
+        <section class="px-4 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold">Nouveautés</h3>
+                <div class="flex gap-2">
+                    <button onclick="setView('grid')" class="p-2 rounded-lg bg-slate-100 text-slate-600" id="btn-grid">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    </button>
+                    <button onclick="setView('list')" class="p-2 rounded-lg text-slate-400" id="btn-list">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3" id="products-grid">
+                <div class="skeleton aspect-[3/4] rounded-2xl"></div>
+                <div class="skeleton aspect-[3/4] rounded-2xl"></div>
+                <div class="skeleton aspect-[3/4] rounded-2xl"></div>
+                <div class="skeleton aspect-[3/4] rounded-2xl"></div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section class="px-4 mb-8">
+            <h3 class="text-lg font-bold mb-4">Services Pro</h3>
+            <div class="bg-slate-900 rounded-3xl p-6 text-white relative overflow-hidden">
+                <div class="relative z-10">
+                    <span class="text-sky-400 text-xs font-bold uppercase tracking-wider">B2B</span>
+                    <h4 class="text-xl font-black italic uppercase mt-2 mb-3">Solutions entreprises</h4>
+                    <ul class="space-y-2 text-sm text-slate-300 mb-4">
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Sourcing international
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            BTP & Construction
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Transport & Logistique
+                        </li>
+                    </ul>
+                    <button onclick="openServicesPage()" class="bg-white text-slate-900 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-sky-500 hover:text-white transition">
+                        Voir les services
+                    </button>
+                </div>
+                <div class="absolute top-0 right-0 w-32 h-32 bg-sky-500/20 rounded-full blur-3xl"></div>
+            </div>
+        </section>
+
+        <!-- WhatsApp Support Floating Button -->
+        <a href="https://wa.me/237655959284?text=Bonjour%20YARID%2C%20j'ai%20besoin%20d'aide" 
+           class="fixed bottom-24 right-4 z-50 bg-[#25D366] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+            </svg>
+        </a>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="flex justify-around items-center h-16">
+            <a href="index.html" class="nav-item active flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-sky-500 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span class="text-[9px] font-bold">Accueil</span>
+            </a>
+            <a href="category.html" class="nav-item flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-sky-500 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                <span class="text-[9px] font-bold">Catégories</span>
+            </a>
+            <button onclick="toggleCart()" class="nav-item flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-sky-500 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                <span class="text-[9px] font-bold">Panier</span>
+            </button>
+            <button onclick="openAccountModal()" class="nav-item flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-sky-500 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <span class="text-[9px] font-bold">Compte</span>
+            </button>
         </div>
     </nav>
 
-    <section class="container mx-auto px-4 py-6">
-        <div class="swiper heroSwiper rounded-[2.5rem] overflow-hidden shadow-2xl">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide relative h-[450px]">
-                    <img src="https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=1200" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-8 md:p-12">
-                        <span class="text-sky-400 font-bold uppercase tracking-[0.3em] text-[10px] mb-2">Exclusivité Yarid</span>
-                        <h2 class="text-white text-4xl md:text-6xl font-black italic uppercase leading-none mb-6">Fragrances <br>D'Exception</h2>
-                        <a href="#shop-content" class="bg-white text-black px-8 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest w-fit">Acheter Maintenant</a>
+    <!-- Cart Drawer -->
+    <div class="overlay" id="cart-overlay" onclick="toggleCart()"></div>
+    <div class="cart-drawer" id="cart-drawer">
+        <div class="flex flex-col h-full">
+            <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                <h2 class="text-xl font-black italic uppercase">Mon Panier</h2>
+                <button onclick="toggleCart()" class="p-2 rounded-full hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 space-y-4" id="cart-items">
+                <!-- Cart items injectés ici -->
+            </div>
+            
+            <div class="p-4 border-t border-slate-100 bg-slate-50 space-y-3">
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">Sous-total</span>
+                    <span class="font-bold" id="cart-subtotal">0 FCFA</span>
+                </div>
+                <div class="flex justify-between text-sm" id="discount-row" style="display: none;">
+                    <span class="text-emerald-600">Réduction</span>
+                    <span class="font-bold text-emerald-600" id="cart-discount">-0 FCFA</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">Livraison</span>
+                    <span class="font-bold text-slate-900" id="cart-delivery">0 FCFA</span>
+                </div>
+                <div class="flex justify-between text-lg font-bold pt-2 border-t border-slate-200">
+                    <span>Total</span>
+                    <span class="text-sky-600" id="cart-total">0 FCFA</span>
+                </div>
+                
+                <!-- Promo Code -->
+                <div class="flex gap-2 pt-2">
+                    <input type="text" id="promo-input" placeholder="Code promo" 
+                           class="flex-1 px-4 py-2 rounded-xl border border-slate-200 text-sm uppercase font-semibold outline-none focus:border-sky-500">
+                    <button onclick="applyPromo()" class="bg-slate-900 text-white px-4 rounded-xl text-xs font-bold uppercase">OK</button>
+                </div>
+                
+                <button onclick="openCheckout()" class="btn-primary w-full py-4 rounded-2xl text-white font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2">
+                    Commander
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </button>
+                
+                <button onclick="orderViaWhatsApp()" class="btn-whatsapp w-full py-3 rounded-2xl text-white font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                    WhatsApp Direct
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal" id="product-modal">
+        <div class="modal-content absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto">
+            <div class="relative">
+                <button onclick="closeProductModal()" class="absolute top-4 right-4 z-10 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                <img id="modal-image" src="" class="w-full h-64 object-cover">
+            </div>
+            
+            <div class="p-5">
+                <div class="flex items-start justify-between mb-2">
+                    <div>
+                        <p class="text-sky-500 text-sm font-bold mb-1" id="modal-category">Parfums</p>
+                        <h2 class="text-2xl font-black uppercase italic leading-tight" id="modal-title">Nom Produit</h2>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-2xl font-black text-slate-900" id="modal-price">0 FCFA</p>
+                        <p class="text-xs text-slate-400 line-through" id="modal-old-price"></p>
                     </div>
                 </div>
-                <div class="swiper-slide relative h-[450px]">
-                    <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1200" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-8 md:p-12">
-                        <h2 class="text-white text-4xl md:text-6xl font-black italic uppercase leading-none mb-6">Technologie <br>Au Poignet</h2>
-                        <a href="#shop-content" class="bg-sky-500 text-white px-8 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest w-fit">Voir la Collection</a>
+                
+                <!-- Rating -->
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="flex text-yellow-400" id="modal-rating">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    </div>
+                    <span class="text-xs text-slate-500 font-medium" id="modal-reviews">128 avis • 847 vendus</span>
+                </div>
+                
+                <p class="text-slate-600 text-sm leading-relaxed mb-6" id="modal-desc">
+                    Description du produit...
+                </p>
+                
+                <!-- Similar Products Recommendation -->
+                <div class="mb-6" id="similar-products-section">
+                    <p class="text-sm font-bold mb-3">Produits similaires</p>
+                    <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide" id="similar-products">
+                        <!-- Produits similaires injectés dynamiquement -->
+                    </div>
+                </div>
+                
+                <div class="space-y-4 mb-24">
+                    <div>
+                        <p class="text-sm font-bold mb-2">Quantité</p>
+                        <div class="flex items-center gap-4 bg-slate-100 w-fit rounded-2xl p-1">
+                            <button onclick="updateModalQty(-1)" class="w-10 h-10 rounded-xl bg-white shadow-sm font-bold text-slate-600 active:scale-95 transition">-</button>
+                            <span class="w-8 text-center font-bold" id="modal-qty">1</span>
+                            <button onclick="updateModalQty(1)" class="w-10 h-10 rounded-xl bg-white shadow-sm font-bold text-slate-600 active:scale-95 transition">+</button>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="swiper-pagination"></div>
+            
+            <!-- Sticky Bottom Actions -->
+            <div class="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100" style="padding-bottom: calc(16px + var(--safe-bottom));">
+                <div class="flex gap-3">
+                    <button onclick="addToCartFromModal()" class="btn-primary flex-1 py-4 rounded-2xl text-white font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 active:scale-95 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                        Ajouter
+                    </button>
+                    <button onclick="buyNow()" class="btn-whatsapp flex-1 py-4 rounded-2xl text-white font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 active:scale-95 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                        WhatsApp
+                    </button>
+                </div>
+            </div>
         </div>
-    </section>
+    </div>
 
-    <main id="shop-content" class="container mx-auto px-4 py-12">
-        <div id="dynamic-shop-container" class="space-y-20">
-            <div class="text-center py-20 text-slate-300 font-bold uppercase tracking-widest text-xs">Chargement de la collection...</div>
+    <!-- Checkout Modal -->
+    <div class="modal" id="checkout-modal">
+        <div class="modal-content absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                <h2 class="text-xl font-black italic uppercase">Finaliser la commande</h2>
+                <button onclick="closeCheckout()" class="p-2 rounded-full hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                <!-- Order Summary -->
+                <div class="bg-slate-50 rounded-2xl p-4 space-y-2">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Récapitulatif</p>
+                    <div id="checkout-items" class="space-y-2 text-sm">
+                        <!-- Items injectés ici -->
+                    </div>
+                    <div class="border-t border-slate-200 pt-2 mt-2 flex justify-between font-bold">
+                        <span>Total</span>
+                        <span class="text-sky-600" id="checkout-total">0 FCFA</span>
+                    </div>
+                </div>
+                
+                <!-- Contact Info -->
+                <div class="space-y-3">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Vos informations</p>
+                    <input type="text" id="checkout-nom" placeholder="Nom complet" class="w-full p-4 rounded-2xl border border-slate-200 text-sm font-semibold outline-none focus:border-sky-500">
+                    <input type="tel" id="checkout-tel" placeholder="Téléphone (WhatsApp)" class="w-full p-4 rounded-2xl border border-slate-200 text-sm font-semibold outline-none focus:border-sky-500">
+                    <input type="text" id="checkout-adresse" placeholder="Quartier / Ville / Repère" class="w-full p-4 rounded-2xl border border-slate-200 text-sm font-semibold outline-none focus:border-sky-500">
+                </div>
+                
+                <!-- Delivery Mode -->
+                <div class="space-y-3">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Livraison</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="setCheckoutDelivery('retrait')" id="btn-checkout-retrait" class="p-4 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white text-center transition-all">
+                            <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            <p class="text-xs font-bold">Retrait</p>
+                            <p class="text-[10px] opacity-80">Gratuit</p>
+                        </button>
+                        <button onclick="setCheckoutDelivery('domicile')" id="btn-checkout-domicile" class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 text-center transition-all">
+                            <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                            <p class="text-xs font-bold">Domicile</p>
+                            <p class="text-[10px] opacity-80">+2000 FCFA</p>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Payment Mode -->
+                <div class="space-y-3">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Paiement</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="setCheckoutPayment('especes')" id="btn-checkout-especes" class="p-4 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white text-center transition-all">
+                            <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            <p class="text-xs font-bold">Cash</p>
+                            <p class="text-[10px] opacity-80">À la livraison</p>
+                        </button>
+                        <button onclick="setCheckoutPayment('mobile')" id="btn-checkout-mobile" class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 text-center transition-all">
+                            <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                            <p class="text-xs font-bold">Mobile Money</p>
+                            <p class="text-[10px] opacity-80">OM/MOMO</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-white border-t border-slate-100" style="padding-bottom: calc(16px + var(--safe-bottom));">
+                <button onclick="submitOrder()" id="btn-submit-order" class="btn-whatsapp w-full py-4 rounded-2xl text-white font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                    Confirmer sur WhatsApp
+                </button>
+            </div>
         </div>
-    </main>
+    </div>
 
-    <section class="bg-slate-950 py-24 text-center text-white">
-        <h3 class="text-3xl font-extrabold italic uppercase mb-12">Accompagnement Sourcing & <br><span class="text-sky-500">Projets de Construction.</span></h3>
-        <a href="services.html" class="bg-white text-black px-10 py-5 rounded-full text-[11px] font-black uppercase tracking-widest">Découvrir nos services</a>
-    </section>
+    <!-- Account Modal -->
+    <div class="modal" id="account-modal">
+        <div class="modal-content absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                <h2 class="text-xl font-black italic uppercase">Mon Compte</h2>
+                <button onclick="closeAccountModal()" class="p-2 rounded-full hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="p-4 space-y-6 overflow-y-auto max-h-[70vh]">
+                <!-- User Info -->
+                <div class="bg-slate-900 rounded-3xl p-6 text-white relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 bg-sky-500 rounded-full flex items-center justify-center text-xl font-black">
+                                <span id="user-initial">Y</span>
+                            </div>
+                            <div>
+                                <p class="font-bold" id="user-name">Invité</p>
+                                <p class="text-xs text-slate-400" id="user-phone">Non connecté</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-sky-500/20 rounded-full blur-3xl"></div>
+                </div>
 
-    <footer class="bg-slate-900 text-slate-300 pt-16 pb-8">
-        </footer>
+                <!-- Points & Rewards Section -->
+                <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-5 text-white">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-200">Mes Points YARID</p>
+                            <p class="text-3xl font-black" id="user-points">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-indigo-200">1 Point = 1 FCFA de réduction</p>
+                    <button onclick="openParrainage()" class="mt-3 w-full bg-white/20 py-2 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-white/30 transition">
+                        Gagner plus de points
+                    </button>
+                </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+                <!-- Orders Section -->
+                <div>
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3">Mes Commandes</h3>
+                    <div id="user-orders" class="space-y-3">
+                        <p class="text-sm text-slate-500 text-center py-4">Aucune commande pour le moment</p>
+                    </div>
+                </div>
+
+                <!-- Referral Table -->
+                <div>
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3">Mon Parrainage</h3>
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs text-slate-500">Code de parrainage</span>
+                            <span class="font-black text-sky-600 bg-sky-100 px-3 py-1 rounded-full text-sm" id="referral-code">---</span>
+                        </div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs text-slate-500">Filleuls parrainés</span>
+                            <span class="font-bold" id="referral-count">0</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-slate-500">Gains totaux</span>
+                            <span class="font-bold text-emerald-600" id="referral-earnings">0 FCFA</span>
+                        </div>
+                        <button onclick="shareReferralCode()" class="mt-3 w-full bg-slate-900 text-white py-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                            Partager mon code
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Support Button -->
+                <a href="https://wa.me/237655959284?text=Bonjour%20YARID%2C%20j'ai%20besoin%20d'aide%20avec%20mon%20compte" 
+                   class="w-full btn-whatsapp py-4 rounded-2xl text-white font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                    Support Client WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parrainage Modal -->
+    <div class="modal" id="parrainage-modal">
+        <div class="modal-content absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                <h2 class="text-xl font-black italic uppercase">Programme Parrainage</h2>
+                <button onclick="closeParrainageModal()" class="p-2 rounded-full hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="p-5">
+                <div class="bg-slate-900 rounded-3xl p-6 mb-6 text-white relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="bg-sky-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase">Elite</span>
+                            <span class="text-slate-300 text-xs">Programme Parrainage</span>
+                        </div>
+                        <h3 class="text-2xl font-black italic uppercase mb-2">Gagnez ensemble</h3>
+                        <p class="text-slate-300 text-sm">Partagez votre code et gagnez 2000 FCFA par ami parrainé</p>
+                    </div>
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-sky-500/20 rounded-full blur-3xl"></div>
+                </div>
+                
+                <div class="space-y-4 mb-6">
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl">
+                        <div class="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center text-sky-500 font-bold text-lg">1</div>
+                        <div>
+                            <p class="font-bold text-sm">Partagez votre code</p>
+                            <p class="text-xs text-slate-500">Copiez et envoyez à vos amis</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl">
+                        <div class="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center text-sky-500 font-bold text-lg">2</div>
+                        <div>
+                            <p class="font-bold text-sm">Ils commandent</p>
+                            <p class="text-xs text-slate-500">-10% sur leur première commande</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl">
+                        <div class="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center text-sky-500 font-bold text-lg">3</div>
+                        <div>
+                            <p class="font-bold text-sm">Vous gagnez</p>
+                            <p class="text-xs text-slate-500">2000 FCFA crédités automatiquement</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-sky-50 border-2 border-sky-100 rounded-2xl p-4 mb-4">
+                    <p class="text-xs font-bold text-sky-600 uppercase mb-2">Votre code</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="parrainage-code" value="YARID-ELITE-2025" readonly class="flex-1 bg-white border-2 border-sky-200 rounded-xl py-3 px-4 font-black text-center text-lg tracking-widest text-slate-800 outline-none">
+                        <button onclick="copyParrainageCode()" class="bg-sky-500 text-white px-4 rounded-xl font-bold text-sm active:scale-95 transition">Copier</button>
+                    </div>
+                </div>
+                
+                <button onclick="shareParrainageCode()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 active:scale-95 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                    Partager mon code
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services Modal -->
+    <div class="modal" id="services-modal">
+        <div class="modal-content absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                <h2 class="text-xl font-black italic uppercase">Services <span class="text-sky-500">Pro</span></h2>
+                <button onclick="closeServicesModal()" class="p-2 rounded-full hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="p-5 space-y-4">
+                <div class="bg-slate-50 rounded-2xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg">BTP & Construction</h4>
+                            <p class="text-sm text-slate-500">Gestion de projets, matériaux</p>
+                        </div>
+                    </div>
+                    <a href="btp-details.html" class="block w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider text-center hover:bg-sky-500 transition">En savoir plus</a>
+                </div>
+                
+                <div class="bg-slate-50 rounded-2xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center text-sky-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg">Sourcing International</h4>
+                            <p class="text-sm text-slate-500">Import/export, Douanes</p>
+                        </div>
+                    </div>
+                    <a href="contact.html?service=sourcing" class="block w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider text-center hover:bg-sky-500 transition">Demander un devis</a>
+                </div>
+                
+                <div class="bg-slate-50 rounded-2xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg">Transport & Logistique</h4>
+                            <p class="text-sm text-slate-500">Livraison B2B, Stockage</p>
+                        </div>
+                    </div>
+                    <a href="contact.html?service=transport" class="block w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider text-center hover:bg-sky-500 transition">Demander un devis</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Initialisation Swiper
-        new Swiper(".heroSwiper", { 
-            pagination: { el: ".swiper-pagination", clickable: true }, 
-            autoplay: { delay: 5000 }, 
-            loop: true 
-        });
-
-        // CONNEXION SUPABASE
+        // ==========================================
+        // CONFIGURATION SUPABASE
+        // ==========================================
         const SUPABASE_URL = 'https://whcpugnkldbmuqzgqxbe.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function fetchProducts() {
-            const { data: produits, error } = await _supabase
-                .from('PRODUITS')
-                .select('*');
+        // ==========================================
+        // ÉTAT GLOBAL
+        // ==========================================
+        let cart = JSON.parse(localStorage.getItem('yarid_cart')) || [];
+        let products = [];
+        let promotions = [];
+        let currentModalProduct = null;
+        let modalQty = 1;
+        let checkoutDelivery = 'retrait';
+        let checkoutPayment = 'especes';
+        let currentUser = null;
 
-            if (error) {
-                console.error("Erreur Supabase:", error);
+        // ==========================================
+        // INITIALISATION
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            initHeroSwiper();
+            await loadProducts();
+            await loadPromotions();
+            await loadUserData();
+            updateCartUI();
+            startPromoCountdown();
+        });
+
+        // ==========================================
+        // HERO SWIPER
+        // ==========================================
+        function initHeroSwiper() {
+            new Swiper('#hero-swiper', {
+                loop: true,
+                autoplay: { delay: 5000, disableOnInteraction: false },
+                pagination: { el: '.swiper-pagination', clickable: true }
+            });
+        }
+
+        // ==========================================
+        // CHARGEMENT DES PRODUITS
+        // ==========================================
+        async function loadProducts() {
+            try {
+                const { data, error } = await _supabase
+                    .from('PRODUITS')
+                    .select('*')
+                    .order('id', { ascending: false })
+                    .limit(20);
+
+                if (error) throw error;
+                products = data || [];
+                renderProducts(products);
+            } catch (e) {
+                console.error('Erreur chargement produits:', e);
+                document.getElementById('products-grid').innerHTML = `
+                    <div class="col-span-2 text-center py-10 text-slate-400">
+                        <p>Impossible de charger les produits</p>
+                        <button onclick="loadProducts()" class="mt-4 text-sky-500 font-bold text-sm">Réessayer</button>
+                    </div>
+                `;
+            }
+        }
+
+        function renderProducts(items) {
+            const grid = document.getElementById('products-grid');
+            if (items.length === 0) {
+                grid.innerHTML = '<p class="col-span-2 text-center py-10 text-slate-400">Aucun produit disponible</p>';
                 return;
             }
 
-            const container = document.getElementById('dynamic-shop-container');
-            container.innerHTML = ''; // On vide le loader
+            grid.innerHTML = items.map(p => `
+                <div class="product-card cursor-pointer" onclick="openProductModal(${p.id})">
+                    <div class="relative aspect-[3/4] overflow-hidden">
+                        <img src="${p.image_url || 'https://via.placeholder.com/300x400'}" 
+                             class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                             alt="${p.name}">
+                        ${p.is_star ? '<span class="absolute top-2 left-2 bg-yellow-400 text-yellow-900 text-[9px] font-black px-2 py-1 rounded-full">STAR</span>' : ''}
+                        ${p.old_price ? `<span class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-full">-${Math.round((1 - p.price/p.old_price) * 100)}%</span>` : ''}
+                    </div>
+                    <div class="p-3">
+                        <p class="text-[10px] text-sky-500 font-bold uppercase tracking-wider mb-1">${p.categorie}</p>
+                        <h4 class="font-bold text-sm text-slate-900 truncate mb-1">${p.name}</h4>
+                        <div class="flex items-center justify-between">
+                            <span class="font-black text-slate-900">${p.price?.toLocaleString() || 0} F</span>
+                            ${p.old_price ? `<span class="text-xs text-slate-400 line-through">${p.old_price.toLocaleString()} F</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-            // 1. ORGANISATION INTELLIGENTE
-            // On récupère toutes les catégories uniques
-            const categories = [...new Set(produits.map(p => p.categorie))];
+        // ==========================================
+        // CHARGEMENT DES PROMOTIONS (CARROUSEL)
+        // ==========================================
+        async function loadPromotions() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const { data, error } = await _supabase
+                    .from('promotions')
+                    .select('*')
+                    .gte('date_fin', today)
+                    .lte('date_debut', today)
+                    .order('id', { ascending: false });
 
-            // 2. AFFICHAGE DES PRODUITS PHARES (Ceux marqués is_star ou Sélection Yarid)
-            const produitsPhares = produits.filter(p => p.is_star === true || p.price > 100000); // Exemple de logique phare
-            if(produitsPhares.length > 0) {
-                renderCategorySection("Sélection Yarid", produitsPhares.slice(0, 4), "bg-sky-50/50");
+                if (error) throw error;
+                promotions = data || [];
+                renderPromotions(promotions);
+            } catch (e) {
+                console.error('Erreur chargement promotions:', e);
+            }
+        }
+
+        function renderPromotions(items) {
+            const container = document.getElementById('promos-container');
+            if (items.length === 0) {
+                document.getElementById('promotions-section').style.display = 'none';
+                return;
             }
 
-            // 3. GÉNÉRATION DYNAMIQUE DES CATÉGORIES
-            categories.forEach(cat => {
-                const catProducts = produits.filter(p => p.categorie === cat);
-                if(catProducts.length > 0) {
-                    // On n'affiche que les produits qui ne sont pas déjà en "Sélection Yarid" si on veut éviter les doublons
-                    renderCategorySection(cat, catProducts);
+            container.innerHTML = items.map(p => `
+                <div class="swiper-slide">
+                    <div class="promo-card relative h-48 overflow-hidden">
+                        <img src="${p.image_url}" class="w-full h-full object-cover" alt="${p.titre}">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-4 flex flex-col justify-end">
+                            <span class="promo-badge text-white text-[9px] font-black px-2 py-1 rounded-full w-fit mb-2">PROMO FLASH</span>
+                            <h4 class="text-white font-black text-lg uppercase italic leading-tight mb-1">${p.titre}</h4>
+                            ${p.prix ? `<p class="text-yellow-400 font-bold text-sm">${p.prix.toLocaleString()} FCFA</p>` : ''}
+                            <button onclick="buyPromoItem('${p.titre}', ${p.prix || 0})" 
+                                    class="mt-2 bg-white text-slate-900 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-sky-500 hover:text-white transition">
+                                Acheter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Initialiser le swiper des promotions
+            new Swiper('#promo-swiper', {
+                slidesPerView: 1.2,
+                spaceBetween: 12,
+                centeredSlides: true,
+                loop: items.length > 1,
+                pagination: { el: '.swiper-pagination', clickable: true },
+                breakpoints: {
+                    640: { slidesPerView: 2.2, centeredSlides: false }
                 }
             });
         }
 
-        // FONCTION POUR GÉNÉRER LE HTML D'UNE SECTION
-        function renderCategorySection(title, products, bgColor = "") {
-            const container = document.getElementById('dynamic-shop-container');
+        function buyPromoItem(titre, prix) {
+            const msg = `Bonjour YARID ! 👋\n\nJe souhaite commander la promotion : *${titre}*\n\nPrix : ${prix > 0 ? prix.toLocaleString() + ' FCFA' : 'À confirmer'}\n\nMerci de confirmer ma commande !`;
+            window.location.href = `https://wa.me/237655959284?text=${encodeURIComponent(msg)}`;
+        }
+
+        function startPromoCountdown() {
+            let hours = 4, minutes = 23, seconds = 15;
+            setInterval(() => {
+                seconds--;
+                if (seconds < 0) { seconds = 59; minutes--; }
+                if (minutes < 0) { minutes = 59; hours--; }
+                if (hours < 0) { hours = 4; minutes = 23; seconds = 15; }
+                document.getElementById('promo-countdown').textContent = 
+                    `Expire dans ${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+            }, 1000);
+        }
+
+        // ==========================================
+        // FILTRES CATÉGORIES
+        // ==========================================
+        function filterCategory(cat, btn) {
+            document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
             
-            const sectionHTML = `
-                <div class="fade-in ${bgColor} ${bgColor ? 'p-8 rounded-[3rem]' : ''}">
-                    <div class="flex justify-between items-end mb-8 px-2">
-                        <div>
-                            <h3 class="text-2xl font-black italic uppercase tracking-tighter">${title}</h3>
-                            <div class="h-1 w-12 bg-sky-500 mt-1"></div>
+            if (cat === 'all') {
+                renderProducts(products);
+            } else if (cat === 'services') {
+                openServicesPage();
+            } else {
+                const filtered = products.filter(p => p.categorie?.toLowerCase().includes(cat));
+                renderProducts(filtered);
+            }
+        }
+
+        function setView(view) {
+            document.getElementById('btn-grid').classList.toggle('bg-slate-100', view === 'grid');
+            document.getElementById('btn-grid').classList.toggle('text-slate-600', view === 'grid');
+            document.getElementById('btn-list').classList.toggle('bg-slate-100', view === 'list');
+            document.getElementById('btn-list').classList.toggle('text-slate-600', view === 'list');
+            
+            const grid = document.getElementById('products-grid');
+            grid.className = view === 'grid' ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3';
+        }
+
+        // ==========================================
+        // MODAL PRODUIT AVEC RECOMMANDATIONS
+        // ==========================================
+        function openProductModal(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            currentModalProduct = product;
+            modalQty = 1;
+            
+            document.getElementById('modal-image').src = product.image_url || 'https://via.placeholder.com/400x400';
+            document.getElementById('modal-category').textContent = product.categorie || 'Produit';
+            document.getElementById('modal-title').textContent = product.name;
+            document.getElementById('modal-price').textContent = `${product.price?.toLocaleString() || 0} FCFA`;
+            document.getElementById('modal-old-price').textContent = product.old_price ? `${product.old_price.toLocaleString()} FCFA` : '';
+            document.getElementById('modal-desc').textContent = product.description || 'Découvrez ce produit exclusif chez YARID.';
+            document.getElementById('modal-qty').textContent = modalQty;
+            
+            // Charger les produits similaires (même catégorie, exclure le produit actuel)
+            loadSimilarProducts(product);
+            
+            document.getElementById('product-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function loadSimilarProducts(currentProduct) {
+            const similar = products
+                .filter(p => p.categorie === currentProduct.categorie && p.id !== currentProduct.id)
+                .slice(0, 5);
+            
+            const container = document.getElementById('similar-products');
+            if (similar.length === 0) {
+                document.getElementById('similar-products-section').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('similar-products-section').style.display = 'block';
+            container.innerHTML = similar.map(p => `
+                <div class="flex-shrink-0 w-20 cursor-pointer" onclick="openProductModal(${p.id})">
+                    <div class="aspect-square bg-slate-100 rounded-xl mb-1 overflow-hidden">
+                        <img src="${p.image_url}" class="w-full h-full object-cover" alt="${p.name}">
+                    </div>
+                    <p class="text-[10px] font-medium truncate">${p.name}</p>
+                    <p class="text-[10px] text-sky-600 font-bold">${p.price?.toLocaleString() || 0}F</p>
+                </div>
+            `).join('');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.remove('active');
+            document.body.style.overflow = '';
+            currentModalProduct = null;
+        }
+
+        function updateModalQty(delta) {
+            modalQty = Math.max(1, modalQty + delta);
+            document.getElementById('modal-qty').textContent = modalQty;
+        }
+
+        function addToCartFromModal() {
+            if (!currentModalProduct) return;
+            addToCart(currentModalProduct, modalQty);
+            closeProductModal();
+        }
+
+        function buyNow() {
+            if (!currentModalProduct) return;
+            const msg = `Bonjour YARID ! 👋\n\nJe souhaite commander : *${currentModalProduct.name}*\n\nQuantité : ${modalQty}\nPrix unitaire : ${currentModalProduct.price?.toLocaleString() || 0} FCFA\nTotal : ${(currentModalProduct.price * modalQty).toLocaleString()} FCFA\n\nMerci de confirmer ma commande !`;
+            window.location.href = `https://wa.me/237655959284?text=${encodeURIComponent(msg)}`;
+        }
+
+        // ==========================================
+        // PANIER
+        // ==========================================
+        function addToCart(product, qty = 1) {
+            const existing = cart.find(item => item.id === product.id);
+            if (existing) {
+                existing.quantity += qty;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image_url,
+                    quantity: qty
+                });
+            }
+            saveCart();
+            updateCartUI();
+            
+            // Animation feedback
+            const badge = document.getElementById('cart-count');
+            badge.classList.add('scale-125');
+            setTimeout(() => badge.classList.remove('scale-125'), 200);
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            saveCart();
+            updateCartUI();
+            renderCartItems();
+        }
+
+        function updateCartQty(index, delta) {
+            cart[index].quantity += delta;
+            if (cart[index].quantity <= 0) {
+                cart.splice(index, 1);
+            }
+            saveCart();
+            updateCartUI();
+            renderCartItems();
+        }
+
+        function saveCart() {
+            localStorage.setItem('yarid_cart', JSON.stringify(cart));
+        }
+
+        function updateCartUI() {
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cart-count');
+            badge.textContent = count;
+            badge.classList.toggle('hidden', count === 0);
+            
+            // Mettre à jour les totaux
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('cart-subtotal').textContent = `${subtotal.toLocaleString()} FCFA`;
+            document.getElementById('cart-total').textContent = `${subtotal.toLocaleString()} FCFA`;
+        }
+
+        function toggleCart() {
+            const drawer = document.getElementById('cart-drawer');
+            const overlay = document.getElementById('cart-overlay');
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('active');
+            renderCartItems();
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cart-items');
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10">
+                        <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                        </svg>
+                        <p class="text-slate-400">Votre panier est vide</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = cart.map((item, index) => `
+                <div class="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-100">
+                    <img src="${item.image}" class="w-16 h-16 object-cover rounded-xl" alt="${item.name}">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-sm truncate">${item.name}</h4>
+                        <p class="text-sky-600 font-bold text-sm">${(item.price * item.quantity).toLocaleString()} FCFA</p>
+                    </div>
+                    <div class="flex items-center gap-2 bg-slate-100 rounded-xl p-1">
+                        <button onclick="updateCartQty(${index}, -1)" class="w-7 h-7 rounded-lg bg-white font-bold text-slate-600">-</button>
+                        <span class="w-6 text-center font-bold text-sm">${item.quantity}</span>
+                        <button onclick="updateCartQty(${index}, 1)" class="w-7 h-7 rounded-lg bg-white font-bold text-slate-600">+</button>
+                    </div>
+                    <button onclick="removeFromCart(${index})" class="p-2 text-red-400 hover:text-red-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function orderViaWhatsApp() {
+            if (cart.length === 0) return alert('Votre panier est vide !');
+            
+            const cartSummary = cart.map(i => `• ${i.quantity}x ${i.name} = ${(i.price * i.quantity).toLocaleString()} FCFA`).join('\n');
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            const msg = `*COMMANDE YARID* 🛒\n\n${cartSummary}\n\n*TOTAL : ${total.toLocaleString()} FCFA*\n\nMerci de confirmer ma commande !`;
+            window.location.href = `https://wa.me/237655959284?text=${encodeURIComponent(msg)}`;
+        }
+
+        function applyPromo() {
+            const code = document.getElementById('promo-input').value.trim().toUpperCase();
+            if (!code) return;
+            alert('Code promo en cours de vérification...');
+        }
+
+        // ==========================================
+        // CHECKOUT
+        // ==========================================
+        function openCheckout() {
+            if (cart.length === 0) return alert('Votre panier est vide !');
+            
+            toggleCart();
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('checkout-total').textContent = `${total.toLocaleString()} FCFA`;
+            
+            document.getElementById('checkout-items').innerHTML = cart.map(item => `
+                <div class="flex justify-between">
+                    <span class="text-slate-600">${item.quantity}x ${item.name}</span>
+                    <span class="font-medium">${(item.price * item.quantity).toLocaleString()} F</span>
+                </div>
+            `).join('');
+            
+            document.getElementById('checkout-modal').classList.add('active');
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkout-modal').classList.remove('active');
+        }
+
+        function setCheckoutDelivery(mode) {
+            checkoutDelivery = mode;
+            document.getElementById('btn-checkout-retrait').className = mode === 'retrait' 
+                ? 'p-4 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white text-center transition-all'
+                : 'p-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 text-center transition-all';
+            document.getElementById('btn-checkout-domicile').className = mode === 'domicile'
+                ? 'p-4 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white text-center transition-all'
+                : 'p-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 text-center transition-all';
+            
+            // Mettre à jour le total avec frais de livraison
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const deliveryFee = mode === 'domicile' ? 2000 : 0;
+            document.getElementById('checkout-total').textContent = `${(subtotal + deliveryFee).toLocaleString()} FCFA`;
+        }
+
+        function setCheckoutPayment(mode) {
+            checkoutPayment = mode;
+            document.getElementById('btn-checkout-especes').className = mode === 'especes'
+                ? 'p-4 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white text-center transition-all'
+                : 'p-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 text-center transition-all';
+            document.getElementById('btn-checkout-mobile').className = mode === 'mobile'
+                ? 'p-4 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white text-center transition-all'
+                : 'p-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 text-center transition-all';
+        }
+
+        async function submitOrder() {
+            const nom = document.getElementById('checkout-nom').value.trim();
+            const tel = document.getElementById('checkout-tel').value.trim();
+            const adresse = document.getElementById('checkout-adresse').value.trim();
+            
+            if (!nom || !tel) {
+                alert('Veuillez remplir votre nom et téléphone');
+                return;
+            }
+            
+            const btn = document.getElementById('btn-submit-order');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"></span>Envoi...';
+            
+            const orderId = 'YRD-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const deliveryFee = checkoutDelivery === 'domicile' ? 2000 : 0;
+            const total = subtotal + deliveryFee;
+            
+            const cartSummary = cart.map(i => `${i.quantity}x ${i.name}`).join(', ');
+            
+            // Sauvegarder la commande dans Supabase
+            try {
+                await _supabase.from('commande').insert([{
+                    order_id: orderId,
+                    client_nom: nom,
+                    client_phone: tel,
+                    client_adresse: adresse,
+                    article: cartSummary,
+                    montant_total: total,
+                    mode_livraison: checkoutDelivery,
+                    mode_paiement: checkoutPayment,
+                    statut: 'en_attente'
+                }]);
+            } catch (e) {
+                console.error('Erreur sauvegarde commande:', e);
+            }
+            
+            // Ouvrir WhatsApp avec les détails de la commande
+            const msg = `*NOUVELLE COMMANDE YARID* 🛒\n\n` +
+                        `*N° Commande :* ${orderId}\n\n` +
+                        `*Client :* ${nom}\n` +
+                        `*Téléphone :* ${tel}\n` +
+                        `*Adresse :* ${adresse || 'Non précisée'}\n\n` +
+                        `*Articles :*\n${cart.map(i => `• ${i.quantity}x ${i.name}`).join('\n')}\n\n` +
+                        `*Sous-total :* ${subtotal.toLocaleString()} FCFA\n` +
+                        `*Livraison :* ${checkoutDelivery === 'domicile' ? '2000 FCFA' : 'Gratuit (retrait)'}\n` +
+                        `*Mode de paiement :* ${checkoutPayment === 'especes' ? 'Espèces' : 'Mobile Money'}\n` +
+                        `*TOTAL :* ${total.toLocaleString()} FCFA\n\n` +
+                        `Merci de confirmer ma commande !`;
+            
+            // Vider le panier
+            cart = [];
+            saveCart();
+            updateCartUI();
+            
+            // Redirection WhatsApp
+            window.location.href = `https://wa.me/237655959284?text=${encodeURIComponent(msg)}`;
+        }
+
+        // ==========================================
+        // COMPTE UTILISATEUR
+        // ==========================================
+        async function loadUserData() {
+            const savedPhone = localStorage.getItem('yarid_user_phone');
+            if (savedPhone) {
+                try {
+                    const { data: user } = await _supabase
+                        .from('parrainage')
+                        .select('*')
+                        .eq('telephone_parrain', savedPhone)
+                        .single();
+                    
+                    if (user) {
+                        currentUser = user;
+                        document.getElementById('user-name').textContent = `Client ${savedPhone}`;
+                        document.getElementById('user-phone').textContent = savedPhone;
+                        document.getElementById('user-initial').textContent = savedPhone.charAt(0).toUpperCase();
+                        document.getElementById('user-points').textContent = (user.visites || 0) * 2;
+                        document.getElementById('referral-code').textContent = user.code_ref || '---';
+                        document.getElementById('referral-count').textContent = user.filleuls || 0;
+                        document.getElementById('referral-earnings').textContent = `${((user.filleuls || 0) * 2000).toLocaleString()} FCFA`;
+                        document.getElementById('parrainage-code').value = user.code_ref || 'YARID-ELITE-2025';
+                    }
+                } catch (e) {
+                    console.error('Erreur chargement utilisateur:', e);
+                }
+            }
+            
+            // Charger les commandes de l'utilisateur
+            loadUserOrders();
+        }
+
+        async function loadUserOrders() {
+            const savedPhone = localStorage.getItem('yarid_user_phone');
+            if (!savedPhone) return;
+            
+            try {
+                const { data: orders } = await _supabase
+                    .from('commande')
+                    .select('*')
+                    .eq('client_phone', savedPhone)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                const container = document.getElementById('user-orders');
+                if (orders && orders.length > 0) {
+                    container.innerHTML = orders.map(o => `
+                        <div class="bg-slate-50 rounded-xl p-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-sm text-sky-600">#${o.order_id}</span>
+                                <span class="text-[10px] px-2 py-1 rounded-full ${getStatusColor(o.statut)}">${getStatusLabel(o.statut)}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 truncate">${o.article}</p>
+                            <p class="text-sm font-bold mt-1">${o.montant_total?.toLocaleString() || 0} FCFA</p>
                         </div>
-                    </div>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-                        ${products.map(p => renderProductCard(p)).join('')}
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', sectionHTML);
+                    `).join('');
+                }
+            } catch (e) {
+                console.error('Erreur chargement commandes:', e);
+            }
         }
 
-        // FONCTION POUR GÉNÉRER UNE CARTE PRODUIT
-        function renderProductCard(p) {
-            const safeId = p.id || p.Id || p.ID;
-            return `
-                <div class="bg-white rounded-[2rem] p-3 border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 group">
-                    <div class="aspect-square bg-slate-50 rounded-[1.5rem] overflow-hidden mb-4 relative">
-                        <img src="${p.image_url}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                        ${p.is_star ? '<span class="absolute top-4 left-4 bg-sky-500 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase italic">Star</span>' : ''}
-                    </div>
-                    <h4 class="font-bold text-[11px] uppercase truncate px-1">${p.name}</h4>
-                    <p class="text-sky-600 font-black text-sm px-1 mb-4">${p.price.toLocaleString()} FCFA</p>
-                    <a href="product-detail.html?id=${safeId}" class="block w-full text-center bg-slate-900 text-white py-3 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-sky-500 transition shadow-lg shadow-slate-200">
-                        Détails
-                    </a>
-                </div>
-            `;
+        function getStatusColor(status) {
+            const colors = {
+                'en_attente': 'bg-yellow-100 text-yellow-700',
+                'en_cours': 'bg-blue-100 text-blue-700',
+                'livree': 'bg-green-100 text-green-700',
+                'annulee': 'bg-red-100 text-red-700'
+            };
+            return colors[status] || 'bg-slate-100 text-slate-700';
         }
 
-        function updateCartCount() {
-            const cart = JSON.parse(localStorage.getItem('yarid_cart')) || [];
-            document.getElementById('cart-count').innerText = cart.length;
+        function getStatusLabel(status) {
+            const labels = {
+                'en_attente': 'En attente',
+                'en_cours': 'En cours',
+                'livree': 'Livrée',
+                'annulee': 'Annulée'
+            };
+            return labels[status] || status;
         }
 
-        fetchProducts();
-        updateCartCount();
-    </script>
+        function openAccountModal() {
+            document.getElementById('account-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            loadUserData();
+        }
 
-<footer class="bg-slate-900 text-slate-300 pt-16 pb-8 mt-20">
-    <div class="container mx-auto px-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+        function closeAccountModal() {
+            document.getElementById('account-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function shareReferralCode() {
+            const code = document.getElementById('referral-code').textContent;
+            const link = window.location.origin + '/promo.html?ref=' + code;
+            const msg = `Salut ! Découvre la boutique YARID, ils ont des produits incroyables. Utilise mon code *${code}* pour avoir -10% sur ta première commande : ${link}`;
+            window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        }
+
+        // ==========================================
+        // PARRAINAGE
+        // ==========================================
+        function openParrainage() {
+            closeAccountModal();
+            document.getElementById('parrainage-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeParrainageModal() {
+            document.getElementById('parrainage-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function copyParrainageCode() {
+            const input = document.getElementById('parrainage-code');
+            input.select();
+            document.execCommand('copy');
+            alert('Code copié !');
+        }
+
+        function shareParrainageCode() {
+            const code = document.getElementById('parrainage-code').value;
+            const link = window.location.origin + '/promo.html?ref=' + code;
+            const msg = `Salut ! Découvre la boutique YARID, ils ont des produits incroyables. Utilise mon code *${code}* pour avoir -10% sur ta première commande : ${link}`;
+            window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        }
+
+        // ==========================================
+        // SERVICES
+        // ==========================================
+        function openServicesPage() {
+            window.location.href = 'services.html';
+        }
+
+        function openServicesModal() {
+            document.getElementById('services-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeServicesModal() {
+            document.getElementById('services-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ==========================================
+        // ANALYTICS
+        // ==========================================
+        async function trackEvent(eventName, eventDetails = {}) {
+            const device = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
+            const sessionId = sessionStorage.getItem('yarid_session_id') || Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('yarid_session_id', sessionId);
             
-            <div>
-                <div class="text-xl font-black uppercase tracking-tighter italic text-white mb-6">
-                    YARID<span class="text-sky-500">.</span>
-                </div>
-                <p class="text-sm leading-relaxed text-slate-400 mb-6">
-                    Votre destination exclusive pour des produits d'exception. Nous nous engageons à offrir la meilleure qualité avec un service client irréprochable.
-                </p>
-                <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-sky-500">
-                    Livraison & Expédition dans tout le Cameroun
-                </p>
-            </div>
+            try {
+                await _supabase.from('site_analytics').insert([{
+                    event_type: eventName,
+                    page_url: 'index',
+                    device_type: device,
+                    session_id: sessionId,
+                    details: eventDetails
+                }]);
+            } catch (e) {}
+        }
 
-            <div>
-                <h3 class="text-white text-[11px] font-black uppercase tracking-widest mb-6">Service Client</h3>
-                <ul class="space-y-4">
-                    <li class="flex items-start gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span class="text-sm">Yaoundé, Texaco Omnisports</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                        </svg>
-                        <span class="text-sm">+237 655 959 284</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        <span class="text-sm">yaridcm237@gmail.com</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div>
-                <h3 class="text-white text-[11px] font-black uppercase tracking-widest mb-6">Nous suivre</h3>
-                <div class="flex gap-4">
-                    <a href="LIEN_FACEBOOK" class="w-10 h-10 rounded-full border border-slate-700 flex items-center justify-center hover:bg-sky-500 hover:border-sky-500 transition duration-300">
-                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/></svg>
-                    </a>
-                    <a href="LIEN_INSTAGRAM" class="w-10 h-10 rounded-full border border-slate-700 flex items-center justify-center hover:bg-sky-500 hover:border-sky-500 transition duration-300">
-                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="border-t border-slate-800 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-[10px] uppercase tracking-widest text-slate-500">
-                &copy; 2024 YARID. Tous droits réservés.
-            </p>
-            <div class="flex gap-6">
-                <span class="text-[10px] uppercase tracking-widest text-slate-500">Qualité Premium</span>
-                <span class="text-[10px] uppercase tracking-widest text-slate-500">Service 24/7</span>
-            </div>
-        </div>
-    </div>
-</footer>
-    </body>
+        window.addEventListener('load', () => trackEvent('page_view'));
+    </script>
+</body>
 </html>
