@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('YARID PWA : Prête !'))
+        .catch(err => console.log('Erreur PWA :', err));
+    });
+  }
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Privilège | YARID</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .btn-gradient { background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); }
+        .btn-indigo { background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%); }
+        .bg-glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+        .loader { border: 2px solid #f3f3f3; border-top: 2px solid #0ea5e9; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
+        .loader-small { border: 2px solid #f3f3f3; border-top: 2px solid #0ea5e9; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="antialiased text-slate-900 flex flex-col min-h-screen">
+
+<nav class="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-slate-100">
+    <div class="container mx-auto px-4 h-16 flex items-center justify-between">
+        <a href="index.html" class="font-black italic uppercase tracking-tighter text-sm flex items-center gap-2 hover:text-sky-500 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+            Retour
+        </a>
+        <div class="text-xl font-black italic tracking-tighter uppercase text-slate-900">YARID<span class="text-sky-500">.</span></div>
+        <div class="w-10"></div>
+    </div>
+</nav>
+
+<main class="container mx-auto px-4 pt-24 pb-12 flex-grow">
+    <div id="promo-content" class="max-w-xl mx-auto space-y-6">
+        <div class="text-center py-20"><div class="loader"></div></div>
+    </div>
+</main>
+
+<footer class="bg-slate-900 pt-16 pb-8 border-t border-slate-800 mt-auto">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+            <div>
+                <div class="text-2xl font-black italic tracking-tighter uppercase text-white mb-4">YARID<span class="text-sky-500">.</span></div>
+                <p class="text-slate-400 text-sm leading-relaxed mb-6">Votre boutique premium au Cameroun. Découvrez notre sélection exclusive de parfums, d'électronique et profitez de notre service d'accompagnement professionnel.</p>
+            </div>
+            <div>
+                <h4 class="text-white font-black uppercase tracking-widest text-[11px] mb-6">Contact & Accès</h4>
+                <ul class="space-y-4 text-slate-400 text-sm">
+                    <li class="flex items-center gap-3">📍 Texaco Omnisports, Yaoundé</li>
+                    <li class="flex items-center gap-3">✉️ yaridcm237@gmail.com</li>
+                    <li class="flex items-center gap-3">📞 +237 655 95 92 84</li>
+                </ul>
+            </div>
+            <div>
+                 <h4 class="text-white font-black uppercase tracking-widest text-[11px] mb-6">Assistance</h4>
+                 <p class="text-slate-400 text-sm mb-4">Notre service client est disponible pour répondre à toutes vos questions.</p>
+                 <a href="https://wa.me/237655959284" class="inline-flex items-center gap-2 bg-[#25D366]/10 text-[#25D366] px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-[#25D366] hover:text-white transition-colors border border-[#25D366]/20">
+                     Discuter sur WhatsApp
+                 </a>
+            </div>
+        </div>
+        <div class="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            <p>&copy; 2026 YARID. TOUS DROITS RÉSERVÉS.</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const SUPABASE_URL = 'https://whcpugnkldbmuqzgqxbe.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // PARAMÈTRES DU SYSTÈME VIRAL (YARID POINTS)
+    const POINTS_PAR_VISITE = 2; // 2 points par clic
+    const ACHAT_MINIMUM = 5000; // 5000 FCFA minimum
+    const TAUX_REMISE_MAX = 0.25; // 25% max du panier
+    const MAX_POINTS_UTILISABLES = 1000; // Limite par commande
+    const VALEUR_POINT = 1; // 1 point = 1 FCFA de réduction
+
+    async function initPage() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type');
+        const promoId = urlParams.get('id');
+
+        if (type === 'parrainage') {
+            const savedPhone = localStorage.getItem('yarid_user_phone');
+            if (savedPhone) {
+                await renderDashboard(savedPhone);
+            } else {
+                renderRegister();
+            }
+        } else if (type === 'promo') {
+            await renderPromo(promoId);
+        } else {
+            renderRegister();
+        }
+    }
+
+    // --- SECTION INSCRIPTION ---
+    function renderRegister() {
+        document.getElementById('promo-content').innerHTML = `
+            <div class="fade-in bg-white rounded-[2.5rem] p-8 md:p-10 shadow-2xl border border-slate-100 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+                
+                <div class="relative z-10 text-center mb-8">
+                    <span class="inline-block px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">Programme Viral</span>
+                    <h2 class="text-3xl font-black uppercase italic mb-2">Gagnez des Points</h2>
+                    <p class="text-slate-500 text-sm">Transformez vos partages en réductions réelles chez YARID.</p>
+                </div>
+
+                <div class="bg-slate-50 rounded-2xl p-5 mb-8 border border-slate-100">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-xl flex-shrink-0">🚀</div>
+                        <div>
+                            <h4 class="text-[11px] font-black uppercase tracking-widest text-slate-800">Gagnez facilement</h4>
+                            <p class="text-xs text-slate-500 mt-1">Chaque clic sur votre lien génère des <strong>YARID Points</strong> (1 Point = 1 FCFA de remise).</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-xl flex-shrink-0">🎁</div>
+                        <div>
+                            <h4 class="text-[11px] font-black uppercase tracking-widest text-slate-800">Réductions Immédiates</h4>
+                            <p class="text-xs text-slate-500 mt-1">Payez jusqu'à <strong>25% de vos commandes</strong> avec vos points cumulés !</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <input type="tel" id="user-phone" placeholder="Votre numéro WhatsApp (ex: 655XXXXXX)" 
+                           class="w-full px-6 py-4 rounded-2xl bg-white border-2 border-slate-100 focus:border-indigo-500 outline-none text-center font-bold text-lg transition-colors shadow-sm">
+                    
+                    <button id="submit-btn" onclick="processRegistration()" 
+                            class="w-full btn-indigo text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg shadow-indigo-200 hover:scale-[1.02] transition-transform">
+                        Créer mon lien de partage
+                    </button>
+                </div>
+                <div id="error-msg" class="hidden mt-4 text-red-500 text-[10px] font-bold uppercase tracking-widest text-center"></div>
+            </div>
+        `;
+    }
+
+    async function processRegistration() {
+        const phoneVal = document.getElementById('user-phone').value.trim();
+        const btn = document.getElementById('submit-btn');
+        const err = document.getElementById('error-msg');
+
+        if (phoneVal.length < 8) { err.innerText = "Numéro invalide"; err.classList.remove('hidden'); return; }
+
+        btn.disabled = true; btn.innerHTML = `<span class="loader-small"></span> Patientez...`; err.classList.add('hidden');
+
+        const myCode = "Y" + Math.floor(1000 + Math.random() * 9000);
+
+        try {
+            const upsertPromise = _supabase.from('parrainage').upsert([{ telephone_parrain: phoneVal, code_ref: myCode }], { onConflict: 'telephone_parrain' });
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Délai d'attente dépassé")), 6000));
+            const { error } = await Promise.race([upsertPromise, timeoutPromise]);
+            if (error) throw error;
+
+            localStorage.setItem('yarid_user_phone', phoneVal);
+            localStorage.setItem('yarid_ref_code', myCode);
+            await renderDashboard(phoneVal);
+        } catch (e) {
+            btn.disabled = false; btn.innerText = "Réessayer"; err.innerText = "Erreur : " + e.message; err.classList.remove('hidden');
+        }
+    }
+
+    // --- SECTION DASHBOARD ---
+    async function renderDashboard(phoneVal) {
+        const container = document.getElementById('promo-content');
+        container.innerHTML = `<div class="text-center py-20"><div class="loader"></div></div>`;
+
+        try {
+            const { data: user, error } = await _supabase.from('parrainage').select('*').eq('telephone_parrain', phoneVal).single();
+            const clics = user.visites || 0;
+            const soldePoints = clics * POINTS_PAR_VISITE;
+
+            container.innerHTML = `
+                <div class="fade-in space-y-6">
+                    <div class="bg-indigo-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-600 rounded-full opacity-50 blur-3xl"></div>
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300 mb-2 relative z-10">Solde YARID</p>
+                        <h3 class="text-5xl font-black italic tracking-tighter relative z-10">${soldePoints.toLocaleString()} <span class="text-lg opacity-50 not-italic">Points</span></h3>
+                        <p class="text-[10px] text-indigo-200 mt-4 relative z-10 font-bold">1 Point = 1 FCFA de réduction</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Trafic généré</p>
+                                <p class="text-xl font-black">${clics} clics validés</p>
+                            </div>
+                            <div class="bg-indigo-50 text-indigo-600 p-3 rounded-xl">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-100 rounded-2xl p-6">
+                            <h4 class="font-black uppercase text-[10px] mb-4 text-slate-800 tracking-widest flex items-center gap-2">
+                                <span class="w-2 h-2 bg-indigo-500 rounded-full"></span> Règles d'utilisation
+                            </h4>
+                            <ul class="text-xs text-slate-600 space-y-3 font-medium">
+                                <li class="flex items-start gap-2">✅ Commande minimum de <strong>${ACHAT_MINIMUM.toLocaleString()} FCFA</strong>.</li>
+                                <li class="flex items-start gap-2">✅ Maximum <strong>${MAX_POINTS_UTILISABLES} points</strong> par commande.</li>
+                                <li class="flex items-start gap-2">✅ Réduction maximale de <strong>25%</strong> sur le total.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <button onclick="shareLink('${user.code_ref}')" class="w-full bg-[#25D366] text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[11px] hover:scale-[1.02] transition-transform shadow-lg shadow-green-200">
+                        Inviter mes contacts sur WhatsApp
+                    </button>
+                </div>
+            `;
+        } catch (e) {
+            container.innerHTML = `<div class="text-center text-red-500 font-bold">Erreur de chargement.</div>`;
+        }
+    }
+
+    function shareLink(code) {
+        const link = window.location.origin + window.location.pathname + "?ref=" + code;
+        const msg = `Salut ! Découvre la boutique YARID, ils ont des produits incroyables. Clique sur mon lien pour y accéder : ${link}`;
+        window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    }
+
+    // --- SECTION PROMO PRODUIT ---
+    async function renderPromo(id) {
+        const container = document.getElementById('promo-content');
+        container.innerHTML = `<div class="text-center py-20"><div class="loader"></div></div>`;
+        
+        try {
+            // 1. Récupérer le produit
+            const { data: promo, error } = await _supabase.from('PROMOTIONS').select('*').eq('id', id).single();
+            if(error || !promo) { container.innerHTML = `<div class="text-center py-20 text-slate-400 uppercase font-bold text-xs tracking-widest">Offre introuvable ou expirée</div>`; return; }
+
+            // 2. Récupérer les points de l'utilisateur s'il est connecté
+            const savedPhone = localStorage.getItem('yarid_user_phone');
+            const refCode = localStorage.getItem('yarid_ref_code') || "Aucun";
+            let soldePoints = 0;
+
+            if (savedPhone) {
+                const { data: user } = await _supabase.from('parrainage').select('*').eq('telephone_parrain', savedPhone).single();
+                if (user) { soldePoints = (user.visites || 0) * POINTS_PAR_VISITE; }
+            }
+
+            // Si le prix n'est pas dans la base, on met 0 (on demandera au client)
+            const prixProduit = promo.prix || 0; 
+
+            container.innerHTML = `
+                <div class="fade-in bg-white rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100">
+                    <img src="${promo.image_url}" class="w-full h-80 object-cover">
+                    <div class="p-8 md:p-10">
+                        <div class="inline-block px-3 py-1 bg-red-100 text-red-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">Offre Flash</div>
+                        <h1 class="text-3xl font-black italic uppercase mb-2 leading-tight">${promo.titre}</h1>
+                        ${prixProduit > 0 ? `<p class="text-xl font-bold text-indigo-600 mb-4">${prixProduit.toLocaleString()} FCFA</p>` : ''}
+                        
+                        <p class="text-slate-500 text-sm mb-8 leading-relaxed">${promo.description || 'Découvrez cette offre exclusive dans notre boutique YARID.'}</p>
+                        
+                        ${soldePoints > 0 ? `
+                        <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-6 flex items-center justify-between">
+                            <span class="text-xs font-bold text-indigo-800">Vos points : ${soldePoints}</span>
+                            <span class="text-[10px] bg-indigo-600 text-white px-2 py-1 rounded-full font-bold">Réduction applicable !</span>
+                        </div>` : ''}
+
+                        <div class="mb-6">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Choisir la taille</label>
+                            <select id="size-select" class="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none focus:border-indigo-500">
+                                <option value="Standard">Taille Standard</option>
+                                <option value="S">Small (S)</option>
+                                <option value="M">Medium (M)</option>
+                                <option value="L">Large (L)</option>
+                                <option value="XL">Extra Large (XL)</option>
+                            </select>
+                        </div>
+
+                        <button onclick="sendOrder('${promo.titre}', '${refCode}', ${soldePoints}, ${prixProduit})" 
+                                class="block w-full btn-indigo text-white text-center py-5 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg shadow-indigo-200 hover:scale-[1.02] transition-transform">
+                            Commander sur WhatsApp
+                        </button>
+                    </div>
+                </div>
+            `;
+        } catch(e) {
+            container.innerHTML = `<div class="text-center py-20 text-red-500 font-bold text-sm">Erreur de chargement.</div>`;
+        }
+    }
+
+    // --- LOGIQUE AUTOMATIQUE DE CALCUL DE COMMANDE ---
+    window.sendOrder = function(itemName, refCode, soldePoints, prixProduit) {
+        const size = document.getElementById('size-select').value;
+        let montantCommande = prixProduit;
+
+        // Si le prix n'est pas dans la BDD, on demande au client de le saisir
+        if (!montantCommande || montantCommande <= 0) {
+            montantCommande = parseFloat(prompt("Quel est le montant total de l'article (en FCFA) ?"));
+            if (isNaN(montantCommande) || montantCommande <= 0) {
+                alert("Montant invalide. Commande annulée.");
+                return;
+            }
+        }
+        
+        let remiseAppliquee = 0;
+        let detailRemiseMsg = "";
+
+        // Si l'utilisateur a des points et que la commande dépasse 5000 FCFA
+        if (soldePoints > 0 && montantCommande >= ACHAT_MINIMUM) {
+            // Règle 1: Max 1000 points
+            let pointsMaxPermis = Math.min(soldePoints, MAX_POINTS_UTILISABLES);
+            // Règle 2: Max 25% de la commande
+            let plafondRemise = montantCommande * TAUX_REMISE_MAX;
+            
+            // Calcul final de la réduction
+            remiseAppliquee = Math.min(pointsMaxPermis, plafondRemise);
+            detailRemiseMsg = `\n🎁 *Réduction YARID Points* : -${remiseAppliquee} FCFA\n(Points restants à déduire par l'admin)`;
+        } else if (soldePoints > 0 && montantCommande < ACHAT_MINIMUM) {
+            alert(`Vos points n'ont pas été appliqués car la commande est inférieure à ${ACHAT_MINIMUM} FCFA.`);
+        }
+
+        let prixFinal = montantCommande - remiseAppliquee;
+
+        const msg = `Bonjour YARID ! 👋\n\n` +
+                    `Je souhaite commander : *${itemName}* (Taille : ${size}).\n\n` +
+                    `💳 *Sous-total* : ${montantCommande} FCFA` + detailRemiseMsg + `\n` +
+                    `✅ *Total à payer* : *${prixFinal} FCFA*\n\n` +
+                    `Code Parrain : *${refCode}*\n\n` +
+                    `Merci de confirmer ma commande !`;
+        
+        const whatsappUrl = `https://wa.me/237655959284?text=${encodeURIComponent(msg)}`;
+        window.location.href = whatsappUrl;
+    };
+
+    initPage();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // 1. Initialise Supabase (Mets tes vraies clés ici !)
+    const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
+
+    // 2. Fonction pour détecter le type d'appareil
+    function getDeviceType() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
+    }
+
+    // 3. Fonction principale d'envoi de données
+    async function trackYaridEvent(eventName, extraDetails = {}) {
+        try {
+            await analyticsClient.from('site_analytics').insert([{
+                event_type: eventName,
+                page_url: window.location.pathname.split('/').pop() || 'accueil', // Garde juste le nom du fichier
+                device_type: getDeviceType(),
+                details: extraDetails
+            }]);
+        } catch (err) {
+            console.error("Erreur Analytics:", err);
+        }
+    }
+
+    // 4. Déclenchement automatique : Enregistre la vue de la page dès qu'elle s'ouvre
+    window.onload = () => {
+        trackYaridEvent('page_view');
+    };
+
+    // (Optionnel) Exemple si tu veux suivre un clic sur un bouton d'achat :
+    // onclick="trackYaridEvent('clic_achat', { produit: 'Livraison Express' })"
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
+
+    // 1. GESTION DE LA SESSION (Pour le tunnel de conversion)
+    // Crée un ID unique pour la visite, qui s'efface quand on ferme le navigateur
+    if (!sessionStorage.getItem('yarid_session_id')) {
+        sessionStorage.setItem('yarid_session_id', 'sess_' + Math.random().toString(36).substr(2, 9));
+    }
+    const sessionId = sessionStorage.getItem('yarid_session_id');
+
+    // 2. LECTURE DES CAMPAGNES MARKETING (UTM)
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmSource = urlParams.get('utm_source') || 'direct';
+    const utmCampaign = urlParams.get('utm_campaign') || null;
+
+    // 3. IDENTIFICATION UTILISATEUR (Segmentation)
+    // Si l'utilisateur s'est connecté via le portail, on récupère son ID
+    const activeUser = JSON.parse(localStorage.getItem('yarid_user') || '{}');
+    const userId = activeUser.username || null;
+
+    // 4. MOTEUR D'ENVOI DES DONNÉES
+    async function trackEvent(eventName, eventDetails = {}) {
+        // Calcul du temps de chargement pour les événements "page_view"
+        let loadTime = null;
+        if (eventName === 'page_view' && window.performance) {
+            loadTime = Math.round(performance.now());
+        }
+
+        const device = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
+
+        const payload = {
+            event_type: eventName,
+            page_url: window.location.pathname.split('/').pop() || 'accueil',
+            device_type: device,
+            session_id: sessionId,
+            user_id: userId,
+            utm_source: utmSource,
+            utm_campaign: utmCampaign,
+            load_time_ms: loadTime,
+            details: eventDetails // Pour les infos produits, panier, etc.
+        };
+
+        try {
+            await analyticsClient.from('site_analytics').insert([payload]);
+        } catch (err) {
+            console.error("Tracker Error:", err);
+        }
+    }
+
+    // 5. DÉCLENCHEURS AUTOMATIQUES
+    // Enregistre la vue de la page au chargement complet
+    window.addEventListener('load', () => {
+        trackEvent('page_view', { title: document.title });
+    });
+</script>
+</body>
+</html>

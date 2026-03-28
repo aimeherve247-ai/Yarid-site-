@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('YARID PWA : Prête !'))
+        .catch(err => console.log('Erreur PWA :', err));
+    });
+  }
+</script>
+
+    <meta charset="UTF-8">
+    <title>Gérer les Promos | YARID</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 p-10">
+    <div class="max-w-4xl mx-auto space-y-8">
+        
+        <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+            <h1 class="text-xl font-black uppercase tracking-tighter mb-8">Ajouter une Promo</h1>
+            <form id="promoForm" class="space-y-4">
+                <input type="text" id="promoTitre" placeholder="Titre de la promo" required class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold">
+                <textarea id="promoDesc" placeholder="Description" required class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold h-24"></textarea>
+                <input type="text" id="promoImg" placeholder="URL de l'image" required class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="date" id="dateDebut" required class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold">
+                    <input type="date" id="dateFin" required class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold">
+                </div>
+                <button type="submit" class="w-full bg-sky-500 text-white py-4 rounded-2xl font-black uppercase text-[10px]">Publier la Promo</button>
+            </form>
+        </div>
+
+        <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+            <h2 class="text-xl font-black uppercase tracking-tighter mb-6">Promotions Actives</h2>
+            <div id="promoList" class="space-y-4">
+                <div class="text-center py-10 text-slate-400">Chargement...</div>
+            </div>
+        </div>
+
+        <a href="admin.html" class="block text-center mt-6 text-[10px] font-bold text-slate-400 uppercase">Retour Dashboard</a>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://whcpugnkldbmuqzgqxbe.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Charger les promos
+        async function fetchPromos() {
+            const { data } = await _supabase.from('PROMOTIONS').select('*').order('id', { ascending: false });
+            const list = document.getElementById('promoList');
+            
+            if (!data || data.length === 0) { list.innerHTML = "Aucune promo active."; return; }
+            
+            list.innerHTML = data.map(p => `
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                    <div>
+                        <p class="font-black text-sm uppercase">${p.titre}</p>
+                        <p class="text-[10px] text-slate-500">Du ${p.date_debut} au ${p.date_fin}</p>
+                    </div>
+                    <button onclick="deletePromo(${p.id})" class="text-red-500 font-bold text-[10px] uppercase bg-red-50 px-4 py-2 rounded-xl">Supprimer</button>
+                </div>
+            `).join('');
+        }
+
+        // Supprimer une promo
+        window.deletePromo = async (id) => {
+            if(confirm("Confirmer la suppression ?")) {
+                await _supabase.from('PROMOTIONS').delete().eq('id', id);
+                fetchPromos();
+            }
+        };
+
+        // Ajouter une promo
+        document.getElementById('promoForm').onsubmit = async (e) => {
+            e.preventDefault();
+            await _supabase.from('PROMOTIONS').insert([{
+                titre: document.getElementById('promoTitre').value,
+                description: document.getElementById('promoDesc').value,
+                image_url: document.getElementById('promoImg').value,
+                date_debut: document.getElementById('dateDebut').value,
+                date_fin: document.getElementById('dateFin').value
+            }]);
+            alert("Promo publiée !");
+            document.getElementById('promoForm').reset();
+            fetchPromos();
+        };
+
+        fetchPromos();
+(function() {
+    // Vérifie si la session est active
+    const session = sessionStorage.getItem('yarid_admin_session');
+    
+    // Si pas de session et qu'on n'est pas sur la page de login, on dégage
+    if (session !== 'active' && !window.location.pathname.includes('login.html')) {
+        window.location.href = 'login.html';
+    }
+})();
+
+    </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // 1. Initialise Supabase (Mets tes vraies clés ici !)
+    const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
+
+    // 2. Fonction pour détecter le type d'appareil
+    function getDeviceType() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
+    }
+
+    // 3. Fonction principale d'envoi de données
+    async function trackYaridEvent(eventName, extraDetails = {}) {
+        try {
+            await analyticsClient.from('site_analytics').insert([{
+                event_type: eventName,
+                page_url: window.location.pathname.split('/').pop() || 'accueil', // Garde juste le nom du fichier
+                device_type: getDeviceType(),
+                details: extraDetails
+            }]);
+        } catch (err) {
+            console.error("Erreur Analytics:", err);
+        }
+    }
+
+    // 4. Déclenchement automatique : Enregistre la vue de la page dès qu'elle s'ouvre
+    window.onload = () => {
+        trackYaridEvent('page_view');
+    };
+
+    // (Optionnel) Exemple si tu veux suivre un clic sur un bouton d'achat :
+    // onclick="trackYaridEvent('clic_achat', { produit: 'Livraison Express' })"
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
+
+    // 1. GESTION DE LA SESSION (Pour le tunnel de conversion)
+    // Crée un ID unique pour la visite, qui s'efface quand on ferme le navigateur
+    if (!sessionStorage.getItem('yarid_session_id')) {
+        sessionStorage.setItem('yarid_session_id', 'sess_' + Math.random().toString(36).substr(2, 9));
+    }
+    const sessionId = sessionStorage.getItem('yarid_session_id');
+
+    // 2. LECTURE DES CAMPAGNES MARKETING (UTM)
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmSource = urlParams.get('utm_source') || 'direct';
+    const utmCampaign = urlParams.get('utm_campaign') || null;
+
+    // 3. IDENTIFICATION UTILISATEUR (Segmentation)
+    // Si l'utilisateur s'est connecté via le portail, on récupère son ID
+    const activeUser = JSON.parse(localStorage.getItem('yarid_user') || '{}');
+    const userId = activeUser.username || null;
+
+    // 4. MOTEUR D'ENVOI DES DONNÉES
+    async function trackEvent(eventName, eventDetails = {}) {
+        // Calcul du temps de chargement pour les événements "page_view"
+        let loadTime = null;
+        if (eventName === 'page_view' && window.performance) {
+            loadTime = Math.round(performance.now());
+        }
+
+        const device = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
+
+        const payload = {
+            event_type: eventName,
+            page_url: window.location.pathname.split('/').pop() || 'accueil',
+            device_type: device,
+            session_id: sessionId,
+            user_id: userId,
+            utm_source: utmSource,
+            utm_campaign: utmCampaign,
+            load_time_ms: loadTime,
+            details: eventDetails // Pour les infos produits, panier, etc.
+        };
+
+        try {
+            await analyticsClient.from('site_analytics').insert([payload]);
+        } catch (err) {
+            console.error("Tracker Error:", err);
+        }
+    }
+
+    // 5. DÉCLENCHEURS AUTOMATIQUES
+    // Enregistre la vue de la page au chargement complet
+    window.addEventListener('load', () => {
+        trackEvent('page_view', { title: document.title });
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
+
+    // 1. GESTION DE LA SESSION (Pour le tunnel de conversion)
+    // Crée un ID unique pour la visite, qui s'efface quand on ferme le navigateur
+    if (!sessionStorage.getItem('yarid_session_id')) {
+        sessionStorage.setItem('yarid_session_id', 'sess_' + Math.random().toString(36).substr(2, 9));
+    }
+    const sessionId = sessionStorage.getItem('yarid_session_id');
+
+    // 2. LECTURE DES CAMPAGNES MARKETING (UTM)
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmSource = urlParams.get('utm_source') || 'direct';
+    const utmCampaign = urlParams.get('utm_campaign') || null;
+
+    // 3. IDENTIFICATION UTILISATEUR (Segmentation)
+    // Si l'utilisateur s'est connecté via le portail, on récupère son ID
+    const activeUser = JSON.parse(localStorage.getItem('yarid_user') || '{}');
+    const userId = activeUser.username || null;
+
+    // 4. MOTEUR D'ENVOI DES DONNÉES
+    async function trackEvent(eventName, eventDetails = {}) {
+        // Calcul du temps de chargement pour les événements "page_view"
+        let loadTime = null;
+        if (eventName === 'page_view' && window.performance) {
+            loadTime = Math.round(performance.now());
+        }
+
+        const device = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
+
+        const payload = {
+            event_type: eventName,
+            page_url: window.location.pathname.split('/').pop() || 'accueil',
+            device_type: device,
+            session_id: sessionId,
+            user_id: userId,
+            utm_source: utmSource,
+            utm_campaign: utmCampaign,
+            load_time_ms: loadTime,
+            details: eventDetails // Pour les infos produits, panier, etc.
+        };
+
+        try {
+            await analyticsClient.from('site_analytics').insert([payload]);
+        } catch (err) {
+            console.error("Tracker Error:", err);
+        }
+    }
+
+    // 5. DÉCLENCHEURS AUTOMATIQUES
+    // Enregistre la vue de la page au chargement complet
+    window.addEventListener('load', () => {
+        trackEvent('page_view', { title: document.title });
+    });
+</script>
+</body>
+</html>

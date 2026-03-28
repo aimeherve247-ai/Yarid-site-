@@ -1,0 +1,21 @@
+{
+  "name": "YARID Management System",
+  "short_name": "YARID",
+  "description": "Système de gestion et logistique YARID",
+  "start_url": "portail.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192.png?text=Y",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512.png?text=YARID",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

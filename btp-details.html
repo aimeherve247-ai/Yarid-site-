@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('YARID PWA : Prête !'))
+        .catch(err => console.log('Erreur PWA :', err));
+    });
+  }
+</script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BTP & Matériaux | YARID GROUP</title>
@@ -71,7 +84,7 @@
         <div class="mt-16 md:mt-32 bg-slate-900 rounded-[2rem] md:rounded-[4rem] p-8 md:p-20 text-center text-white">
             <h2 class="text-2xl md:text-4xl font-black uppercase italic mb-4 md:mb-6">Une demande spécifique ?</h2>
             <p class="text-slate-400 text-xs md:text-base mb-8 md:mb-12 max-w-xl mx-auto italic">
-                De la tôle SCTA au ciment Mira-Co, demandez votre cotation personnalisée.
+                De la tôle SCTA au ciment, demandez votre cotation personnalisée.
             </p>
             <div class="flex flex-col md:flex-row justify-center gap-4">
                 <a href="contact.html?service=btp&type=devis" class="bg-sky-500 text-white px-8 md:px-12 py-5 md:py-6 rounded-xl md:rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-widest hover:bg-white hover:text-black transition duration-500">
@@ -148,5 +161,149 @@
         </div>
     </div>
 </footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // 1. Initialise Supabase (Mets tes vraies clés ici !)
+    const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
+
+    // 2. Fonction pour détecter le type d'appareil
+    function getDeviceType() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
+    }
+
+    // 3. Fonction principale d'envoi de données
+    async function trackYaridEvent(eventName, extraDetails = {}) {
+        try {
+            await analyticsClient.from('site_analytics').insert([{
+                event_type: eventName,
+                page_url: window.location.pathname.split('/').pop() || 'accueil', // Garde juste le nom du fichier
+                device_type: getDeviceType(),
+                details: extraDetails
+            }]);
+        } catch (err) {
+            console.error("Erreur Analytics:", err);
+        }
+    }
+
+    // 4. Déclenchement automatique : Enregistre la vue de la page dès qu'elle s'ouvre
+    window.onload = () => {
+        trackYaridEvent('page_view');
+    };
+
+    // (Optionnel) Exemple si tu veux suivre un clic sur un bouton d'achat :
+    // onclick="trackYaridEvent('clic_achat', { produit: 'Livraison Express' })"
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
+
+    // 1. GESTION DE LA SESSION (Pour le tunnel de conversion)
+    // Crée un ID unique pour la visite, qui s'efface quand on ferme le navigateur
+    if (!sessionStorage.getItem('yarid_session_id')) {
+        sessionStorage.setItem('yarid_session_id', 'sess_' + Math.random().toString(36).substr(2, 9));
+    }
+    const sessionId = sessionStorage.getItem('yarid_session_id');
+
+    // 2. LECTURE DES CAMPAGNES MARKETING (UTM)
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmSource = urlParams.get('utm_source') || 'direct';
+    const utmCampaign = urlParams.get('utm_campaign') || null;
+
+    // 3. IDENTIFICATION UTILISATEUR (Segmentation)
+    // Si l'utilisateur s'est connecté via le portail, on récupère son ID
+    const activeUser = JSON.parse(localStorage.getItem('yarid_user') || '{}');
+    const userId = activeUser.username || null;
+
+    // 4. MOTEUR D'ENVOI DES DONNÉES
+    async function trackEvent(eventName, eventDetails = {}) {
+        // Calcul du temps de chargement pour les événements "page_view"
+        let loadTime = null;
+        if (eventName === 'page_view' && window.performance) {
+            loadTime = Math.round(performance.now());
+        }
+
+        const device = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
+
+        const payload = {
+            event_type: eventName,
+            page_url: window.location.pathname.split('/').pop() || 'accueil',
+            device_type: device,
+            session_id: sessionId,
+            user_id: userId,
+            utm_source: utmSource,
+            utm_campaign: utmCampaign,
+            load_time_ms: loadTime,
+            details: eventDetails // Pour les infos produits, panier, etc.
+        };
+
+        try {
+            await analyticsClient.from('site_analytics').insert([payload]);
+        } catch (err) {
+            console.error("Tracker Error:", err);
+        }
+    }
+
+    // 5. DÉCLENCHEURS AUTOMATIQUES
+    // Enregistre la vue de la page au chargement complet
+    window.addEventListener('load', () => {
+        trackEvent('page_view', { title: document.title });
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
+
+    // 1. GESTION DE LA SESSION (Pour le tunnel de conversion)
+    // Crée un ID unique pour la visite, qui s'efface quand on ferme le navigateur
+    if (!sessionStorage.getItem('yarid_session_id')) {
+        sessionStorage.setItem('yarid_session_id', 'sess_' + Math.random().toString(36).substr(2, 9));
+    }
+    const sessionId = sessionStorage.getItem('yarid_session_id');
+
+    // 2. LECTURE DES CAMPAGNES MARKETING (UTM)
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmSource = urlParams.get('utm_source') || 'direct';
+    const utmCampaign = urlParams.get('utm_campaign') || null;
+
+    // 3. IDENTIFICATION UTILISATEUR (Segmentation)
+    // Si l'utilisateur s'est connecté via le portail, on récupère son ID
+    const activeUser = JSON.parse(localStorage.getItem('yarid_user') || '{}');
+    const userId = activeUser.username || null;
+
+    // 4. MOTEUR D'ENVOI DES DONNÉES
+    async function trackEvent(eventName, eventDetails = {}) {
+        // Calcul du temps de chargement pour les événements "page_view"
+        let loadTime = null;
+        if (eventName === 'page_view' && window.performance) {
+            loadTime = Math.round(performance.now());
+        }
+
+        const device = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
+
+        const payload = {
+            event_type: eventName,
+            page_url: window.location.pathname.split('/').pop() || 'accueil',
+            device_type: device,
+            session_id: sessionId,
+            user_id: userId,
+            utm_source: utmSource,
+            utm_campaign: utmCampaign,
+            load_time_ms: loadTime,
+            details: eventDetails // Pour les infos produits, panier, etc.
+        };
+
+        try {
+            await analyticsClient.from('site_analytics').insert([payload]);
+        } catch (err) {
+            console.error("Tracker Error:", err);
+        }
+    }
+
+    // 5. DÉCLENCHEURS AUTOMATIQUES
+    // Enregistre la vue de la page au chargement complet
+    window.addEventListener('load', () => {
+        trackEvent('page_view', { title: document.title });
+    });
+</script>
     </body>
 </html>

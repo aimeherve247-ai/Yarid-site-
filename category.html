@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('YARID PWA : Prête !'))
+            .catch(err => console.log('Erreur PWA :', err));
+        });
+      }
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YARID | Catégorie de Produits</title>
+    
+    <link rel="icon" type="image/png" href="favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* Tiroir Panier */
+        #cart-drawer { transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        #cart-drawer.open { transform: translateX(0); }
+        
+        /* Toast Notification */
+        .toast-enter { animation: toastSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .toast-leave { animation: toastSlideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes toastSlideUp { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+        @keyframes toastSlideDown { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, 20px); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased pt-20 flex flex-col min-h-screen">
+    
+    <nav class="fixed top-0 w-full bg-white/95 backdrop-blur-md z-[100] border-b border-slate-100 shadow-sm">
+        <div class="container mx-auto px-4 h-16 flex justify-between items-center gap-3 md:gap-6">
+            <a href="index.html" class="flex items-center gap-3 text-slate-900 hover:text-sky-500 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                <span class="text-xl md:text-2xl font-black italic tracking-tighter uppercase hidden md:block">YARID<span class="text-sky-500">.</span></span>
+            </a>
+            
+            <h1 id="category-title" class="flex-1 text-center font-black uppercase tracking-widest text-lg md:text-xl text-sky-500">Chargement...</h1>
+
+            <div class="flex items-center gap-2 shrink-0">
+                <button onclick="toggleCart()" class="relative p-2 hover:text-sky-500 transition outline-none group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    <span id="cart-count" class="absolute top-0 right-0 bg-sky-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full border-2 border-white">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="cart-overlay" onclick="toggleCart()" class="fixed inset-0 bg-slate-900/40 z-[110] hidden backdrop-blur-sm transition-opacity"></div>
+    <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[120] shadow-2xl flex flex-col">
+        <div class="p-6 border-b flex justify-between items-center bg-white">
+            <h2 class="text-xl font-black uppercase italic tracking-tighter text-slate-900">Mon <span class="text-sky-500">Panier</span></h2>
+            <button onclick="toggleCart()" class="p-2 hover:bg-slate-100 rounded-full transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <div id="cart-items-container" class="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50">
+            </div>
+
+        <div id="checkout-form" class="p-6 bg-white border-t space-y-4 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
+            <div class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="text" id="client_nom" placeholder="Nom complet" class="p-3 rounded-xl border-none ring-1 ring-slate-200 text-sm font-semibold outline-none focus:ring-2 focus:ring-sky-500 shadow-sm transition-all">
+                    <input type="tel" id="client_tel" placeholder="Téléphone" class="p-3 rounded-xl border-none ring-1 ring-slate-200 text-sm font-semibold outline-none focus:ring-2 focus:ring-sky-500 shadow-sm transition-all">
+                </div>
+                <input type="text" id="client_adresse" placeholder="Adresse complète (Quartier, Repère)" class="w-full p-3 rounded-xl border-none ring-1 ring-slate-200 text-sm font-semibold outline-none focus:ring-2 focus:ring-sky-500 shadow-sm transition-all">
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Mode de livraison</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="setDelivery('retrait')" id="btn-retrait" class="delivery-btn p-3 rounded-xl border-2 border-slate-900 bg-slate-900 text-[10px] font-black uppercase tracking-widest text-white transition-all">Retrait (0F)</button>
+                    <button onclick="setDelivery('domicile')" id="btn-domicile" class="delivery-btn p-3 rounded-xl border-2 border-transparent bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-500 shadow-sm transition-all hover:bg-slate-100">Domicile (2000F)</button>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100">
+                <div class="flex justify-between text-sm font-bold mb-1 text-slate-500">
+                    <span>Sous-total</span><span id="summary-subtotal">0 F</span>
+                </div>
+                <div class="flex justify-between text-sm font-bold mb-4 text-slate-500">
+                    <span>Livraison</span><span id="summary-delivery">0 F</span>
+                </div>
+                <div class="flex justify-between text-2xl font-black italic text-slate-900 mb-6 uppercase">
+                    <span>TOTAL</span><span id="summary-total" class="text-sky-500">0 F</span>
+                </div>
+
+                <button onclick="validerCommande()" id="btn-valider" class="w-full bg-sky-500 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-sky-500/30 hover:bg-sky-600 transition-all flex items-center justify-center gap-3">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 2.73 1.984 5.054 4.645 5.593l.354.071v2.174l2.55-1.513c2.406-.757 4.04-2.984 4.04-5.467 0-3.18-2.586-5.766-5.767-5.766-.002 0-.003 0-.004 0zm0 10.454c-.114 0-.228-.014-.342-.041-2.023-.411-3.535-2.181-3.534-4.242 0-2.383 1.939-4.323 4.322-4.324h.003c2.382 0 4.322 1.94 4.323 4.323 0 1.861-1.228 3.535-3.037 4.102l-1.735 1.029v-1.144c0-.138-.112-.25-.25-.25-.138 0-.25.112-.25.25v1.144l.322.062c.04.007.081.011.123.011z"/></svg>
+                    Commander via WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="product-modal-overlay" onclick="closeProductModal()" class="fixed inset-0 bg-slate-900/60 z-[130] hidden backdrop-blur-sm transition-opacity opacity-0 duration-300"></div>
+    <div id="product-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-4xl bg-white z-[140] rounded-[2rem] shadow-2xl hidden flex-col md:flex-row overflow-hidden scale-95 opacity-0 transition-all duration-300">
+        <div class="md:w-1/2 bg-slate-50 relative aspect-square md:aspect-auto">
+            <img id="modal-img" src="" alt="Produit" class="w-full h-full object-cover">
+            <button onclick="closeProductModal()" class="absolute top-4 left-4 md:hidden bg-white/90 backdrop-blur p-2 rounded-full text-slate-900 shadow-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="md:w-1/2 p-6 md:p-10 flex flex-col max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-2 hidden md:flex">
+                <h2 id="modal-title" class="text-3xl font-black italic uppercase tracking-tighter text-slate-900"></h2>
+                <button onclick="closeProductModal()" class="text-slate-400 hover:text-slate-900 transition p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <h2 id="modal-title-mobile" class="text-2xl font-black italic uppercase tracking-tighter text-slate-900 md:hidden mb-1"></h2>
+            <p id="modal-price" class="text-sky-500 font-black text-2xl mb-6"></p>
+            <div class="prose prose-sm text-slate-500 mb-8 leading-relaxed" id="modal-desc"></div>
+            <div class="mt-auto space-y-3">
+                <button id="btn-modal-add" class="w-full bg-slate-100 text-slate-900 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-200 transition-all text-xs">Continuer mes achats</button>
+                <button id="btn-modal-buy" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg hover:bg-slate-800 transition-all text-xs">Commander directement</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="container mx-auto px-4 py-8 flex-1">
+        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-4">
+            </div>
+    </main>
+
+    <footer class="bg-slate-950 text-slate-300 pt-16 pb-8 mt-12 rounded-t-[3rem]">
+        <div class="container mx-auto px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                <div>
+                    <div class="text-2xl font-black uppercase tracking-tighter italic text-white mb-4">YARID<span class="text-sky-500">.</span></div>
+                    <p class="text-sm leading-relaxed text-slate-400">L'excellence au service de vos envies. E-commerce premium et accompagnement de projets au Cameroun.</p>
+                </div>
+                <div>
+                    <h3 class="text-white text-[11px] font-black uppercase tracking-widest mb-6">Contact</h3>
+                    <p class="text-sm text-slate-400 mb-2">Yaoundé, Texaco Omnisports</p>
+                    <p class="text-sm text-slate-400">+237 655 959 284</p>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 pt-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-[10px] uppercase tracking-widest text-slate-500">&copy; 2025 YARID. L'Excellence absolue.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const SUPABASE_URL = 'https://whcpugnkldbmuqzgqxbe.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentDeliveryMode = 'retrait';
+        let currentFrais = 0;
+
+        // --- CHARGEMENT DES PRODUITS PAR CATÉGORIE ---
+        async function loadCategory() {
+            const params = new URLSearchParams(window.location.search);
+            const catName = params.get('cat') || "Catégorie";
+            document.getElementById('category-title').innerText = catName;
+
+            const { data: produits, error } = await _supabase
+                .from('PRODUITS')
+                .select('*')
+                .eq('categorie', catName);
+
+            const grid = document.getElementById('product-grid');
+
+            if (error || !produits || produits.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">Aucun produit dans cette catégorie pour le moment.</div>`;
+                return;
+            }
+
+            // Génération des cartes produits identiques à index.html
+            grid.innerHTML = produits.map(p => `
+                <div class="bg-white rounded-[2rem] p-4 border border-slate-100 shadow-sm hover:shadow-xl transition-all group flex flex-col">
+                    <div class="aspect-square bg-slate-50 rounded-[1.5rem] overflow-hidden mb-5 relative cursor-pointer" onclick='openProductModal(${JSON.stringify(p).replace(/"/g, '&quot;')})'>
+                        <img src="${p.image_url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    </div>
+                    <h4 class="font-bold text-[11px] uppercase truncate text-slate-800 mb-1">${p.name}</h4>
+                    <p class="text-sky-500 font-black text-sm mb-5">${p.price.toLocaleString()} F</p>
+                    <div class="grid grid-cols-2 gap-2 mt-auto">
+                        <button onclick='openProductModal(${JSON.stringify(p).replace(/"/g, '&quot;')})' class="text-center bg-slate-50 text-slate-600 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-100 transition">Détails</button>
+                        <button onclick='addToCart(${JSON.stringify(p).replace(/"/g, '&quot;')}, true)' class="bg-slate-900 text-white py-3 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg hover:bg-slate-800 transition">Acheter</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- GESTION DU PANIER & COMMANDES ---
+        function toggleCart() {
+            document.getElementById('cart-drawer').classList.toggle('open');
+            document.getElementById('cart-overlay').classList.toggle('hidden');
+            renderCart();
+        }
+
+        function setDelivery(mode) {
+            currentDeliveryMode = mode;
+            currentFrais = (mode === 'domicile') ? 2000 : 0;
+            
+            document.querySelectorAll('.delivery-btn').forEach(btn => {
+                btn.className = 'delivery-btn p-3 rounded-xl border-2 border-transparent bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-500 shadow-sm transition-all hover:bg-slate-100';
+            });
+            document.getElementById('btn-' + mode).className = 'delivery-btn p-3 rounded-xl border-2 border-slate-900 bg-slate-900 text-[10px] font-black uppercase tracking-widest text-white transition-all';
+            
+            renderCart();
+        }
+
+        function renderCart() {
+            const cart = JSON.parse(localStorage.getItem('yarid_cart')) || [];
+            const container = document.getElementById('cart-items-container');
+            let subtotal = 0;
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 font-bold py-10 uppercase tracking-widest text-[10px]">Panier vide</p>';
+                document.getElementById('summary-subtotal').innerText = '0 F';
+                document.getElementById('summary-total').innerText = '0 F';
+                return;
+            }
+
+            container.innerHTML = cart.map((item, index) => {
+                subtotal += item.price;
+                return `
+                    <div class="flex items-center gap-4 bg-white border border-slate-100 p-3 rounded-2xl shadow-sm">
+                        <img src="${item.image_url}" class="w-16 h-16 object-cover rounded-xl bg-slate-50">
+                        <div class="flex-1">
+                            <h4 class="text-[10px] font-black uppercase text-slate-800 line-clamp-1">${item.name}</h4>
+                            <p class="text-sky-500 font-black text-xs">${item.price.toLocaleString()} F</p>
+                        </div>
+                        <button onclick="removeFromCart(${index})" class="text-slate-300 hover:text-red-500 p-2 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('summary-subtotal').innerText = subtotal.toLocaleString() + ' F';
+            document.getElementById('summary-delivery').innerText = currentFrais.toLocaleString() + ' F';
+            document.getElementById('summary-total').innerText = (subtotal + currentFrais).toLocaleString() + ' F';
+        }
+
+        function removeFromCart(index) {
+            let cart = JSON.parse(localStorage.getItem('yarid_cart')) || [];
+            cart.splice(index, 1);
+            localStorage.setItem('yarid_cart', JSON.stringify(cart));
+            renderCart();
+            updateCartCount();
+        }
+
+        function addToCart(product, openDrawer = false) {
+            let cart = JSON.parse(localStorage.getItem('yarid_cart')) || [];
+            cart.push(product);
+            localStorage.setItem('yarid_cart', JSON.stringify(cart));
+            updateCartCount();
+            if (openDrawer) {
+                if(!document.getElementById('cart-drawer').classList.contains('open')) { toggleCart(); } else { renderCart(); }
+            } else { showToast("Produit ajouté !"); }
+        }
+
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] bg-slate-900 text-white px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest shadow-2xl toast-enter";
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 400); }, 3000);
+        }
+
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('yarid_cart')) || [];
+            document.getElementById('cart-count').innerText = cart.length;
+        }
+
+        function openProductModal(product) {
+            document.getElementById('modal-img').src = product.image_url;
+            document.getElementById('modal-title').innerText = product.name;
+            document.getElementById('modal-title-mobile').innerText = product.name;
+            document.getElementById('modal-price').innerText = product.price.toLocaleString() + ' F';
+            document.getElementById('modal-desc').innerHTML = product.description || "Un produit d'exception minutieusement sélectionné.";
+            
+            document.getElementById('btn-modal-add').onclick = () => { addToCart(product, false); closeProductModal(); };
+            document.getElementById('btn-modal-buy').onclick = () => { closeProductModal(); addToCart(product, true); };
+
+            const ov = document.getElementById('product-modal-overlay');
+            const md = document.getElementById('product-modal');
+            ov.classList.remove('hidden'); md.classList.remove('hidden');
+            setTimeout(() => { ov.classList.remove('opacity-0'); md.classList.remove('opacity-0', 'scale-95'); }, 10);
+        }
+
+        function closeProductModal() {
+            const ov = document.getElementById('product-modal-overlay');
+            const md = document.getElementById('product-modal');
+            ov.classList.add('opacity-0'); md.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => { ov.classList.add('hidden'); md.classList.add('hidden'); }, 300);
+        }
+
+        async function validerCommande() {
+            const nom = document.getElementById('client_nom').value.trim();
+            const tel = document.getElementById('client_tel').value.trim();
+            const adresse = document.getElementById('client_adresse').value.trim();
+            const cart = JSON.parse(localStorage.getItem('yarid_cart')) || [];
+            const total = parseInt(document.getElementById('summary-total').innerText.replace(/\D/g, ''));
+
+            if (!nom || !tel || !adresse || cart.length === 0) {
+                alert("Veuillez remplir vos informations complètes (Nom, Téléphone, Adresse).");
+                return;
+            }
+
+            document.getElementById('btn-valider').innerText = "Veuillez patienter...";
+            const orderId = 'YRD-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+
+            const payload = {
+                order_id: orderId, client_nom: nom, client_telephone: tel, client_adresse: adresse,
+                contenu_panier: cart.map(i => i.name).join(', '), montant_total: total, 
+                mode_livraison: currentDeliveryMode, frais_livraison: currentFrais, statut: 'en_attente', created_at: new Date()
+            };
+
+            const { error } = await _supabase.from('commande').insert([payload]);
+            if (error) console.warn("Erreur Supabase, mais redirection WhatsApp maintenue.", error);
+
+            const msg = `*🛍️ NOUVELLE COMMANDE YARID*\n\n*ID :* ${orderId}\n*Client :* ${nom}\n*Téléphone :* ${tel}\n*Adresse :* ${adresse}\n\n*🛒 Produits :*\n${cart.map(i => `- ${i.name}`).join('\n')}\n\n*Livraison :* ${currentDeliveryMode.toUpperCase()}\n*TOTAL : ${total.toLocaleString()} FCFA*\n\n_Merci de confirmer ma commande._`;
+            
+            localStorage.removeItem('yarid_cart');
+            window.location.href = `https://wa.me/237655959284?text=${encodeURIComponent(msg)}`;
+        }
+
+        // INITIALISATION
+        loadCategory();
+        updateCartCount();
+    </script>
+
+    <script>
+        const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
+        
+        if (!sessionStorage.getItem('yarid_session_id')) {
+            sessionStorage.setItem('yarid_session_id', 'sess_' + Math.random().toString(36).substr(2, 9));
+        }
+        
+        window.addEventListener('load', async () => {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                await analyticsClient.from('site_analytics').insert([{
+                    event_type: 'page_view',
+                    page_url: window.location.pathname.split('/').pop() || 'categorie',
+                    device_type: /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur',
+                    session_id: sessionStorage.getItem('yarid_session_id'),
+                    details: { category_viewed: params.get('cat') }
+                }]);
+            } catch (err) { console.error("Analytics Error", err); }
+        });
+    </script>
+</body>
+</html>
