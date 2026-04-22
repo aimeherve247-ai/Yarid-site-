@@ -1,252 +1,476 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gérer les Promotions | YARID</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('YARID PWA : Prête !'))
+            .catch(err => console.log('Erreur PWA :', err));
+        });
+      }
+    </script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="analytics.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        body { 
+            background: #f1f5f9; 
+        }
+        
+        .btn-primary { 
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); 
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .input-field {
+            background: #f8fafc;
+            border: 2px solid transparent;
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            background: white;
+            border-color: #0ea5e9;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+        }
+        
+        .promo-item {
+            background: #f8fafc;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .promo-item:hover {
+            border-color: #0ea5e9;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);
+        }
+        
+        .btn-danger {
+            background: #fef2f2;
+            color: #ef4444;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-danger:hover {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .badge-active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .badge-expired {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .badge-upcoming {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+    </style>
+<link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="YARID">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon_32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon_16.png">
+<link rel="apple-touch-icon" href="/icons/ios.png">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="YARID - Boutique Premium">
+<meta property="og:description" content="Votre destination exclusive pour des produits d'exception au Cameroun.">
+<meta property="og:image" content="/icons/icon_512.png">
+<meta property="og:url" content="https://votre-site.netlify.app">
 
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('YARID PWA : Prête !'))
-        .catch(err => console.log('Erreur PWA :', err));
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker enregistré !'))
+        .catch(err => console.log('Erreur SW:', err));
     });
   }
 </script>
 
-    <meta charset="UTF-8">
-    <title>Gérer les Promos | YARID</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-50 p-10">
-    <div class="max-w-4xl mx-auto space-y-8">
+<body class="min-h-screen p-4 md:p-8">
+    
+    <div class="max-w-5xl mx-auto">
         
-        <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-            <h1 class="text-xl font-black uppercase tracking-tighter mb-8">Ajouter une Promo</h1>
-            <form id="promoForm" class="space-y-4">
-                <input type="text" id="promoTitre" placeholder="Titre de la promo" required class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold">
-                <textarea id="promoDesc" placeholder="Description" required class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold h-24"></textarea>
-                <input type="text" id="promoImg" placeholder="URL de l'image" required class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="date" id="dateDebut" required class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold">
-                    <input type="date" id="dateFin" required class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold">
-                </div>
-                <button type="submit" class="w-full bg-sky-500 text-white py-4 rounded-2xl font-black uppercase text-[10px]">Publier la Promo</button>
-            </form>
-        </div>
-
-        <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-            <h2 class="text-xl font-black uppercase tracking-tighter mb-6">Promotions Actives</h2>
-            <div id="promoList" class="space-y-4">
-                <div class="text-center py-10 text-slate-400">Chargement...</div>
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-black italic uppercase tracking-tighter text-slate-900">
+                    Gestion des <span class="text-sky-500">Promotions</span>
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">Créez et gérez vos offres promotionnelles</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="admin.html" class="px-5 py-3 bg-slate-100 text-slate-600 rounded-2xl text-xs font-bold uppercase tracking-wider hover:bg-slate-200 transition">
+                    ← Retour Dashboard
+                </a>
+            </div>
+        </header>
+        
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="stat-card">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Actives</p>
+                <p class="text-3xl font-black text-emerald-500" id="stat-active">0</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">À venir</p>
+                <p class="text-3xl font-black text-amber-500" id="stat-upcoming">0</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Expirées</p>
+                <p class="text-3xl font-black text-red-500" id="stat-expired">0</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Total</p>
+                <p class="text-3xl font-black text-sky-500" id="stat-total">0</p>
             </div>
         </div>
-
-        <a href="admin.html" class="block text-center mt-6 text-[10px] font-bold text-slate-400 uppercase">Retour Dashboard</a>
+        
+        <div class="grid lg:grid-cols-5 gap-6">
+            
+            <!-- Formulaire -->
+            <div class="lg:col-span-2">
+                <div class="card p-6 sticky top-4">
+                    <h2 class="text-lg font-black uppercase tracking-tighter mb-6 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        Nouvelle Promo
+                    </h2>
+                    
+                    <form id="promoForm" class="space-y-4">
+                        <div>
+                            <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 block">Titre de la promo</label>
+                            <input type="text" id="promoTitre" placeholder="Ex: Soldes d'été" required 
+                                   class="input-field w-full p-4 text-sm font-semibold">
+                        </div>
+                        
+                        <div>
+                            <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 block">Description</label>
+                            <textarea id="promoDesc" placeholder="Décrivez l'offre..." required 
+                                      class="input-field w-full p-4 text-sm font-semibold h-24 resize-none"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 block">URL de l'image</label>
+                            <input type="url" id="promoImg" placeholder="https://..." required 
+                                   class="input-field w-full p-4 text-sm font-semibold">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 block">Date début</label>
+                                <input type="date" id="dateDebut" required 
+                                       class="input-field w-full p-4 text-sm font-semibold">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 block">Date fin</label>
+                                <input type="date" id="dateFin" required 
+                                       class="input-field w-full p-4 text-sm font-semibold">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 block">Type</label>
+                                <select id="promoType" class="input-field w-full p-4 text-sm font-semibold">
+                                    <option value="percentage">Pourcentage %</option>
+                                    <option value="fixed">Montant fixe</option>
+                                    <option value="free_shipping">Livraison gratuite</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 block">Valeur</label>
+                                <input type="number" id="promoValue" placeholder="20" 
+                                       class="input-field w-full p-4 text-sm font-semibold">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 block">Code promo (optionnel)</label>
+                            <input type="text" id="promoCode" placeholder="Ex: ETE2025" 
+                                   class="input-field w-full p-4 text-sm font-semibold uppercase">
+                        </div>
+                        
+                        <button type="submit" class="btn-primary w-full py-4 rounded-2xl text-white font-black uppercase text-xs tracking-wider mt-4">
+                            Publier la Promotion
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Liste des promotions -->
+            <div class="lg:col-span-3">
+                <div class="card p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-black uppercase tracking-tighter">Promotions Actives</h2>
+                        <div class="flex gap-2">
+                            <button onclick="filterPromos('all')" class="px-3 py-1.5 rounded-full text-xs font-bold bg-slate-900 text-white" id="filter-all">Tout</button>
+                            <button onclick="filterPromos('active')" class="px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600" id="filter-active">Actives</button>
+                            <button onclick="filterPromos('expired')" class="px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600" id="filter-expired">Expirées</button>
+                        </div>
+                    </div>
+                    
+                    <div id="promoList" class="space-y-3">
+                        <div class="text-center py-10">
+                            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-slate-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                            </div>
+                            <p class="text-slate-400 text-sm">Chargement des promotions...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
     </div>
 
     <script>
         const SUPABASE_URL = 'https://whcpugnkldbmuqzgqxbe.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+        
+        let allPromos = [];
+        let currentFilter = 'all';
+        
         // Charger les promos
         async function fetchPromos() {
-            const { data } = await _supabase.from('PROMOTIONS').select('*').order('id', { ascending: false });
+            const { data, error } = await _supabase.from('PROMOTIONS').select('*').order('id', { ascending: false });
+            
+            if (error) {
+                console.error('Erreur chargement promotions:', error);
+                document.getElementById('promoList').innerHTML = `
+                    <div class="text-center py-10 text-red-500">
+                        <p>Erreur lors du chargement</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            allPromos = data || [];
+            updateStats();
+            renderPromos();
+        }
+        
+        function updateStats() {
+            const today = new Date().toISOString().split('T')[0];
+            
+            const active = allPromos.filter(p => p.date_debut <= today && p.date_fin >= today).length;
+            const upcoming = allPromos.filter(p => p.date_debut > today).length;
+            const expired = allPromos.filter(p => p.date_fin < today).length;
+            
+            document.getElementById('stat-active').textContent = active;
+            document.getElementById('stat-upcoming').textContent = upcoming;
+            document.getElementById('stat-expired').textContent = expired;
+            document.getElementById('stat-total').textContent = allPromos.length;
+        }
+        
+        function getPromoStatus(promo) {
+            const today = new Date().toISOString().split('T')[0];
+            if (promo.date_fin < today) return 'expired';
+            if (promo.date_debut > today) return 'upcoming';
+            return 'active';
+        }
+        
+        function getStatusBadge(status) {
+            const badges = {
+                'active': '<span class="badge-active text-white text-[10px] font-black px-2 py-1 rounded-full">ACTIVE</span>',
+                'upcoming': '<span class="badge-upcoming text-white text-[10px] font-black px-2 py-1 rounded-full">À VENIR</span>',
+                'expired': '<span class="badge-expired text-white text-[10px] font-black px-2 py-1 rounded-full">EXPIRÉE</span>'
+            };
+            return badges[status] || '';
+        }
+        
+        function renderPromos() {
             const list = document.getElementById('promoList');
             
-            if (!data || data.length === 0) { list.innerHTML = "Aucune promo active."; return; }
+            let filtered = allPromos;
+            if (currentFilter !== 'all') {
+                filtered = allPromos.filter(p => getPromoStatus(p) === currentFilter);
+            }
             
-            list.innerHTML = data.map(p => `
-                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                    <div>
-                        <p class="font-black text-sm uppercase">${p.titre}</p>
-                        <p class="text-[10px] text-slate-500">Du ${p.date_debut} au ${p.date_fin}</p>
+            if (filtered.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-10 text-slate-400">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                        <p>Aucune promotion ${currentFilter !== 'all' ? 'dans cette catégorie' : ''}</p>
                     </div>
-                    <button onclick="deletePromo(${p.id})" class="text-red-500 font-bold text-[10px] uppercase bg-red-50 px-4 py-2 rounded-xl">Supprimer</button>
-                </div>
-            `).join('');
+                `;
+                return;
+            }
+            
+            list.innerHTML = filtered.map(p => {
+                const status = getPromoStatus(p);
+                const discountText = p.type === 'percentage' ? `-${p.value}%` : 
+                                    p.type === 'fixed' ? `-${p.value} FCFA` : 'Livraison gratuite';
+                
+                return `
+                    <div class="promo-item p-4">
+                        <div class="flex gap-4">
+                            <div class="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100">
+                                <img src="${p.image_url || 'https://via.placeholder.com/100'}" class="w-full h-full object-cover" alt="${p.titre}">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            ${getStatusBadge(status)}
+                                            ${p.code ? `<span class="bg-sky-100 text-sky-600 text-[10px] font-bold px-2 py-0.5 rounded">${p.code}</span>` : ''}
+                                        </div>
+                                        <h3 class="font-bold text-slate-900 truncate">${p.titre}</h3>
+                                        <p class="text-xs text-slate-500 truncate">${p.description}</p>
+                                    </div>
+                                    <button onclick="deletePromo(${p.id})" class="btn-danger px-3 py-2 text-xs font-bold uppercase">
+                                        Suppr.
+                                    </button>
+                                </div>
+                                <div class="flex items-center justify-between mt-3">
+                                    <div class="text-xs text-slate-400">
+                                        <span class="font-semibold text-slate-600">${discountText}</span> • 
+                                        Du ${formatDate(p.date_debut)} au ${formatDate(p.date_fin)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
-
+        
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+        }
+        
+        function filterPromos(filter) {
+            currentFilter = filter;
+            
+            // Update buttons
+            ['all', 'active', 'expired'].forEach(f => {
+                const btn = document.getElementById(`filter-${f}`);
+                if (f === filter) {
+                    btn.className = 'px-3 py-1.5 rounded-full text-xs font-bold bg-slate-900 text-white';
+                } else {
+                    btn.className = 'px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200';
+                }
+            });
+            
+            renderPromos();
+        }
+        
         // Supprimer une promo
         window.deletePromo = async (id) => {
-            if(confirm("Confirmer la suppression ?")) {
-                await _supabase.from('PROMOTIONS').delete().eq('id', id);
-                fetchPromos();
+            if(confirm("Êtes-vous sûr de vouloir supprimer cette promotion ?")) {
+                try {
+                    await _supabase.from('PROMOTIONS').delete().eq('id', id);
+                    fetchPromos();
+                } catch (err) {
+                    alert('Erreur lors de la suppression');
+                }
             }
         };
-
+        
         // Ajouter une promo
         document.getElementById('promoForm').onsubmit = async (e) => {
             e.preventDefault();
-            await _supabase.from('PROMOTIONS').insert([{
-                titre: document.getElementById('promoTitre').value,
-                description: document.getElementById('promoDesc').value,
-                image_url: document.getElementById('promoImg').value,
-                date_debut: document.getElementById('dateDebut').value,
-                date_fin: document.getElementById('dateFin').value
-            }]);
-            alert("Promo publiée !");
-            document.getElementById('promoForm').reset();
-            fetchPromos();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>Publication...';
+            
+            try {
+                await _supabase.from('PROMOTIONS').insert([{
+                    titre: document.getElementById('promoTitre').value,
+                    description: document.getElementById('promoDesc').value,
+                    image_url: document.getElementById('promoImg').value,
+                    date_debut: document.getElementById('dateDebut').value,
+                    date_fin: document.getElementById('dateFin').value,
+                    type: document.getElementById('promoType').value,
+                    value: parseInt(document.getElementById('promoValue').value) || 0,
+                    code: document.getElementById('promoCode').value.toUpperCase() || null
+                }]);
+                
+                // Tracker l'événement
+                if (window.trackYaridEvent) {
+                    trackYaridEvent('promo_created', {
+                        title: document.getElementById('promoTitre').value,
+                        type: document.getElementById('promoType').value
+                    });
+                }
+                
+                alert("Promotion publiée avec succès !");
+                document.getElementById('promoForm').reset();
+                fetchPromos();
+                
+            } catch (err) {
+                console.error('Erreur création promo:', err);
+                alert('Erreur lors de la publication');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Publier la Promotion';
+            }
         };
-
+        
+        // Initialisation
         fetchPromos();
-(function() {
-    // Vérifie si la session est active
-    const session = sessionStorage.getItem('yarid_admin_session');
-    
-    // Si pas de session et qu'on n'est pas sur la page de login, on dégage
-    if (session !== 'active' && !window.location.pathname.includes('login.html')) {
-        window.location.href = 'login.html';
-    }
-})();
-
+        
+        // Auth check
+        (function() {
+            const session = sessionStorage.getItem('yarid_admin_session');
+            if (session !== 'active' && !window.location.pathname.includes('login.html')) {
+                window.location.href = 'login.html';
+            }
+        })();
     </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-    // 1. Initialise Supabase (Mets tes vraies clés ici !)
-    const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
-
-    // 2. Fonction pour détecter le type d'appareil
-    function getDeviceType() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
-    }
-
-    // 3. Fonction principale d'envoi de données
-    async function trackYaridEvent(eventName, extraDetails = {}) {
-        try {
-            await analyticsClient.from('site_analytics').insert([{
-                event_type: eventName,
-                page_url: window.location.pathname.split('/').pop() || 'accueil', // Garde juste le nom du fichier
-                device_type: getDeviceType(),
-                details: extraDetails
-            }]);
-        } catch (err) {
-            console.error("Erreur Analytics:", err);
-        }
-    }
-
-    // 4. Déclenchement automatique : Enregistre la vue de la page dès qu'elle s'ouvre
-    window.onload = () => {
-        trackYaridEvent('page_view');
-    };
-
-    // (Optionnel) Exemple si tu veux suivre un clic sur un bouton d'achat :
-    // onclick="trackYaridEvent('clic_achat', { produit: 'Livraison Express' })"
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-    const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
-
-    // 1. GESTION DE LA SESSION (Pour le tunnel de conversion)
-    // Crée un ID unique pour la visite, qui s'efface quand on ferme le navigateur
-    if (!sessionStorage.getItem('yarid_session_id')) {
-        sessionStorage.setItem('yarid_session_id', 'sess_' + Math.random().toString(36).substr(2, 9));
-    }
-    const sessionId = sessionStorage.getItem('yarid_session_id');
-
-    // 2. LECTURE DES CAMPAGNES MARKETING (UTM)
-    const urlParams = new URLSearchParams(window.location.search);
-    const utmSource = urlParams.get('utm_source') || 'direct';
-    const utmCampaign = urlParams.get('utm_campaign') || null;
-
-    // 3. IDENTIFICATION UTILISATEUR (Segmentation)
-    // Si l'utilisateur s'est connecté via le portail, on récupère son ID
-    const activeUser = JSON.parse(localStorage.getItem('yarid_user') || '{}');
-    const userId = activeUser.username || null;
-
-    // 4. MOTEUR D'ENVOI DES DONNÉES
-    async function trackEvent(eventName, eventDetails = {}) {
-        // Calcul du temps de chargement pour les événements "page_view"
-        let loadTime = null;
-        if (eventName === 'page_view' && window.performance) {
-            loadTime = Math.round(performance.now());
-        }
-
-        const device = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
-
-        const payload = {
-            event_type: eventName,
-            page_url: window.location.pathname.split('/').pop() || 'accueil',
-            device_type: device,
-            session_id: sessionId,
-            user_id: userId,
-            utm_source: utmSource,
-            utm_campaign: utmCampaign,
-            load_time_ms: loadTime,
-            details: eventDetails // Pour les infos produits, panier, etc.
-        };
-
-        try {
-            await analyticsClient.from('site_analytics').insert([payload]);
-        } catch (err) {
-            console.error("Tracker Error:", err);
-        }
-    }
-
-    // 5. DÉCLENCHEURS AUTOMATIQUES
-    // Enregistre la vue de la page au chargement complet
-    window.addEventListener('load', () => {
-        trackEvent('page_view', { title: document.title });
-    });
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-    const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
-
-    // 1. GESTION DE LA SESSION (Pour le tunnel de conversion)
-    // Crée un ID unique pour la visite, qui s'efface quand on ferme le navigateur
-    if (!sessionStorage.getItem('yarid_session_id')) {
-        sessionStorage.setItem('yarid_session_id', 'sess_' + Math.random().toString(36).substr(2, 9));
-    }
-    const sessionId = sessionStorage.getItem('yarid_session_id');
-
-    // 2. LECTURE DES CAMPAGNES MARKETING (UTM)
-    const urlParams = new URLSearchParams(window.location.search);
-    const utmSource = urlParams.get('utm_source') || 'direct';
-    const utmCampaign = urlParams.get('utm_campaign') || null;
-
-    // 3. IDENTIFICATION UTILISATEUR (Segmentation)
-    // Si l'utilisateur s'est connecté via le portail, on récupère son ID
-    const activeUser = JSON.parse(localStorage.getItem('yarid_user') || '{}');
-    const userId = activeUser.username || null;
-
-    // 4. MOTEUR D'ENVOI DES DONNÉES
-    async function trackEvent(eventName, eventDetails = {}) {
-        // Calcul du temps de chargement pour les événements "page_view"
-        let loadTime = null;
-        if (eventName === 'page_view' && window.performance) {
-            loadTime = Math.round(performance.now());
-        }
-
-        const device = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
-
-        const payload = {
-            event_type: eventName,
-            page_url: window.location.pathname.split('/').pop() || 'accueil',
-            device_type: device,
-            session_id: sessionId,
-            user_id: userId,
-            utm_source: utmSource,
-            utm_campaign: utmCampaign,
-            load_time_ms: loadTime,
-            details: eventDetails // Pour les infos produits, panier, etc.
-        };
-
-        try {
-            await analyticsClient.from('site_analytics').insert([payload]);
-        } catch (err) {
-            console.error("Tracker Error:", err);
-        }
-    }
-
-    // 5. DÉCLENCHEURS AUTOMATIQUES
-    // Enregistre la vue de la page au chargement complet
-    window.addEventListener('load', () => {
-        trackEvent('page_view', { title: document.title });
-    });
-</script>
 </body>
 </html>

@@ -5,12 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nos Services | YARID GROUP</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="analytics.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .service-card:hover img { transform: scale(1.05); }
         #cart-drawer { transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="YARID">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon_32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon_16.png">
+<link rel="apple-touch-icon" href="/icons/ios.png">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="YARID - Boutique Premium">
+<meta property="og:description" content="Votre destination exclusive pour des produits d'exception au Cameroun.">
+<meta property="og:image" content="/icons/icon_512.png">
+<meta property="og:url" content="https://votre-site.netlify.app">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker enregistré !'))
+        .catch(err => console.log('Erreur SW:', err));
+    });
+  }
+</script>
+
 </head>
 <body class="bg-white pt-24 md:pt-32">
 
@@ -118,7 +147,7 @@
             </div>
             
             <div class="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                <p class="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-600">© 2024 YARID GROUP. TOUS DROITS RÉSERVÉS.</p>
+                <p class="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-600">© 2025 YARID GROUP. TOUS DROITS RÉSERVÉS.</p>
                 <div class="flex gap-8">
                     <a href="#" class="text-slate-600 hover:text-white transition text-[10px] font-black uppercase tracking-widest italic">Instagram</a>
                     <a href="#" class="text-slate-600 hover:text-white transition text-[10px] font-black uppercase tracking-widest italic">LinkedIn</a>
