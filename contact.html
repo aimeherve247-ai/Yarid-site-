@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('YARID PWA : Prête !'))
+        .catch(err => console.log('Erreur PWA :', err));
+    });
+  }
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultation | YARID GROUP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="analytics.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .input-focus:focus { border-color: #0ea5e9; outline: none; box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1); }
+        select { appearance: none; -webkit-appearance: none; }
+    </style>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="YARID">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon_32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon_16.png">
+<link rel="apple-touch-icon" href="/icons/ios.png">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="YARID - Boutique Premium">
+<meta property="og:description" content="Votre destination exclusive pour des produits d'exception au Cameroun.">
+<meta property="og:image" content="/icons/icon_512.png">
+<meta property="og:url" content="https://votre-site.netlify.app">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker enregistré !'))
+        .catch(err => console.log('Erreur SW:', err));
+    });
+  }
+</script>
+
+</head>
+<body class="bg-white pt-32">
+
+    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-[100] border-b border-slate-50 h-20 flex items-center px-6 justify-between">
+        <a href="index.html" class="text-2xl font-black italic tracking-tighter uppercase">YARID<span class="text-sky-500">.</span></a>
+        <div class="hidden md:flex space-x-10 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            <a href="index.html" class="hover:text-sky-500 transition">Boutique</a>
+            <a href="services.html" class="hover:text-sky-500 transition">Nos Services</a>
+            <a href="contact.html" class="text-sky-500 border-b-2 border-sky-500 pb-1">Consultation</a>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 max-w-7xl mb-32">
+        <div class="grid lg:grid-cols-12 gap-20 items-start">
+            
+            <div class="lg:col-span-5">
+                <span class="text-sky-500 font-black text-[11px] uppercase tracking-[0.4em] mb-6 block">Contact & Support</span>
+                <h1 class="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-[0.9] mb-10 text-slate-950">
+                    Parlons de vos <br><span class="text-slate-200">Projets.</span>
+                </h1>
+                
+                <p class="text-slate-500 text-lg mb-12 leading-relaxed">
+                    Besoin d'un devis pour du BTP, d'une expertise en Sourcing ou d'un site web ? Notre équipe vous répond sous 24h.
+                </p>
+
+                <div class="space-y-8 border-t border-slate-100 pt-12">
+                    <div>
+                        <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Bureaux</h4>
+                        <p class="font-bold text-slate-900 text-lg">Yaoundé Texaco omnisport, Cameroun</p>
+                    </div>
+                    <div>
+                        <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Ligne Directe</h4>
+                        <p class="font-bold text-slate-900 text-lg">+237 655 959 284</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-7 bg-slate-50 p-8 md:p-16 rounded-[3rem]">
+                <form id="contactForm" class="space-y-8">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Nom Complet</label>
+                            <input type="text" id="nom" required class="w-full bg-white border-2 border-transparent p-5 rounded-2xl input-focus font-semibold transition text-slate-900 shadow-sm" placeholder="Ex: Jean Dupont">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Service Concerné</label>
+                            <div class="relative">
+                                <select id="service" class="w-full bg-white border-2 border-transparent p-5 rounded-2xl input-focus font-bold text-slate-700 shadow-sm cursor-pointer">
+                                    <option value="Boutique">Boutique (Produit)</option>
+                                    <option value="Digital">Digital / Site Web</option>
+                                    <option value="BTP">BTP & Matériaux</option>
+                                    <option value="Sourcing">Sourcing International</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Votre Message</label>
+                        <textarea id="message" rows="6" required class="w-full bg-white border-2 border-transparent p-5 rounded-2xl input-focus font-semibold transition text-slate-900 shadow-sm" placeholder="Décrivez votre projet avec précision..."></textarea>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row gap-4 pt-6">
+                        <button type="button" onclick="sendToWhatsApp()" class="flex-1 bg-slate-950 text-white py-6 rounded-2xl font-black uppercase tracking-widest hover:bg-sky-500 transition-all duration-500 shadow-xl shadow-slate-200">
+                            WhatsApp
+                        </button>
+                        <button type="button" onclick="sendToEmail()" class="flex-1 border-2 border-slate-900 text-slate-900 py-6 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all duration-500">
+                            Email
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-slate-950 text-white pt-20 pb-10">
+        <div class="container mx-auto px-6 max-w-6xl">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+                <div class="md:col-span-2 text-center md:text-left">
+                    <a href="index.html" class="text-3xl font-black italic tracking-tighter uppercase mb-6 block">YARID<span class="text-sky-500">.</span></a>
+                    <p class="text-slate-500 text-sm leading-relaxed max-w-sm mx-auto md:mx-0">
+                        Distributeur officiel de matériaux de construction et studio de design digital. Nous bâtissons l'avenir.
+                    </p>
+                </div>
+                <div class="text-center md:text-left">
+                    <h4 class="text-[10px] font-black uppercase tracking-[0.3em] mb-6 text-sky-500">Navigation</h4>
+                    <ul class="space-y-4 text-xs font-bold uppercase tracking-widest">
+                        <li><a href="index.html" class="hover:text-sky-500 transition">Boutique</a></li>
+                        <li><a href="services.html" class="hover:text-sky-500 transition">Expertises</a></li>
+                    </ul>
+                </div>
+                <div class="text-center md:text-left">
+                    <h4 class="text-[10px] font-black uppercase tracking-[0.3em] mb-6 text-sky-500">Contact</h4>
+                    <ul class="space-y-4 text-xs font-bold uppercase tracking-widest text-slate-400 italic">
+                        <li>yaoundé, Cameroun</li>
+                        <li>+237 655 959 284</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/5 pt-10 text-center">
+                <p class="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-600">© 2024 YARID GROUP. TOUS DROITS RÉSERVÉS.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- LOGIQUE DE COMMUNICATION AUTOMATIQUE ---
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            const serviceParam = params.get('service'); // Récupère 'digital', 'btp', 'sourcing'
+            
+            if (serviceParam) {
+                const selectElement = document.getElementById('service');
+                // On mappe les paramètres de services.html aux options du formulaire
+                if(serviceParam === 'digital') selectElement.value = "Digital";
+                if(serviceParam === 'btp') selectElement.value = "BTP";
+                if(serviceParam === 'sourcing') selectElement.value = "Sourcing";
+                if(serviceParam === 'boutique') selectElement.value = "Boutique";
+            }
+        };
+
+        function sendToWhatsApp() {
+            const nom = document.getElementById('nom').value;
+            const service = document.getElementById('service').value;
+            const message = document.getElementById('message').value;
+            if(!nom || !message) return alert("Veuillez remplir les champs.");
+            const texteFinal = `*DEMANDE DE CONSULTATION YARID*\n\n👤 Nom: ${nom}\n📂 Service: ${service}\n📝 Message: ${message}`;
+            window.location.href = `https://wa.me/237655959284?text=${encodeURIComponent(texteFinal)}`;
+        }
+
+        function sendToEmail() {
+            const nom = document.getElementById('nom').value;
+            const service = document.getElementById('service').value;
+            const message = document.getElementById('message').value;
+            if(!nom || !message) return alert("Veuillez remplir les champs.");
+            window.location.href = `mailto:yaridcm237@gmail.com?subject=Consultation ${service}&body=Nom: ${nom}%0A%0AMessage: ${message}`;
+        }
+    </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // 1. Initialise Supabase (Mets tes vraies clés ici !)
+    const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
+
+    // 2. Fonction pour détecter le type d'appareil
+    function getDeviceType() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
+    }
+
+    // 3. Fonction principale d'envoi de données
+    async function trackYaridEvent(eventName, extraDetails = {}) {
+        try {
+            await analyticsClient.from('site_analytics').insert([{
+                event_type: eventName,
+                page_url: window.location.pathname.split('/').pop() || 'accueil', // Garde juste le nom du fichier
+                device_type: getDeviceType(),
+                details: extraDetails
+            }]);
+        } catch (err) {
+            console.error("Erreur Analytics:", err);
+        }
+    }
+
+    // 4. Déclenchement automatique : Enregistre la vue de la page dès qu'elle s'ouvre
+    window.onload = () => {
+        trackYaridEvent('page_view');
+    };
+
+    // (Optionnel) Exemple si tu veux suivre un clic sur un bouton d'achat :
+    // onclick="trackYaridEvent('clic_achat', { produit: 'Livraison Express' })"
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
+
+    // 1. GESTION DE LA SESSION (Pour le tunnel de conversion)
+    // Crée un ID unique pour la visite, qui s'efface quand on ferme le navigateur
+    if (!sessionStorage.getItem('yarid_session_id')) {
+        sessionStorage.setItem('yarid_session_id', 'sess_' + Math.random().toString(36).substr(2, 9));
+    }
+    const sessionId = sessionStorage.getItem('yarid_session_id');
+
+    // 2. LECTURE DES CAMPAGNES MARKETING (UTM)
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmSource = urlParams.get('utm_source') || 'direct';
+    const utmCampaign = urlParams.get('utm_campaign') || null;
+
+    // 3. IDENTIFICATION UTILISATEUR (Segmentation)
+    // Si l'utilisateur s'est connecté via le portail, on récupère son ID
+    const activeUser = JSON.parse(localStorage.getItem('yarid_user') || '{}');
+    const userId = activeUser.username || null;
+
+    // 4. MOTEUR D'ENVOI DES DONNÉES
+    async function trackEvent(eventName, eventDetails = {}) {
+        // Calcul du temps de chargement pour les événements "page_view"
+        let loadTime = null;
+        if (eventName === 'page_view' && window.performance) {
+            loadTime = Math.round(performance.now());
+        }
+
+        const device = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
+
+        const payload = {
+            event_type: eventName,
+            page_url: window.location.pathname.split('/').pop() || 'accueil',
+            device_type: device,
+            session_id: sessionId,
+            user_id: userId,
+            utm_source: utmSource,
+            utm_campaign: utmCampaign,
+            load_time_ms: loadTime,
+            details: eventDetails // Pour les infos produits, panier, etc.
+        };
+
+        try {
+            await analyticsClient.from('site_analytics').insert([payload]);
+        } catch (err) {
+            console.error("Tracker Error:", err);
+        }
+    }
+
+    // 5. DÉCLENCHEURS AUTOMATIQUES
+    // Enregistre la vue de la page au chargement complet
+    window.addEventListener('load', () => {
+        trackEvent('page_view', { title: document.title });
+    });
+</script>
+
+</body>
+</html>
+

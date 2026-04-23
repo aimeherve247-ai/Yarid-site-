@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('YARID PWA : Prête !'))
+        .catch(err => console.log('Erreur PWA :', err));
+    });
+  }
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital & Technologie | YARID GROUP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="analytics.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+    </style>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="YARID">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon_32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon_16.png">
+<link rel="apple-touch-icon" href="/icons/ios.png">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="YARID - Boutique Premium">
+<meta property="og:description" content="Votre destination exclusive pour des produits d'exception au Cameroun.">
+<meta property="og:image" content="/icons/icon_512.png">
+<meta property="og:url" content="https://votre-site.netlify.app">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker enregistré !'))
+        .catch(err => console.log('Erreur SW:', err));
+    });
+  }
+</script>
+
+</head>
+<body class="bg-slate-950 text-slate-200 pt-20 md:pt-28">
+
+    <nav class="fixed top-0 w-full bg-slate-950/90 backdrop-blur-md z-[100] border-b border-slate-900 h-16 md:h-20 flex items-center px-4 md:px-6 justify-between">
+        <a href="index.html" class="text-xl md:text-2xl font-black italic tracking-tighter uppercase text-white">YARID<span class="text-sky-500">.</span></a>
+        <a href="services.html" class="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-500 bg-slate-900 px-3 py-2 rounded-lg">← Services</a>
+    </nav>
+
+    <main class="container mx-auto px-4 md:px-6 max-w-6xl">
+        
+        <header class="mb-16 md:mb-32">
+            <span class="text-sky-500 font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] mb-4 block">Yarid Digital Studio</span>
+            <h1 class="text-4xl md:text-7xl lg:text-8xl font-black italic uppercase tracking-tighter leading-[0.95] mb-6 text-white">
+                L'ARCHITECTURE <br class="hidden md:block"> DIGITALE <span class="text-slate-700">&</span> <br> <span class="text-sky-500">DESIGN.</span>
+            </h1>
+            <p class="text-slate-400 text-sm md:text-xl max-w-2xl leading-relaxed">
+                Nous transformons vos idées en produits numériques performants. Du design d'interface au développement complexe.
+            </p>
+        </header>
+
+        <div class="space-y-20 md:space-y-40">
+
+            <section class="flex flex-col lg:flex-row gap-8 md:gap-16 items-center">
+                <div class="w-full lg:w-1/2 order-2 lg:order-1">
+                    <span class="text-sky-500 font-bold text-[10px] uppercase mb-2 block">Service 01</span>
+                    <h2 class="text-3xl md:text-5xl font-black uppercase italic mb-6 text-white">Sites Vitrines <br>& Portfolios</h2>
+                    <p class="text-slate-400 text-sm md:text-base leading-relaxed mb-8">
+                        Une présence en ligne qui impose votre marque. Nous créons des sites fluides, optimisés pour Google et conçus pour captiver vos clients dès la première seconde.
+                    </p>
+                    <div class="flex gap-4">
+                        <div class="glass-card p-4 rounded-2xl flex-1 text-center">
+                            <span class="block text-white font-black text-lg">100%</span>
+                            <span class="text-[9px] uppercase text-slate-500">Responsive</span>
+                        </div>
+                        <div class="glass-card p-4 rounded-2xl flex-1 text-center">
+                            <span class="block text-white font-black text-lg">SEO</span>
+                            <span class="text-[9px] uppercase text-slate-500">Optimisé</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full lg:w-1/2 order-1 lg:order-2">
+                    <div class="rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl shadow-sky-500/10">
+                        <img src="https://i.ibb.co/1Y7VnPpJ/IMG-5585.jpg" alt="Web Design" class="w-full h-64 md:h-[400px] object-cover">
+                    </div>
+                </div>
+            </section>
+
+            <section class="flex flex-col lg:flex-row gap-8 md:gap-16 items-center">
+                <div class="w-full lg:w-1/2">
+                    <div class="rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl shadow-purple-500/10">
+                        <img src="https://i.ibb.co/q31tJz5q/IMG-5586.jpg" alt="UI/UX Design" class="w-full h-64 md:h-[400px] object-cover">
+                    </div>
+                </div>
+                <div class="w-full lg:w-1/2">
+                    <span class="text-sky-500 font-bold text-[10px] uppercase mb-2 block">Service 02</span>
+                    <h2 class="text-3xl md:text-5xl font-black uppercase italic mb-6 text-white">Maquettes <br>& Prototypage</h2>
+                    <p class="text-slate-400 text-sm md:text-base leading-relaxed mb-8">
+                        Visualisez votre application avant de dépenser un franc en développement. Nous réalisons des maquettes haute fidélité (Figma) pour tester l'expérience utilisateur.
+                    </p>
+                    <a href="contact.html?service=digital&type=rdv" class="inline-block border-b-2 border-sky-500 pb-1 text-xs font-black uppercase tracking-widest text-white hover:text-sky-500 transition">Prendre rendez-vous →</a>
+                </div>
+            </section>
+
+            <section class="flex flex-col lg:flex-row gap-8 md:gap-16 items-center">
+                <div class="w-full lg:w-1/2 order-2 lg:order-1">
+                    <span class="text-sky-500 font-bold text-[10px] uppercase mb-2 block">Service 03</span>
+                    <h2 class="text-3xl md:text-5xl font-black uppercase italic mb-6 text-white">Médias & <br>Magazines Web</h2>
+                    <p class="text-slate-400 text-sm md:text-base leading-relaxed mb-8">
+                        Des plateformes de contenu robustes pour les blogs d'entreprise ou les magazines d'actualité. Gestion facile des articles et rapidité de lecture extrême.
+                    </p>
+                </div>
+                <div class="w-full lg:w-1/2 order-1 lg:order-2">
+                    <div class="rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl">
+                        <img src="https://i.ibb.co/twFSq5GP/IMG-5584.jpg" alt="Blog & Media" class="w-full h-64 md:h-[400px] object-cover">
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <div class="mt-20 md:mt-40 mb-20 bg-gradient-to-br from-slate-900 to-slate-950 rounded-[2.5rem] md:rounded-[4rem] p-10 md:p-24 text-center border border-slate-800">
+            <h2 class="text-3xl md:text-6xl font-black uppercase italic mb-6 text-white tracking-tighter">Prêt à digitaliser <br>votre business ?</h2>
+            <p class="text-slate-500 text-xs md:text-lg mb-10 md:mb-16 max-w-xl mx-auto">
+                De la simple maquette au site e-commerce complet, Yarid Group vous accompagne.
+            </p>
+            <div class="flex flex-col md:flex-row justify-center gap-4">
+                <a href="contact.html?service=digital&type=devis" class="bg-sky-500 text-white px-10 md:px-14 py-5 md:py-6 rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-widest hover:bg-white hover:text-black transition-all duration-500">
+                    Demander un Devis
+                </a>
+                <a href="contact.html?service=digital&type=rdv" class="bg-transparent border border-slate-800 text-white px-10 md:px-14 py-5 md:py-6 rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-widest hover:bg-slate-800 transition-all">
+                    Prendre un RDV
+                </a>
+            </div>
+        </div>
+    </main>
+    <footer class="bg-slate-950 text-white pt-20 pb-10">
+        <div class="container mx-auto px-6 max-w-6xl">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+                
+                <div class="md:col-span-2 text-center md:text-left">
+                    <a href="index.html" class="text-3xl font-black italic tracking-tighter uppercase mb-6 block">
+                        YARID<span class="text-sky-500">.</span>
+                    </a>
+                    <p class="text-slate-500 text-sm leading-relaxed max-w-sm mx-auto md:mx-0">
+                        Distributeur officiel de matériaux de construction et studio de design digital. Nous bâtissons l'avenir, pierre par pierre, pixel par pixel.
+                    </p>
+                </div>
+
+                <div class="text-center md:text-left">
+                    <h4 class="text-[10px] font-black uppercase tracking-[0.3em] mb-6 text-sky-500">Navigation</h4>
+                    <ul class="space-y-4 text-xs font-bold uppercase tracking-widest">
+                        <li><a href="index.html" class="hover:text-sky-500 transition">Boutique</a></li>
+                        <li><a href="services.html" class="hover:text-sky-500 transition">Expertises</a></li>
+                        <li><a href="contact.html" class="hover:text-sky-500 transition">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="text-center md:text-left">
+                    <h4 class="text-[10px] font-black uppercase tracking-[0.3em] mb-6 text-sky-500">Contact</h4>
+                    <ul class="space-y-4 text-xs font-bold uppercase tracking-widest">
+                        <li class="text-slate-400 italic">Cameroun, Douala</li>
+                        <li><a href="https://wa.me/237655959284" class="hover:text-sky-500 transition">+237 655 959 284</a></li>
+                        <li><a href="mailto:yaridcm237@gmail.com" class="hover:text-sky-500 transition text-[9px] md:text-xs lowercase">yaridcm237@gmail.com</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-600">
+                    © 2025 YARID GROUP. Tous droits réservés.
+                </p>
+                <div class="flex gap-8">
+                    <a href="#" class="text-slate-600 hover:text-white transition text-[10px] font-black uppercase tracking-widest italic">Instagram</a>
+                    <a href="#" class="text-slate-600 hover:text-white transition text-[10px] font-black uppercase tracking-widest italic">LinkedIn</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // 1. Initialise Supabase (Mets tes vraies clés ici !)
+    const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
+
+    // 2. Fonction pour détecter le type d'appareil
+    function getDeviceType() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
+    }
+
+    // 3. Fonction principale d'envoi de données
+    async function trackYaridEvent(eventName, extraDetails = {}) {
+        try {
+            await analyticsClient.from('site_analytics').insert([{
+                event_type: eventName,
+                page_url: window.location.pathname.split('/').pop() || 'accueil', // Garde juste le nom du fichier
+                device_type: getDeviceType(),
+                details: extraDetails
+            }]);
+        } catch (err) {
+            console.error("Erreur Analytics:", err);
+        }
+    }
+
+    // 4. Déclenchement automatique : Enregistre la vue de la page dès qu'elle s'ouvre
+    window.onload = () => {
+        trackYaridEvent('page_view');
+    };
+
+    // (Optionnel) Exemple si tu veux suivre un clic sur un bouton d'achat :
+    // onclick="trackYaridEvent('clic_achat', { produit: 'Livraison Express' })"
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const analyticsClient = supabase.createClient('https://whcpugnkldbmuqzgqxbe.supabase.co', 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk');
+
+    // 1. GESTION DE LA SESSION (Pour le tunnel de conversion)
+    // Crée un ID unique pour la visite, qui s'efface quand on ferme le navigateur
+    if (!sessionStorage.getItem('yarid_session_id')) {
+        sessionStorage.setItem('yarid_session_id', 'sess_' + Math.random().toString(36).substr(2, 9));
+    }
+    const sessionId = sessionStorage.getItem('yarid_session_id');
+
+    // 2. LECTURE DES CAMPAGNES MARKETING (UTM)
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmSource = urlParams.get('utm_source') || 'direct';
+    const utmCampaign = urlParams.get('utm_campaign') || null;
+
+    // 3. IDENTIFICATION UTILISATEUR (Segmentation)
+    // Si l'utilisateur s'est connecté via le portail, on récupère son ID
+    const activeUser = JSON.parse(localStorage.getItem('yarid_user') || '{}');
+    const userId = activeUser.username || null;
+
+    // 4. MOTEUR D'ENVOI DES DONNÉES
+    async function trackEvent(eventName, eventDetails = {}) {
+        // Calcul du temps de chargement pour les événements "page_view"
+        let loadTime = null;
+        if (eventName === 'page_view' && window.performance) {
+            loadTime = Math.round(performance.now());
+        }
+
+        const device = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
+
+        const payload = {
+            event_type: eventName,
+            page_url: window.location.pathname.split('/').pop() || 'accueil',
+            device_type: device,
+            session_id: sessionId,
+            user_id: userId,
+            utm_source: utmSource,
+            utm_campaign: utmCampaign,
+            load_time_ms: loadTime,
+            details: eventDetails // Pour les infos produits, panier, etc.
+        };
+
+        try {
+            await analyticsClient.from('site_analytics').insert([payload]);
+        } catch (err) {
+            console.error("Tracker Error:", err);
+        }
+    }
+
+    // 5. DÉCLENCHEURS AUTOMATIQUES
+    // Enregistre la vue de la page au chargement complet
+    window.addEventListener('load', () => {
+        trackEvent('page_view', { title: document.title });
+    });
+</script>
+    </body>
+</html>
