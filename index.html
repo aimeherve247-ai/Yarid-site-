@@ -1,0 +1,3213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta name="google-site-verification" content="cKHQPS2htt-g8DP0uV9dWiQDv72HEkhSzMmQuVTfz7U" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>YARID | Boutique Premium</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('YARID PWA : Prête !'))
+            .catch(err => console.log('Erreur PWA :', err));
+        });
+      }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="referral-system.js"></script>
+    <script src="analytics.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        :root {
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+        }
+        
+        body { 
+            background: #f8fafc; 
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+        }
+        
+        .btn-primary { 
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); 
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+        
+        .btn-whatsapp { 
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); 
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+        
+        .category-pill { 
+            background: white; 
+            border: 1px solid #e2e8f0; 
+            transition: all 0.3s ease;
+        }
+        
+        .category-pill.active { 
+            background: #0f172a; 
+            color: white; 
+            border-color: #0f172a;
+        }
+        
+        .category-scroll { 
+            display: flex; 
+            gap: 0.75rem; 
+            overflow-x: auto; 
+            padding: 0 1rem 1rem; 
+            scrollbar-width: none;
+        }
+        
+        .category-scroll::-webkit-scrollbar { display: none; }
+        
+        .product-card { 
+            background: white; 
+            border-radius: 1rem; 
+            overflow: hidden; 
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .product-card:hover { 
+            transform: translateY(-4px); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .product-card .product-image-container {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+        
+        .product-card .product-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .product-card:hover .product-image-container img {
+            transform: scale(1.05);
+        }
+        
+        .product-card .product-info {
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+        
+        .product-card .product-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1e293b;
+            line-height: 1.3;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 2.6em;
+        }
+        
+        .product-card .product-price-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-card .product-price {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        
+        .product-card .product-old-price {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-decoration: line-through;
+        }
+        
+        .product-card .product-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+        
+        .product-card .btn-add-cart {
+            flex: 1;
+            background: #0f172a;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.625rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .product-card .btn-add-cart:hover {
+            background: #0ea5e9;
+        }
+        
+        .product-card .btn-buy-now {
+            flex: 1;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.625rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .product-card .btn-buy-now:hover {
+            opacity: 0.9;
+        }
+        
+        /* Amélioration du scroll des catégories sur mobile */
+        .category-scroll {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding: 0.5rem 1rem;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+        }
+        
+        .category-scroll::-webkit-scrollbar { display: none; }
+        
+        .category-scroll .category-pill {
+            scroll-snap-align: start;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        
+        .skeleton { 
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); 
+            background-size: 200% 100%; 
+            animation: shimmer 1.5s infinite;
+        }
+        
+        @keyframes shimmer { 
+            0% { background-position: 200% 0; } 
+            100% { background-position: -200% 0; } 
+        }
+        
+        /* Hero Carousel Alibaba Style */
+        .hero-alibaba-section {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero-carousel-container {
+            width: 60%;
+            flex-shrink: 0;
+        }
+        
+        .hero-product-grid {
+            width: 40%;
+            flex-shrink: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        
+        .hero-swiper-alibaba {
+            height: 220px;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        
+        .hero-swiper-alibaba .swiper-slide {
+            border-radius: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .hero-swiper-alibaba .swiper-pagination {
+            bottom: 8px !important;
+        }
+        
+        .hero-swiper-alibaba .swiper-pagination-bullet {
+            width: 6px;
+            height: 6px;
+            background: rgba(255,255,255,0.6);
+        }
+        
+        .hero-swiper-alibaba .swiper-pagination-bullet-active {
+            background: white;
+            width: 16px;
+            border-radius: 3px;
+        }
+        
+        .mini-product-card {
+            background: white;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .mini-product-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .mini-product-card img {
+            width: 100%;
+            height: 65%;
+            object-fit: cover;
+        }
+        
+        .mini-product-info {
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .mini-product-name {
+            font-size: 9px;
+            font-weight: 600;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .mini-product-price {
+            font-size: 10px;
+            font-weight: 800;
+            color: #0ea5e9;
+        }
+        
+        .mini-badge {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 7px;
+            font-weight: 800;
+            padding: 1px 4px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        
+        .badge-top {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+        
+        .badge-certified {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        /* Search Bar Styles */
+        .search-container {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 1rem;
+            position: relative;
+        }
+        
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+            border-radius: 9999px;
+            padding: 0 0.75rem;
+            height: 40px;
+            transition: all 0.2s ease;
+        }
+        
+        .search-input-wrapper:focus-within {
+            background: white;
+            box-shadow: 0 0 0 2px #0ea5e9;
+        }
+        
+        .search-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            color: #1e293b;
+            outline: none;
+            padding: 0 0.5rem;
+        }
+        
+        .search-input::placeholder {
+            color: #94a3b8;
+        }
+        
+        .search-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            z-index: 100;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .search-dropdown.active {
+            display: block;
+            animation: slideDown 0.2s ease;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .search-section {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .search-section:last-child {
+            border-bottom: none;
+        }
+        
+        .search-section-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .search-suggestion {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        
+        .search-suggestion:hover {
+            background: #f8fafc;
+        }
+        
+        .search-suggestion-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 0.5rem;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .search-suggestion-text {
+            font-size: 13px;
+            color: #334155;
+        }
+        
+        .popular-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.35rem 0.75rem;
+            background: #f1f5f9;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            margin: 0.25rem;
+        }
+        
+        .popular-tag:hover {
+            background: #e2e8f0;
+            color: #0ea5e9;
+        }
+        
+        .modal { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.5); 
+            z-index: 1000; 
+            display: none; 
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal.active { display: flex; }
+        
+        .modal-content { 
+            background: white; 
+            border-radius: 2rem 2rem 0 0; 
+            max-height: 90vh; 
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp { 
+            from { transform: translateY(100%); } 
+            to { transform: translateY(0); } 
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .promo-card {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .promo-badge {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            padding-bottom: var(--safe-bottom);
+            z-index: 100;
+        }
+        
+        .nav-item.active { color: #0ea5e9; }
+        
+        .cart-drawer {
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            z-index: 1100;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .cart-drawer.open { transform: translateX(0); }
+        
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1050;
+            display: none;
+        }
+        
+        .overlay.active { display: block; }
+        
+        /* Reviews System Styles */
+        .reviews-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f1f5f9;
+        }
+        
+        .rating-stars {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .star {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+        
+        .star:hover {
+            transform: scale(1.2);
+        }
+        
+        .star.filled {
+            color: #fbbf24;
+        }
+        
+        .star.empty {
+            color: #e2e8f0;
+        }
+        
+        .review-item {
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+        
+        .reviewer-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .review-date {
+            font-size: 10px;
+            color: #94a3b8;
+        }
+        
+        .review-text {
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.4;
+        }
+        
+        .add-review-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #f1f5f9;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0ea5e9;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        
+        .add-review-btn:hover {
+            background: #e0f2fe;
+        }
+        
+        /* Rating Input */
+        .rating-input {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+        
+        .rating-input .star {
+            width: 32px;
+            height: 32px;
+        }
+        
+        /* Product rating badge */
+        .product-rating-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.15rem 0.5rem;
+            background: rgba(251, 191, 36, 0.15);
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #d97706;
+        }
+        
+        /* Review Modal */
+        .review-modal-content {
+            padding: 1.5rem;
+        }
+        
+        .review-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            font-size: 14px;
+            resize: vertical;
+            outline: none;
+        }
+        
+        .review-textarea:focus {
+            border-color: #0ea5e9;
+        }
+        
+        /* Header sticky */
+        header {
+            transition: box-shadow 0.2s ease;
+        }
+        
+        header.scrolled {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        /* Referral System Styles */
+        .referral-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .referral-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(14, 165, 233, 0.2) 0%, transparent 70%);
+        }
+        
+        .wallet-card {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .wallet-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        }
+        
+        .otp-input {
+            width: 3rem;
+            height: 3.5rem;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        
+        .otp-input:focus {
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #0ea5e9;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+        
+        .referral-code-box {
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 1rem;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        
+        .referral-code-text {
+            font-family: monospace;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: 0.1em;
+        }
+        
+        .wallet-history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .wallet-credit {
+            color: #10b981;
+            font-weight: 700;
+        }
+        
+        .wallet-debit {
+            color: #ef4444;
+            font-weight: 700;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0ea5e9, #10b981);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+    </style>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="YARID">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon_32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon_16.png">
+<link rel="apple-touch-icon" href="/icons/ios.png">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="YARID - Boutique Premium">
+<meta property="og:description" content="Votre destination exclusive pour des produits d'exception au Cameroun.">
+<meta property="og:image" content="/icons/icon_512.png">
+<meta property="og:url" content="https://votre-site.netlify.app">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker enregistré !'))
+        .catch(err => console.log('Erreur SW:', err));
+    });
+  }
+</script>
+
+</head>
+<body class="antialiased text-slate-900 pb-20">
+
+    <!-- Header Modifié avec Barre de Recherche -->
+    <header id="main-header" class="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md z-50 border-b border-slate-100">
+        <div class="flex items-center justify-between px-3 h-16">
+            <!-- Logo -->
+            <a href="index.html" class="text-xl font-black italic tracking-tighter uppercase flex-shrink-0">YARID<span class="text-sky-500">.</span></a>
+            
+            <!-- Barre de Recherche Centrale -->
+            <div class="search-container">
+                <div class="search-input-wrapper">
+                    <svg class="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input type="text" 
+                           id="search-input" 
+                           class="search-input" 
+                           placeholder="Rechercher un produit..."
+                           autocomplete="off">
+                    <button class="p-1 rounded-full hover:bg-slate-200 transition flex-shrink-0" onclick="startVoiceSearch()">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Dropdown Recherche -->
+                <div class="search-dropdown" id="search-dropdown">
+                    <!-- Historique -->
+                    <div class="search-section" id="search-history-section">
+                        <p class="search-section-title">Recherches récentes</p>
+                        <div id="search-history-list"></div>
+                    </div>
+                    
+                    <!-- Suggestions populaires -->
+                    <div class="search-section">
+                        <p class="search-section-title">Populaires</p>
+                        <div class="flex flex-wrap">
+                            <span class="popular-tag" onclick="searchProduct('Téléphones')">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                Téléphones
+                            </span>
+                            <span class="popular-tag" onclick="searchProduct('Chaussures')">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                Chaussures
+                            </span>
+                            <span class="popular-tag" onclick="searchProduct('Montres')">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                Montres
+                            </span>
+                            <span class="popular-tag" onclick="searchProduct('Parfums')">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                Parfums
+                            </span>
+                            <span class="popular-tag" onclick="searchProduct('Sacs')">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                Sacs
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Résultats auto-complétion -->
+                    <div class="search-section" id="search-suggestions-section" style="display: none;">
+                        <p class="search-section-title">Suggestions</p>
+                        <div id="search-suggestions-list"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- À Propos + Panier -->
+            <div class="flex items-center gap-2 flex-shrink-0">
+             
+                <button onclick="toggleCart()" class="relative p-2 rounded-full hover:bg-slate-100 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-sky-500 text-white text-[9px] font-black rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-16">
+        
+        <!-- NOUVEAU: Hero Carousel + Product Grid (Style Alibaba) -->
+        <section class="pt-4">
+            <div class="hero-alibaba-section">
+                <!-- Bloc Gauche: Hero Carousel -->
+                <div class="hero-carousel-container">
+                    <div class="swiper hero-swiper-alibaba" id="hero-swiper-alibaba">
+                        <div class="swiper-wrapper">
+                            <!-- Slide 1: Coups de cœur -->
+                            <div class="swiper-slide">
+                                <img src="https://i.ibb.co/FbFV9sc8/IMG-3670.jpg" class="w-full h-full object-cover" alt="Coups de cœur">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-4">
+                                    <span class="text-white/80 text-[10px] font-bold uppercase tracking-wider mb-1">Sélection Premium</span>
+                                    <h2 class="text-white text-lg font-black italic uppercase leading-tight mb-2">Coups de cœur</h2>
+                                    <button onclick="scrollToProducts()" class="bg-white text-slate-900 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider w-fit hover:bg-sky-500 hover:text-white transition">
+                                        Voir les offres
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Slide 2: Nouveautés -->
+                            <div class="swiper-slide">
+                                <img src="https://i.ibb.co/WWFjbGxr/IMG-6273.jpg" class="w-full h-full object-cover" alt="Nouveautés">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-4">
+                                    <span class="text-white/80 text-[10px] font-bold uppercase tracking-wider mb-1">Nouveau</span>
+                                    <h2 class="text-white text-lg font-black italic uppercase leading-tight mb-2">Tendances</h2>
+                                    <button onclick="scrollToProducts()" class="bg-white text-slate-900 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider w-fit hover:bg-sky-500 hover:text-white transition">
+                                        Découvrir
+
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="swiper-pagination"></div>
+                    </div>
+                </div>
+                
+                <!-- Bloc Droite: Product Grid Mini -->
+                <div class="hero-product-grid" id="hero-mini-products">
+                    <!-- Produits injectés dynamiquement -->
+                    <div class="mini-product-card skeleton"></div>
+                    <div class="mini-product-card skeleton"></div>
+                    <div class="mini-product-card skeleton"></div>
+                    <div class="mini-product-card skeleton"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories - DÉPLACÉ AVANT le parrainage -->
+        <section class="mb-6 pt-4">
+            <div class="flex items-center justify-between px-4 mb-3">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Explorer</h3>
+                <a href="categories.html" class="text-xs font-semibold text-sky-500 flex items-center gap-1">
+                    Voir tout
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+          <div class="category-scroll" id="categories">
+
+                <button class="category-pill px-5 py-2.5 rounded-full text-sm font-semibold text-slate-600 flex items-center gap-2" onclick="openAboutModal()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    À Propos
+                </button>
+                <button class="category-pill active px-5 py-2.5 rounded-full text-sm font-semibold" onclick="filterCategory('all', this)">Tout</button>
+                <button class="category-pill px-5 py-2.5 rounded-full text-sm font-semibold text-slate-600" onclick="filterCategory('parfums', this)">Parfums</button>
+                <button class="category-pill px-5 py-2.5 rounded-full text-sm font-semibold text-slate-600" onclick="filterCategory('tech', this)">Tech</button>
+                <button class="category-pill px-5 py-2.5 rounded-full text-sm font-semibold text-slate-600" onclick="filterCategory('mode', this)">Mode</button>
+                <button class="category-pill px-5 py-2.5 rounded-full text-sm font-semibold text-slate-600" onclick="filterCategory('services', this)">Services Pro</button>
+            </div>
+        </section>
+
+        <!-- Hero Carousel Parrainage - DÉPLACÉ APRÈS les catégories -->
+        <section class="mb-6 px-4">
+            <div class="swiper hero-swiper" id="hero-swiper" style="height: 180px; border-radius: 1rem; overflow: hidden;">
+                <div class="swiper-wrapper" id="hero-wrapper">
+                    <div class="swiper-slide relative bg-slate-900">
+                        <img src="https://i.ibb.co/8gnggR3s/IMG-6357.jpg" class="w-full h-full object-cover opacity-60">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent p-5 flex flex-col justify-end">
+                            <span class="text-sky-400 text-xs font-bold uppercase tracking-wider mb-1">Programme Elite</span>
+                            <h2 class="text-white text-2xl font-black italic uppercase leading-none mb-2">Parrainez<br>& Gagnez</h2>
+                            <p class="text-slate-300 text-xs mb-3">1 clic=1FCFA par ami parrainé</p>
+                            <button onclick="openParrainage()" class="btn-primary text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider w-fit">
+                                Participer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-pagination !bottom-3"></div>
+            </div>
+        </section>
+
+        <!-- Products Grid -->
+        <section class="px-4 mb-8" id="products-section">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold">Nouveautés</h3>
+                <div class="flex gap-2">
+                    <button onclick="setView('grid')" class="p-2 rounded-lg bg-slate-100 text-slate-600" id="btn-grid">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    </button>
+                    <button onclick="setView('list')" class="p-2 rounded-lg text-slate-400" id="btn-list">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3" id="products-grid">
+                <div class="skeleton aspect-[3/4] rounded-2xl"></div>
+                <div class="skeleton aspect-[3/4] rounded-2xl"></div>
+                <div class="skeleton aspect-[3/4] rounded-2xl"></div>
+                <div class="skeleton aspect-[3/4] rounded-2xl"></div>
+            </div>
+        </section>
+
+
+        <!-- Services Section -->
+        <section class="px-4 mb-8">
+            <h3 class="text-lg font-bold mb-4">Services Pro</h3>
+            <div class="bg-slate-900 rounded-3xl p-6 text-white relative overflow-hidden">
+                <div class="relative z-10">
+                    <span class="text-sky-400 text-xs font-bold uppercase tracking-wider">B2B</span>
+                    <h4 class="text-xl font-black italic uppercase mt-2 mb-3">Solutions entreprises</h4>
+                    <ul class="space-y-2 text-sm text-slate-300 mb-4">
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Sourcing international
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            BTP & Construction
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Transport & Logistique
+                        </li>
+                    </ul>
+                    <button onclick="openServicesPage()" class="bg-white text-slate-900 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-sky-500 hover:text-white transition">
+                        Voir les services
+                    </button>
+                </div>
+                <div class="absolute top-0 right-0 w-32 h-32 bg-sky-500/20 rounded-full blur-3xl"></div>
+            </div>
+        </section>
+
+        <!-- WhatsApp Support Floating Button -->
+        <a href="https://wa.me/237655959284?text=Bonjour%20YARID%2C%20j'ai%20besoin%20d'aide" 
+           class="fixed bottom-24 right-4 z-50 bg-[#25D366] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+            </svg>
+        </a>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="flex justify-around items-center h-16">
+            <a href="index.html" class="nav-item active flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-sky-500 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4m-4 0h4"/></svg>
+                <span class="text-[9px] font-bold">Accueil</span>
+            </a>
+            <a href="categories.html" class="nav-item flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-sky-500 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                <span class="text-[9px] font-bold">Catégories</span>
+            </a>
+            <button onclick="toggleCart()" class="nav-item flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-sky-500 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                <span class="text-[9px] font-bold">Panier</span>
+            </button>
+            <button onclick="openAccountModal()" class="nav-item flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-sky-500 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <span class="text-[9px] font-bold">Compte</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Cart Drawer -->
+    <div class="overlay" id="cart-overlay" onclick="toggleCart()"></div>
+    <div class="cart-drawer" id="cart-drawer">
+        <div class="flex flex-col h-full">
+            <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                <h2 class="text-xl font-black italic uppercase">Mon Panier</h2>
+                <button onclick="toggleCart()" class="p-2 rounded-full hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 space-y-4" id="cart-items">
+                <!-- Cart items injectés ici -->
+            </div>
+            
+            <div class="p-4 border-t border-slate-100 bg-slate-50 space-y-3">
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">Sous-total</span>
+                    <span class="font-bold" id="cart-subtotal">0 FCFA</span>
+                </div>
+                <div class="flex justify-between text-sm" id="discount-row" style="display: none;">
+                    <span class="text-emerald-600">Réduction</span>
+                    <span class="font-bold text-emerald-600" id="cart-discount">-0 FCFA</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">Livraison</span>
+                    <span class="font-bold text-slate-900" id="cart-delivery">0 FCFA</span>
+                </div>
+                <div class="flex justify-between text-lg font-bold pt-2 border-t border-slate-200">
+                    <span>Total</span>
+                    <span class="text-sky-600" id="cart-total">0 FCFA</span>
+                </div>
+                
+                <!-- Promo Code -->
+                <div class="flex gap-2 pt-2">
+                    <input type="text" id="promo-input" placeholder="Code promo" 
+                           class="flex-1 px-4 py-2 rounded-xl border border-slate-200 text-sm uppercase font-semibold outline-none focus:border-sky-500">
+                    <button onclick="applyPromo()" class="bg-slate-900 text-white px-4 rounded-xl text-xs font-bold uppercase">OK</button>
+                </div>
+                
+                <button onclick="openCheckout()" class="btn-primary w-full py-4 rounded-2xl text-white font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2">
+                    Commander
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </button>
+                
+                <button onclick="orderViaWhatsApp()" class="btn-whatsapp w-full py-3 rounded-2xl text-white font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                    WhatsApp Direct
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal avec Système d'Avis -->
+    <div class="modal" id="product-modal">
+        <div class="modal-content absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto">
+            <div class="relative">
+                <button onclick="closeProductModal()" class="absolute top-4 right-4 z-10 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                <img id="modal-image" src="" class="w-full h-64 object-cover">
+            </div>
+            
+            <div class="p-5">
+                <div class="flex items-start justify-between mb-2">
+                    <div>
+                        <p class="text-sky-500 text-sm font-bold mb-1" id="modal-category">Parfums</p>
+                        <h2 class="text-2xl font-black uppercase italic leading-tight" id="modal-title">Nom Produit</h2>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-2xl font-black text-slate-900" id="modal-price">0 FCFA</p>
+                        <p class="text-xs text-slate-400 line-through" id="modal-old-price"></p>
+                    </div>
+                </div>
+                
+                <!-- Rating Summary -->
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="flex items-center gap-1">
+                        <div class="rating-stars" id="modal-rating-stars">
+                            <!-- Stars injected dynamically -->
+                        </div>
+                        <span class="text-sm font-bold text-slate-700 ml-1" id="modal-rating-value">4.5</span>
+                    </div>
+                    <span class="text-xs text-slate-400" id="modal-reviews-count">• 128 avis</span>
+                    <span class="text-xs text-slate-400" id="modal-sold-count">• 847 vendus</span>
+                </div>
+                
+                <p class="text-slate-600 text-sm leading-relaxed mb-4" id="modal-desc">
+                    Description du produit...
+                </p>
+                
+                <!-- Reviews Section -->
+                <div class="reviews-section">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-sm font-bold">Avis clients</h4>
+                        <button onclick="openReviewModal()" class="text-xs font-semibold text-sky-500">Donner mon avis</button>
+                    </div>
+                    
+                    <!-- Rating Distribution -->
+                    <div class="bg-slate-50 rounded-xl p-3 mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="text-center">
+                                <p class="text-2xl font-black text-slate-900" id="avg-rating-big">4.5</p>
+                                <div class="rating-stars justify-center my-1" id="avg-rating-stars"></div>
+                                <p class="text-[10px] text-slate-400" id="total-reviews-text">128 avis</p>
+                            </div>
+                            <div class="flex-1 space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-3">5</span>
+                                    <div class="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-yellow-400 rounded-full" id="bar-5" style="width: 60%"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-3">4</span>
+                                    <div class="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-yellow-400 rounded-full" id="bar-4" style="width: 25%"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-3">3</span>
+                                    <div class="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-yellow-400 rounded-full" id="bar-3" style="width: 10%"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-3">2</span>
+                                    <div class="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-yellow-400 rounded-full" id="bar-2" style="width: 3%"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-3">1</span>
+                                    <div class="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-yellow-400 rounded-full" id="bar-1" style="width: 2%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Reviews List -->
+                    <div id="reviews-list" class="space-y-2 max-h-48 overflow-y-auto scrollbar-hide">
+                        <!-- Reviews injected dynamically -->
+                    </div>
+                    
+                    <button onclick="loadMoreReviews()" class="add-review-btn mt-2" id="load-more-reviews">
+                        Voir plus d'avis
+                    </button>
+                </div>
+                
+                <!-- Similar Products Recommendation -->
+                <div class="mb-6 mt-4" id="similar-products-section">
+                    <p class="text-sm font-bold mb-3">Produits similaires</p>
+                    <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide" id="similar-products">
+                        <!-- Produits similaires injectés dynamiquement -->
+                    </div>
+                </div>
+                
+                <div class="space-y-4 mb-24">
+                    <div>
+                        <p class="text-sm font-bold mb-2">Quantité</p>
+                        <div class="flex items-center gap-4 bg-slate-100 w-fit rounded-2xl p-1">
+                            <button onclick="updateModalQty(-1)" class="w-10 h-10 rounded-xl bg-white shadow-sm font-bold text-slate-600 active:scale-95 transition">-</button>
+                            <span class="w-8 text-center font-bold" id="modal-qty">1</span>
+                            <button onclick="updateModalQty(1)" class="w-10 h-10 rounded-xl bg-white shadow-sm font-bold text-slate-600 active:scale-95 transition">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sticky Bottom Actions -->
+            <div class="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100" style="padding-bottom: calc(16px + var(--safe-bottom));">
+                <div class="flex gap-3">
+                    <button onclick="addToCartFromModal()" class="btn-primary flex-1 py-4 rounded-2xl text-white font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 active:scale-95 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                        Ajouter
+                    </button>
+                    <button onclick="buyNow()" class="btn-whatsapp flex-1 py-4 rounded-2xl text-white font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 active:scale-95 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                        WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Review Modal -->
+    <div class="modal" id="review-modal">
+        <div class="modal-content absolute bottom-0 left-0 right-0 max-h-[80vh] overflow-y-auto">
+            <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                <h2 class="text-lg font-black italic uppercase">Donner mon avis</h2>
+                <button onclick="closeReviewModal()" class="p-2 rounded-full hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="review-modal-content">
+                <p class="text-sm text-slate-600 mb-4">Comment évaluez-vous ce produit ?</p>
+                
+                <!-- Star Rating Input -->
+                <div class="rating-input" id="rating-input">
+                    <svg class="star empty" data-rating="1" onclick="setRating(1)" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    <svg class="star empty" data-rating="2" onclick="setRating(2)" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    <svg class="star empty" data-rating="3" onclick="setRating(3)" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    <svg class="star empty" data-rating="4" onclick="setRating(4)" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    <svg class="star empty" data-rating="5" onclick="setRating(5)" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                </div>
+                
+                <p class="text-center text-sm font-medium text-slate-600 mb-4" id="rating-text">Cliquez pour noter</p>
+                
+                <textarea id="review-comment" class="review-textarea" placeholder="Partagez votre expérience (optionnel)..."></textarea>
+                
+                <button onclick="submitReview()" class="btn-primary w-full py-4 rounded-2xl text-white font-bold uppercase tracking-wider text-sm mt-4">
+                    Publier mon avis
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div class="modal" id="checkout-modal">
+        <div class="modal-content absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                <h2 class="text-xl font-black italic uppercase">Finaliser la commande</h2>
+                <button onclick="closeCheckout()" class="p-2 rounded-full hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                <!-- Order Summary -->
+                <div class="bg-slate-50 rounded-2xl p-4 space-y-2">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Récapitulatif</p>
+                    <div id="checkout-items" class="space-y-2 text-sm">
+                        <!-- Items injectés ici -->
+                    </div>
+                    <div class="border-t border-slate-200 pt-2 mt-2 flex justify-between font-bold">
+                        <span>Total</span>
+                        <span class="text-sky-600" id="checkout-total">0 FCFA</span>
+                    </div>
+                </div>
+                
+                <!-- Contact Info -->
+                <div class="space-y-3">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Vos informations</p>
+                    <input type="text" id="checkout-nom" placeholder="Nom complet" class="w-full p-4 rounded-2xl border border-slate-200 text-sm font-semibold outline-none focus:border-sky-500">
+                    <input type="tel" id="checkout-tel" placeholder="Téléphone (WhatsApp)" class="w-full p-4 rounded-2xl border border-slate-200 text-sm font-semibold outline-none focus:border-sky-500">
+                    <input type="text" id="checkout-adresse" placeholder="Quartier / Ville / Repère" class="w-full p-4 rounded-2xl border border-slate-200 text-sm font-semibold outline-none focus:border-sky-500">
+                </div>
+                
+                <!-- Code de Parrainage (NOUVEAU) -->
+                <div class="space-y-3">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Parrainage (optionnel)</p>
+                    <div class="flex gap-2">
+                        <input type="text" 
+                               id="checkout-referral-code" 
+                               placeholder="Code de parrainage" 
+                               class="flex-1 p-4 rounded-2xl border border-slate-200 text-sm font-semibold outline-none focus:border-sky-500 uppercase"
+                               maxlength="15">
+                        <button onclick="applyReferralCodeAtCheckout()" class="bg-slate-900 text-white px-5 rounded-2xl text-xs font-bold uppercase">
+                            Appliquer
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-400" id="referral-code-status"></p>
+                </div>
+                
+                <!-- Réduction parrainage (cachée par défaut) -->
+                <div id="referral-discount-row" style="display: none;" class="flex justify-between text-sm text-emerald-600">
+                    <span>Réduction parrainage</span>
+                    <span class="font-bold" id="referral-discount-amount">-10%</span>
+                </div>
+                
+                <!-- Delivery Mode -->
+                <div class="space-y-3">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Livraison</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="setCheckoutDelivery('retrait')" id="btn-checkout-retrait" class="p-4 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white text-center transition-all">
+                            <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            <p class="text-xs font-bold">Retrait</p>
+                            <p class="text-[10px] opacity-80">Gratuit</p>
+                        </button>
+                        <button onclick="setCheckoutDelivery('domicile')" id="btn-checkout-domicile" class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 text-center transition-all">
+                            <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                            <p class="text-xs font-bold">Domicile</p>
+                            <p class="text-[10px] opacity-80">+2000 FCFA</p>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Payment Mode -->
+                <div class="space-y-3">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Paiement</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="setCheckoutPayment('especes')" id="btn-checkout-especes" class="p-4 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white text-center transition-all">
+                            <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            <p class="text-xs font-bold">Cash</p>
+                            <p class="text-[10px] opacity-80">À la livraison</p>
+                        </button>
+                        <button onclick="setCheckoutPayment('mobile')" id="btn-checkout-mobile" class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 text-center transition-all">
+                            <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                            <p class="text-xs font-bold">Mobile Money</p>
+                            <p class="text-[10px] opacity-80">OM/MOMO</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-white border-t border-slate-100" style="padding-bottom: calc(16px + var(--safe-bottom));">
+                <button onclick="submitOrder()" id="btn-submit-order" class="btn-whatsapp w-full py-4 rounded-2xl text-white font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                    Confirmer sur WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Modal -->
+    <div class="modal" id="account-modal">
+        <div class="modal-content absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                <h2 class="text-xl font-black italic uppercase">Mon Compte</h2>
+                <button onclick="closeAccountModal()" class="p-2 rounded-full hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="p-4 space-y-6 overflow-y-auto max-h-[70vh]">
+                <!-- User Info -->
+                <div class="bg-slate-900 rounded-3xl p-6 text-white relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 bg-sky-500 rounded-full flex items-center justify-center text-xl font-black">
+                                <span id="user-initial">Y</span>
+                            </div>
+                            <div>
+                                <p class="font-bold" id="user-name">Invité</p>
+                                <p class="text-xs text-slate-400" id="user-phone">Non connecté</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-sky-500/20 rounded-full blur-3xl"></div>
+                </div>
+
+                <!-- Points & Rewards Section -->
+                <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-5 text-white">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-200">Mes Points YARID</p>
+                            <p class="text-3xl font-black" id="user-points">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-indigo-200">1 Point = 1 FCFA de réduction</p>
+                    <button onclick="openParrainage()" class="mt-3 w-full bg-white/20 py-2 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-white/30 transition">
+                        Gagner plus de points
+                    </button>
+                </div>
+
+                <!-- Orders Section -->
+                <div>
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3">Mes Commandes</h3>
+                    <div id="user-orders" class="space-y-3">
+                        <p class="text-sm text-slate-500 text-center py-4">Aucune commande pour le moment</p>
+                    </div>
+                </div>
+
+                <!-- Referral Section - NOUVEAU -->
+                <div>
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3">Programme Parrainage</h3>
+                    
+                    <!-- État: Non inscrit -->
+                    <div id="referral-not-activated" class="bg-gradient-to-br from-sky-500 to-blue-600 rounded-2xl p-5 text-white">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-bold">Gagnez 2 000 FCFA</p>
+                                <p class="text-xs text-sky-100">par ami parrainé</p>
+                            </div>
+                        </div>
+                        <button onclick="openReferralActivation()" class="w-full bg-white text-sky-600 py-3 rounded-xl text-xs font-bold uppercase tracking-wider">
+                            Devenir Parrain
+                        </button>
+                    </div>
+                    
+                    <!-- État: Activé -->
+                    <div id="referral-activated" class="bg-slate-50 rounded-2xl p-4" style="display: none;">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs text-slate-500">Code</span>
+                            <span class="font-black text-sky-600 bg-sky-100 px-3 py-1 rounded-full text-sm" id="referral-code">---</span>
+                        </div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs text-slate-500">Filleuls</span>
+                            <span class="font-bold" id="referral-count">0</span>
+                        </div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs text-slate-500">Wallet</span>
+                            <span class="font-bold text-emerald-600" id="wallet-balance-display">0 FCFA</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openReferralDashboard()" class="flex-1 bg-slate-900 text-white py-3 rounded-xl text-xs font-bold uppercase tracking-wider">
+                                Mon Tableau de Bord
+                            </button>
+                            <button onclick="shareReferralCode()" class="w-12 bg-sky-500 text-white rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Support Button -->
+                <a href="https://wa.me/237655959284?text=Bonjour%20YARID%2C%20j'ai%20besoin%20d'aide%20avec%20mon%20compte" 
+                   class="w-full btn-whatsapp py-4 rounded-2xl text-white font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                    Support Client WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parrainage Modal -->
+    <div class="modal" id="parrainage-modal">
+        <div class="modal-content absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                <h2 class="text-xl font-black italic uppercase">Programme Parrainage</h2>
+                <button onclick="closeParrainageModal()" class="p-2 rounded-full hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="p-5">
+                <div class="bg-slate-900 rounded-3xl p-6 mb-6 text-white relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="bg-sky-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase">Elite</span>
+                            <span class="text-slate-300 text-xs">Programme Parrainage</span>
+                        </div>
+                        <h3 class="text-2xl font-black italic uppercase mb-2">Gagnez ensemble</h3>
+                        <p class="text-slate-300 text-sm">Partagez votre code et gagnez 2000 FCFA par ami parrainé</p>
+                    </div>
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-sky-500/20 rounded-full blur-3xl"></div>
+                </div>
+                
+                <div class="space-y-4 mb-6">
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl">
+                        <div class="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center text-sky-500 font-bold text-lg">1</div>
+                        <div>
+                            <p class="font-bold text-sm">Partagez votre code</p>
+                            <p class="text-xs text-slate-500">Copiez et envoyez à vos amis</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl">
+                        <div class="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center text-sky-500 font-bold text-lg">2</div>
+                        <div>
+                            <p class="font-bold text-sm">Ils commandent</p>
+                            <p class="text-xs text-slate-500">-10% sur leur première commande</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl">
+                        <div class="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center text-sky-500 font-bold text-lg">3</div>
+                        <div>
+                            <p class="font-bold text-sm">Vous gagnez</p>
+                            <p class="text-xs text-slate-500">un clic =1 FCFA crédités automatiquement</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-sky-50 border-2 border-sky-100 rounded-2xl p-4 mb-4">
+                    <p class="text-xs font-bold text-sky-600 uppercase mb-2">Votre code</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="parrainage-code" value="YARID-ELITE-2025" readonly class="flex-1 bg-white border-2 border-sky-200 rounded-xl py-3 px-4 font-black text-center text-lg tracking-widest text-slate-800 outline-none">
+                        <button onclick="copyParrainageCode()" class="bg-sky-500 text-white px-4 rounded-xl font-bold text-sm active:scale-95 transition">Copier</button>
+                    </div>
+                </div>
+                
+                <button onclick="shareParrainageCode()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 active:scale-95 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                    Partager mon code
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services Modal -->
+    <div class="modal" id="services-modal">
+        <div class="modal-content absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                <h2 class="text-xl font-black italic uppercase">Services <span class="text-sky-500">Pro</span></h2>
+                <button onclick="closeServicesModal()" class="p-2 rounded-full hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="p-5 space-y-4">
+                <div class="bg-slate-50 rounded-2xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg">BTP & Construction</h4>
+                            <p class="text-sm text-slate-500">Gestion de projets, matériaux</p>
+                        </div>
+                    </div>
+                    <a href="btp-details.html" class="block w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider text-center hover:bg-sky-500 transition">En savoir plus</a>
+                </div>
+                
+                <div class="bg-slate-50 rounded-2xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center text-sky-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg">Sourcing International</h4>
+                            <p class="text-sm text-slate-500">Import/export, Douanes</p>
+                        </div>
+                    </div>
+                    <a href="contact.html?service=sourcing" class="block w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider text-center hover:bg-sky-500 transition">Demander un devis</a>
+                </div>
+                
+                <div class="bg-slate-50 rounded-2xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg">Transport & Logistique</h4>
+                            <p class="text-sm text-slate-500">Livraison B2B, Stockage</p>
+                        </div>
+                    </div>
+                    <a href="contact.html?service=transport" class="block w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider text-center hover:bg-sky-500 transition">Demander un devis</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOUVEAU: Modal d'Activation Compte Parrain (OTP) -->
+    <div class="modal" id="referral-activation-modal">
+        <div class="modal-content absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                <h2 class="text-xl font-black italic uppercase">Devenir Parrain</h2>
+                <button onclick="closeReferralActivation()" class="p-2 rounded-full hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="p-5">
+                <!-- Étape 1: Numéro de téléphone -->
+                <div id="phone-section">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold mb-2">Vérifiez votre numéro</h3>
+                        <p class="text-sm text-slate-500">Nous enverrons un code par SMS</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Numéro WhatsApp</label>
+                            <input type="tel" 
+                                   id="referral-phone" 
+                                   placeholder="6XX XXX XXX" 
+                                   class="w-full p-4 rounded-2xl border-2 border-slate-200 text-lg font-semibold outline-none focus:border-sky-500 text-center tracking-widest">
+                        </div>
+                        
+                        <button onclick="requestOTP()" class="btn-primary w-full py-4 rounded-2xl text-white font-bold uppercase tracking-wider">
+                            Recevoir le code
+                        </button>
+                        
+                        <p class="text-xs text-slate-400 text-center">
+                            En continuant, vous acceptez les conditions du programme de parrainage
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Étape 2: Code OTP -->
+                <div id="otp-section" style="display: none;">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold mb-2">Entrez le code</h3>
+                        <p class="text-sm text-slate-500">Code à 6 chiffres envoyé par SMS</p>
+                        <p id="dev-otp-display" class="text-xs text-sky-500 mt-2 font-mono"></p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <input type="text" 
+                               id="referral-otp" 
+                               placeholder="000000" 
+                               maxlength="6"
+                               class="w-full p-4 rounded-2xl border-2 border-slate-200 text-2xl font-bold outline-none focus:border-sky-500 text-center tracking-[0.5em]">
+                        
+                        <button onclick="verifyOTP()" class="btn-primary w-full py-4 rounded-2xl text-white font-bold uppercase tracking-wider">
+                            Vérifier
+                        </button>
+                        
+                        <button onclick="backToPhone()" class="w-full py-3 text-slate-500 text-sm font-medium">
+                            Modifier le numéro
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOUVEAU: Tableau de Bord Parrain Complet -->
+    <div class="modal" id="referral-dashboard-modal">
+        <div class="modal-content absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                <h2 class="text-xl font-black italic uppercase">Mon Parrainage</h2>
+                <button onclick="closeReferralDashboard()" class="p-2 rounded-full hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="p-5 space-y-5">
+                <!-- Wallet Card -->
+                <div class="wallet-card">
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-emerald-100 text-xs font-bold uppercase tracking-wider">Mon Wallet</span>
+                            <svg class="w-6 h-6 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                            </svg>
+                        </div>
+                        <p class="text-3xl font-black" id="wallet-balance">0 FCFA</p>
+                        <p class="text-emerald-100 text-xs mt-1">Utilisable sur vos commandes</p>
+                    </div>
+                </div>
+                
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="stat-card">
+                        <p class="stat-value" id="dashboard-filleuls">0</p>
+                        <p class="stat-label">Filleuls</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-value text-emerald-500" id="dashboard-actifs">0</p>
+                        <p class="stat-label">Actifs</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-value text-amber-500" id="dashboard-gains">0</p>
+                        <p class="stat-label">Gains (K)</p>
+                    </div>
+                </div>
+                
+                <!-- Code de Parrainage -->
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase mb-2">Votre code</p>
+                    <div class="referral-code-box">
+                        <span class="referral-code-text" id="dashboard-code">---</span>
+                        <button onclick="copyDashboardCode()" class="p-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Bouton Partager -->
+                <button onclick="shareMyReferralCode()" class="w-full btn-whatsapp py-4 rounded-2xl text-white font-bold uppercase tracking-wider flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+                    </svg>
+                    Partager sur WhatsApp
+                </button>
+                
+                <!-- Plafond Mensuel -->
+                <div class="bg-slate-50 rounded-2xl p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-semibold text-slate-700">Plafond mensuel</span>
+                        <span class="text-sm font-bold text-slate-900" id="monthly-progress-text">0 / 50 000 F</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="monthly-progress-bar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2">Réinitialisé le 1er de chaque mois</p>
+                </div>
+                
+                <!-- Historique Wallet -->
+                <div>
+                    <p class="text-sm font-bold text-slate-700 mb-3">Historique</p>
+                    <div id="wallet-history-list" class="space-y-2">
+                        <p class="text-sm text-slate-400 text-center py-4">Aucune transaction</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // CONFIGURATION SUPABASE
+        // ==========================================
+        const SUPABASE_URL = 'https://whcpugnkldbmuqzgqxbe.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ==========================================
+        // ÉTAT GLOBAL
+        // ==========================================
+        let cart = JSON.parse(localStorage.getItem('yarid_cart')) || [];
+        let products = [];
+        let promotions = [];
+        let currentModalProduct = null;
+        let modalQty = 1;
+        let checkoutDelivery = 'retrait';
+        let checkoutPayment = 'especes';
+        let currentUser = null;
+        let searchHistory = JSON.parse(localStorage.getItem('yarid_search_history')) || [];
+        let currentRating = 0;
+        let productReviews = {};
+
+        // ==========================================
+        // INITIALISATION
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            initHeroSwiper();
+            initHeroSwiperAlibaba();
+            await loadProducts();
+            await loadPromotions();
+            await loadUserData();
+            updateCartUI();
+            startPromoCountdown();
+            initSearch();
+            initHeaderScroll();
+            loadMiniHeroProducts();
+        });
+
+        // ==========================================
+        // HEADER SCROLL EFFECT
+        // ==========================================
+        function initHeaderScroll() {
+            const header = document.getElementById('main-header');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 10) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+        }
+
+        // ==========================================
+        // HERO SWIPER (Parrainage - Conservé)
+        // ==========================================
+        function initHeroSwiper() {
+            new Swiper('#hero-swiper', {
+                loop: true,
+                autoplay: { delay: 5000, disableOnInteraction: false },
+                pagination: { el: '.swiper-pagination', clickable: true }
+            });
+        }
+
+        // ==========================================
+        // HERO SWIPER ALIBABA (Nouveau)
+        // ==========================================
+        function initHeroSwiperAlibaba() {
+            new Swiper('#hero-swiper-alibaba', {
+                loop: true,
+                autoplay: { delay: 4000, disableOnInteraction: false },
+                pagination: { el: '.swiper-pagination', clickable: true },
+                touchRatio: 1.5,
+                threshold: 10
+            });
+        }
+
+        // ==========================================
+        // MINI HERO PRODUCTS GRID
+        // ==========================================
+        async function loadMiniHeroProducts() {
+            try {
+                const { data, error } = await _supabase
+                    .from('PRODUITS')
+                    .select('*')
+                    .order('id', { ascending: false })
+                    .limit(4);
+
+                if (error) throw error;
+                const miniProducts = data || [];
+                renderMiniHeroProducts(miniProducts);
+            } catch (e) {
+                console.error('Erreur chargement mini produits:', e);
+            }
+        }
+
+        function renderMiniHeroProducts(items) {
+            const grid = document.getElementById('hero-mini-products');
+            if (items.length === 0) return;
+
+            grid.innerHTML = items.map((p, index) => `
+                <div class="mini-product-card" onclick="openProductModal(${p.id})">
+                    <img src="${p.image_url || 'https://via.placeholder.com/150'}" alt="${p.name}">
+                    <div class="mini-product-info">
+                        <p class="mini-product-name">${p.name}</p>
+                        <p class="mini-product-price">${p.price?.toLocaleString() || 0} F</p>
+                    </div>
+                    ${index === 0 ? '<span class="mini-badge badge-top">Top vente</span>' : ''}
+                    ${index === 1 ? '<span class="mini-badge badge-certified">Certifié</span>' : ''}
+                </div>
+            `).join('');
+        }
+
+        function scrollToProducts() {
+            document.getElementById('products-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ==========================================
+        // SYSTÈME DE RECHERCHE
+        // ==========================================
+        function initSearch() {
+            const searchInput = document.getElementById('search-input');
+            const searchDropdown = document.getElementById('search-dropdown');
+            
+            // Focus sur l'input
+            searchInput.addEventListener('focus', () => {
+                searchDropdown.classList.add('active');
+                renderSearchHistory();
+            });
+            
+            // Clic en dehors pour fermer
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container')) {
+                    searchDropdown.classList.remove('active');
+                }
+            });
+            
+            // Input pour auto-complétion
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.trim();
+                if (query.length > 0) {
+                    showSearchSuggestions(query);
+                } else {
+                    document.getElementById('search-suggestions-section').style.display = 'none';
+                }
+            });
+            
+            // Submit recherche
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const query = searchInput.value.trim();
+                    if (query) {
+                        addToSearchHistory(query);
+                        searchProduct(query);
+                        searchDropdown.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+        function renderSearchHistory() {
+            const historyList = document.getElementById('search-history-list');
+            const historySection = document.getElementById('search-history-section');
+            
+            if (searchHistory.length === 0) {
+                historySection.style.display = 'none';
+                return;
+            }
+            
+            historySection.style.display = 'block';
+            historyList.innerHTML = searchHistory.slice(0, 5).map(query => `
+                <div class="search-suggestion" onclick="searchProduct('${query}')">
+                    <div class="search-suggestion-icon">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <span class="search-suggestion-text">${query}</span>
+                </div>
+            `).join('');
+        }
+
+        function addToSearchHistory(query) {
+            // Éviter les doublons et limiter à 10 entrées
+            searchHistory = searchHistory.filter(q => q.toLowerCase() !== query.toLowerCase());
+            searchHistory.unshift(query);
+            searchHistory = searchHistory.slice(0, 10);
+            localStorage.setItem('yarid_search_history', JSON.stringify(searchHistory));
+        }
+
+        function showSearchSuggestions(query) {
+            const suggestionsSection = document.getElementById('search-suggestions-section');
+            const suggestionsList = document.getElementById('search-suggestions-list');
+            
+            // Filtrer les produits correspondants
+            const matches = products.filter(p => 
+                p.name.toLowerCase().includes(query.toLowerCase()) ||
+                p.categorie?.toLowerCase().includes(query.toLowerCase())
+            ).slice(0, 5);
+            
+            if (matches.length > 0) {
+                suggestionsSection.style.display = 'block';
+                suggestionsList.innerHTML = matches.map(p => `
+                    <div class="search-suggestion" onclick="openProductModal(${p.id}); document.getElementById('search-dropdown').classList.remove('active');">
+                        <div class="search-suggestion-icon">
+                            <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </div>
+                        <span class="search-suggestion-text">${p.name}</span>
+                    </div>
+                `).join('');
+            } else {
+                suggestionsSection.style.display = 'none';
+            }
+        }
+
+        function searchProduct(query) {
+            addToSearchHistory(query);
+            
+            // Filtrer les produits
+            const filtered = products.filter(p => 
+                p.name.toLowerCase().includes(query.toLowerCase()) ||
+                p.categorie?.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            renderProducts(filtered);
+            
+            // Scroll vers les produits
+            document.getElementById('products-section').scrollIntoView({ behavior: 'smooth' });
+            
+            // Mettre à jour le titre
+            document.querySelector('#products-section h3').textContent = `Résultats pour "${query}"`;
+        }
+
+        function startVoiceSearch() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'fr-FR';
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('search-input').value = transcript;
+                    searchProduct(transcript);
+                };
+                recognition.start();
+            } else {
+                alert('La recherche vocale n\'est pas supportée sur votre appareil');
+            }
+        }
+
+        // ==========================================
+        // CHARGEMENT DES PRODUITS
+        // ==========================================
+        async function loadProducts() {
+            try {
+                const { data, error } = await _supabase
+                    .from('PRODUITS')
+                    .select('*')
+                    .order('id', { ascending: false })
+                    .limit(20);
+
+                if (error) throw error;
+                products = data || [];
+                renderProducts(products);
+            } catch (e) {
+                console.error('Erreur chargement produits:', e);
+                document.getElementById('products-grid').innerHTML = `
+                    <div class="col-span-2 text-center py-10 text-slate-400">
+                        <p>Impossible de charger les produits</p>
+                        <button onclick="loadProducts()" class="mt-4 text-sky-500 font-bold text-sm">Réessayer</button>
+                    </div>
+                `;
+            }
+        }
+
+        function renderProducts(items) {
+            const grid = document.getElementById('products-grid');
+            if (items.length === 0) {
+                grid.innerHTML = '<p class="col-span-2 text-center py-10 text-slate-400">Aucun produit disponible</p>';
+                return;
+            }
+
+            grid.innerHTML = items.map(p => {
+                const avgRating = getProductAverageRating(p.id);
+                const reviewCount = getProductReviewCount(p.id);
+                const discount = p.old_price ? Math.round((1 - p.price/p.old_price) * 100) : 0;
+                
+                return `
+                <div class="product-card">
+                    <div class="product-image-container" onclick="openProductModal(${p.id}); trackProductView(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.categorie}')">
+                        <img src="${p.image_url || 'https://via.placeholder.com/400x400'}" 
+                             alt="${p.name}"
+                             loading="lazy">
+                        ${p.is_star ? '<span class="absolute top-2 left-2 bg-yellow-400 text-yellow-900 text-[9px] font-black px-2 py-1 rounded-full">STAR</span>' : ''}
+                        ${p.old_price ? `<span class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-full">-${discount}%</span>` : ''}
+                    </div>
+                    <div class="product-info">
+                        <div>
+                            <p class="text-[10px] text-sky-500 font-bold uppercase tracking-wider mb-1">${p.categorie}</p>
+                            <h4 class="product-title">${p.name}</h4>
+                            <div class="product-price-row">
+                                <span class="product-price">${p.price?.toLocaleString() || 0} FCFA</span>
+                                ${p.old_price ? `<span class="product-old-price">${p.old_price.toLocaleString()} F</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn-add-cart" onclick="event.stopPropagation(); addToCartWithTracking(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})">
+                                <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                                </svg>
+                                Panier
+                            </button>
+                            <button class="btn-buy-now" onclick="event.stopPropagation(); buyNowFromCard(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})">
+                                <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+                                </svg>
+                                Commander
+                            </button>
+                        </div>
+                            ${p.old_price ? `<span class="text-xs text-slate-400 line-through">${p.old_price.toLocaleString()} F</span>` : ''}
+                        </div>
+                        ${reviewCount > 0 ? `
+                        <div class="product-rating-badge mt-1">
+                            <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            ${avgRating.toFixed(1)} (${reviewCount})
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        // ==========================================
+        // SYSTÈME D'AVIS CLIENTS
+        // ==========================================
+        function getProductReviews(productId) {
+            const stored = localStorage.getItem(`yarid_reviews_${productId}`);
+            if (stored) return JSON.parse(stored);
+            
+            // Générer des avis fictifs pour démonstration
+            const mockReviews = generateMockReviews(productId);
+            localStorage.setItem(`yarid_reviews_${productId}`, JSON.stringify(mockReviews));
+            return mockReviews;
+        }
+
+        function generateMockReviews(productId) {
+            const names = ['Amadou K.', 'Fatima B.', 'Jean D.', 'Marie L.', 'Paul M.', 'Aïcha N.', 'Kofi G.'];
+            const comments = [
+                'Excellent produit, je recommande !',
+                'Très satisfait de mon achat.',
+                'Livraison rapide, produit conforme.',
+                'Super qualité pour le prix.',
+                'Je rachèterai sans hésiter.',
+                'Produit arrivé en parfait état.',
+                'Bonne qualité, correspond à la description.'
+            ];
+            
+            const count = 3 + Math.floor(Math.random() * 8);
+            const reviews = [];
+            
+            for (let i = 0; i < count; i++) {
+                reviews.push({
+                    id: Date.now() + i,
+                    name: names[Math.floor(Math.random() * names.length)],
+                    rating: 3 + Math.floor(Math.random() * 3),
+                    comment: comments[Math.floor(Math.random() * comments.length)],
+                    date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR')
+                });
+            }
+            
+            return reviews;
+        }
+
+        function getProductAverageRating(productId) {
+            const reviews = getProductReviews(productId);
+            if (reviews.length === 0) return 0;
+            return reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+        }
+
+        function getProductReviewCount(productId) {
+            return getProductReviews(productId).length;
+        }
+
+        function renderReviews(productId, limit = 3) {
+            const reviews = getProductReviews(productId);
+            const container = document.getElementById('reviews-list');
+            
+            container.innerHTML = reviews.slice(0, limit).map(r => `
+                <div class="review-item">
+                    <div class="review-header">
+                        <span class="reviewer-name">${r.name}</span>
+                        <div class="flex items-center gap-1">
+                            ${renderStars(r.rating, 'w-3 h-3')}
+                        </div>
+                    </div>
+                    <p class="review-date">${r.date}</p>
+                    <p class="review-text">${r.comment}</p>
+                </div>
+            `).join('');
+            
+            // Mettre à jour les statistiques
+            updateRatingStats(productId);
+        }
+
+        function renderStars(rating, sizeClass = 'w-4 h-4') {
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= rating) {
+                    html += `<svg class="star filled ${sizeClass}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>`;
+                } else {
+                    html += `<svg class="star empty ${sizeClass}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>`;
+                }
+            }
+            return html;
+        }
+
+        function updateRatingStats(productId) {
+            const reviews = getProductReviews(productId);
+            const avg = getProductAverageRating(productId);
+            const count = reviews.length;
+            
+            // Distribution
+            const distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            reviews.forEach(r => distribution[r.rating]++);
+            
+            // Mettre à jour l'affichage
+            document.getElementById('avg-rating-big').textContent = avg.toFixed(1);
+            document.getElementById('total-reviews-text').textContent = `${count} avis`;
+            document.getElementById('modal-rating-value').textContent = avg.toFixed(1);
+            document.getElementById('modal-reviews-count').textContent = `• ${count} avis`;
+            document.getElementById('avg-rating-stars').innerHTML = renderStars(Math.round(avg), 'w-3 h-3');
+            document.getElementById('modal-rating-stars').innerHTML = renderStars(Math.round(avg), 'w-4 h-4');
+            
+            // Mettre à jour les barres
+            for (let i = 1; i <= 5; i++) {
+                const bar = document.getElementById(`bar-${i}`);
+                if (bar) {
+                    bar.style.width = `${(distribution[i] / count) * 100}%`;
+                }
+            }
+        }
+
+        function openReviewModal() {
+            if (!currentModalProduct) return;
+            currentRating = 0;
+            updateRatingInput();
+            document.getElementById('review-comment').value = '';
+            document.getElementById('review-modal').classList.add('active');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('review-modal').classList.remove('active');
+        }
+
+        function setRating(rating) {
+            currentRating = rating;
+            updateRatingInput();
+            const texts = ['', 'Déçu', 'Peut mieux faire', 'Correct', 'Bien', 'Excellent !'];
+            document.getElementById('rating-text').textContent = texts[rating];
+        }
+
+        function updateRatingInput() {
+            const stars = document.querySelectorAll('#rating-input .star');
+            stars.forEach((star, index) => {
+                if (index < currentRating) {
+                    star.classList.remove('empty');
+                    star.classList.add('filled');
+                } else {
+                    star.classList.remove('filled');
+                    star.classList.add('empty');
+                }
+            });
+        }
+
+        function submitReview() {
+            if (currentRating === 0) {
+                alert('Veuillez sélectionner une note');
+                return;
+            }
+            
+            const comment = document.getElementById('review-comment').value.trim();
+            const newReview = {
+                id: Date.now(),
+                name: currentUser ? `Client ${currentUser.telephone_parrain}` : 'Client vérifié',
+                rating: currentRating,
+                comment: comment || 'Aucun commentaire',
+                date: new Date().toLocaleDateString('fr-FR')
+            };
+            
+            // Sauvegarder l'avis
+            const reviews = getProductReviews(currentModalProduct.id);
+            reviews.unshift(newReview);
+            localStorage.setItem(`yarid_reviews_${currentModalProduct.id}`, JSON.stringify(reviews));
+            
+            // Mettre à jour l'affichage
+            renderReviews(currentModalProduct.id);
+            closeReviewModal();
+            
+            // Feedback
+            alert('Merci pour votre avis !');
+        }
+
+        function loadMoreReviews() {
+            renderReviews(currentModalProduct.id, 10);
+            document.getElementById('load-more-reviews').style.display = 'none';
+        }
+
+        // ==========================================
+        // CHARGEMENT DES PROMOTIONS (CARROUSEL)
+        // ==========================================
+        async function loadPromotions() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const { data, error } = await _supabase
+                    .from('promotions')
+                    .select('*')
+                    .gte('date_fin', today)
+                    .lte('date_debut', today)
+                    .order('id', { ascending: false });
+
+                if (error) throw error;
+                promotions = data || [];
+                renderPromotions(promotions);
+            } catch (e) {
+                console.error('Erreur chargement promotions:', e);
+            }
+        }
+
+        function renderPromotions(items) {
+            const container = document.getElementById('promos-container');
+            if (items.length === 0) {
+                document.getElementById('promotions-section').style.display = 'none';
+                return;
+            }
+
+            container.innerHTML = items.map(p => `
+                <div class="swiper-slide">
+                    <div class="promo-card relative h-48 overflow-hidden">
+                        <img src="${p.image_url}" class="w-full h-full object-cover" alt="${p.titre}">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-4 flex flex-col justify-end">
+                            <span class="promo-badge text-white text-[9px] font-black px-2 py-1 rounded-full w-fit mb-2">PROMO FLASH</span>
+                            <h4 class="text-white font-black text-lg uppercase italic leading-tight mb-1">${p.titre}</h4>
+                            <p class="text-yellow-400 font-bold text-sm">Offre limitée !</p>
+                            <button onclick="buyPromoItem('${p.titre}')" 
+                                    class="mt-2 bg-white text-slate-900 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-sky-500 hover:text-white transition">
+                                Acheter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            new Swiper('#promo-swiper', {
+                slidesPerView: 1.2,
+                spaceBetween: 12,
+                centeredSlides: true,
+                loop: items.length > 1,
+                pagination: { el: '.swiper-pagination', clickable: true },
+                breakpoints: {
+                    640: { slidesPerView: 2.2, centeredSlides: false }
+                }
+            });
+        }
+
+        function buyPromoItem(titre) {
+            const msg = `Bonjour YARID ! 👋\n\nJe suis intéressé par la promotion : *${titre}*\n\nPouvez-vous me donner plus de détails sur cette offre ?\n\nMerci !`;
+            window.location.href = `https://wa.me/237655959284?text=${encodeURIComponent(msg)}`;
+        }
+
+        function startPromoCountdown() {
+            let hours = 4, minutes = 23, seconds = 15;
+            setInterval(() => {
+                seconds--;
+                if (seconds < 0) { seconds = 59; minutes--; }
+                if (minutes < 0) { minutes = 59; hours--; }
+                if (hours < 0) { hours = 4; minutes = 23; seconds = 15; }
+                document.getElementById('promo-countdown').textContent = 
+                    `Expire dans ${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+            }, 1000);
+        }
+
+        // ==========================================
+        // FILTRES CATÉGORIES
+        // ==========================================
+        function filterCategory(cat, btn) {
+            document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            
+            if (cat === 'all') {
+                renderProducts(products);
+                document.querySelector('#products-section h3').textContent = 'Nouveautés';
+            } else if (cat === 'services') {
+                openServicesPage();
+            } else {
+                const filtered = products.filter(p => p.categorie?.toLowerCase().includes(cat));
+                renderProducts(filtered);
+                document.querySelector('#products-section h3').textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+            }
+        }
+
+        function setView(view) {
+            document.getElementById('btn-grid').classList.toggle('bg-slate-100', view === 'grid');
+            document.getElementById('btn-grid').classList.toggle('text-slate-600', view === 'grid');
+            document.getElementById('btn-list').classList.toggle('bg-slate-100', view === 'list');
+            document.getElementById('btn-list').classList.toggle('text-slate-600', view === 'list');
+            
+            const grid = document.getElementById('products-grid');
+            grid.className = view === 'grid' ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3';
+        }
+
+        // ==========================================
+        // MODAL PRODUIT AVEC RECOMMANDATIONS ET AVIS
+        // ==========================================
+        function openProductModal(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            currentModalProduct = product;
+            modalQty = 1;
+            
+            document.getElementById('modal-image').src = product.image_url || 'https://via.placeholder.com/400x400';
+            document.getElementById('modal-category').textContent = product.categorie || 'Produit';
+            document.getElementById('modal-title').textContent = product.name;
+            document.getElementById('modal-price').textContent = `${product.price?.toLocaleString() || 0} FCFA`;
+            document.getElementById('modal-old-price').textContent = product.old_price ? `${product.old_price.toLocaleString()} FCFA` : '';
+            document.getElementById('modal-desc').textContent = product.description || 'Découvrez ce produit exclusif chez YARID.';
+            document.getElementById('modal-qty').textContent = modalQty;
+            
+            // Charger les avis
+            renderReviews(productId);
+            document.getElementById('load-more-reviews').style.display = 'block';
+            
+            // Charger les produits similaires
+            loadSimilarProducts(product);
+            
+            document.getElementById('product-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function loadSimilarProducts(currentProduct) {
+            const similar = products
+                .filter(p => p.categorie === currentProduct.categorie && p.id !== currentProduct.id)
+                .slice(0, 5);
+            
+            const container = document.getElementById('similar-products');
+            if (similar.length === 0) {
+                document.getElementById('similar-products-section').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('similar-products-section').style.display = 'block';
+            container.innerHTML = similar.map(p => `
+                <div class="flex-shrink-0 w-20 cursor-pointer" onclick="openProductModal(${p.id})">
+                    <div class="aspect-square bg-slate-100 rounded-xl mb-1 overflow-hidden">
+                        <img src="${p.image_url}" class="w-full h-full object-cover" alt="${p.name}">
+                    </div>
+                    <p class="text-[10px] font-medium truncate">${p.name}</p>
+                    <p class="text-[10px] text-sky-600 font-bold">${p.price?.toLocaleString() || 0}F</p>
+                </div>
+            `).join('');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.remove('active');
+            document.body.style.overflow = '';
+            currentModalProduct = null;
+        }
+
+        function updateModalQty(delta) {
+            modalQty = Math.max(1, modalQty + delta);
+            document.getElementById('modal-qty').textContent = modalQty;
+        }
+
+        function addToCartFromModal() {
+            if (!currentModalProduct) return;
+            addToCart(currentModalProduct, modalQty);
+            closeProductModal();
+        }
+
+        function buyNow() {
+            if (!currentModalProduct) return;
+            const msg = `Bonjour YARID ! 👋\n\nJe souhaite commander : *${currentModalProduct.name}*\n\nQuantité : ${modalQty}\nPrix unitaire : ${currentModalProduct.price?.toLocaleString() || 0} FCFA\nTotal : ${(currentModalProduct.price * modalQty).toLocaleString()} FCFA\n\nMerci de confirmer ma commande !`;
+            window.location.href = `https://wa.me/237655959284?text=${encodeURIComponent(msg)}`;
+        }
+
+        // ==========================================
+        // PANIER
+        // ==========================================
+        function addToCart(product, qty = 1) {
+            const existing = cart.find(item => item.id === product.id);
+            if (existing) {
+                existing.quantity += qty;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image_url,
+                    quantity: qty
+                });
+            }
+            saveCart();
+            updateCartUI();
+            
+            const badge = document.getElementById('cart-count');
+            badge.classList.add('scale-125');
+            setTimeout(() => badge.classList.remove('scale-125'), 200);
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            saveCart();
+            updateCartUI();
+            renderCartItems();
+        }
+
+        function updateCartQty(index, delta) {
+            cart[index].quantity += delta;
+            if (cart[index].quantity <= 0) {
+                cart.splice(index, 1);
+            }
+            saveCart();
+            updateCartUI();
+            renderCartItems();
+        }
+
+        function saveCart() {
+            localStorage.setItem('yarid_cart', JSON.stringify(cart));
+        }
+
+        function updateCartUI() {
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cart-count');
+            badge.textContent = count;
+            badge.classList.toggle('hidden', count === 0);
+            
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('cart-subtotal').textContent = `${subtotal.toLocaleString()} FCFA`;
+            document.getElementById('cart-total').textContent = `${subtotal.toLocaleString()} FCFA`;
+        }
+
+        function toggleCart() {
+            const drawer = document.getElementById('cart-drawer');
+            const overlay = document.getElementById('cart-overlay');
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('active');
+            renderCartItems();
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cart-items');
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10">
+                        <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                        </svg>
+                        <p class="text-slate-400">Votre panier est vide</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = cart.map((item, index) => `
+                <div class="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-100">
+                    <img src="${item.image}" class="w-16 h-16 object-cover rounded-xl" alt="${item.name}">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-sm truncate">${item.name}</h4>
+                        <p class="text-sky-600 font-bold text-sm">${(item.price * item.quantity).toLocaleString()} FCFA</p>
+                    </div>
+                    <div class="flex items-center gap-2 bg-slate-100 rounded-xl p-1">
+                        <button onclick="updateCartQty(${index}, -1)" class="w-7 h-7 rounded-lg bg-white font-bold text-slate-600">-</button>
+                        <span class="w-6 text-center font-bold text-sm">${item.quantity}</span>
+                        <button onclick="updateCartQty(${index}, 1)" class="w-7 h-7 rounded-lg bg-white font-bold text-slate-600">+</button>
+                    </div>
+                    <button onclick="removeFromCart(${index})" class="p-2 text-red-400 hover:text-red-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function orderViaWhatsApp() {
+            if (cart.length === 0) return alert('Votre panier est vide !');
+            
+            const cartSummary = cart.map(i => `• ${i.quantity}x ${i.name} = ${(i.price * i.quantity).toLocaleString()} FCFA`).join('\n');
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            const msg = `*COMMANDE YARID* 🛒\n\n${cartSummary}\n\n*TOTAL : ${total.toLocaleString()} FCFA*\n\nMerci de confirmer ma commande !`;
+            window.location.href = `https://wa.me/237655959284?text=${encodeURIComponent(msg)}`;
+        }
+
+        function applyPromo() {
+            const code = document.getElementById('promo-input').value.trim().toUpperCase();
+            if (!code) return;
+            alert('Code promo en cours de vérification...');
+        }
+
+        // ==========================================
+        // CHECKOUT
+        // ==========================================
+        function openCheckout() {
+            if (cart.length === 0) return alert('Votre panier est vide !');
+            
+            toggleCart();
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('checkout-total').textContent = `${total.toLocaleString()} FCFA`;
+            
+            document.getElementById('checkout-items').innerHTML = cart.map(item => `
+                <div class="flex justify-between">
+                    <span class="text-slate-600">${item.quantity}x ${item.name}</span>
+                    <span class="font-medium">${(item.price * item.quantity).toLocaleString()} F</span>
+                </div>
+            `).join('');
+            
+            document.getElementById('checkout-modal').classList.add('active');
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkout-modal').classList.remove('active');
+        }
+
+        function setCheckoutDelivery(mode) {
+            checkoutDelivery = mode;
+            document.getElementById('btn-checkout-retrait').className = mode === 'retrait' 
+                ? 'p-4 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white text-center transition-all'
+                : 'p-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 text-center transition-all';
+            document.getElementById('btn-checkout-domicile').className = mode === 'domicile'
+                ? 'p-4 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white text-center transition-all'
+                : 'p-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 text-center transition-all';
+            
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const deliveryFee = mode === 'domicile' ? 2000 : 0;
+            document.getElementById('checkout-total').textContent = `${(subtotal + deliveryFee).toLocaleString()} FCFA`;
+        }
+
+        function setCheckoutPayment(mode) {
+            checkoutPayment = mode;
+            document.getElementById('btn-checkout-especes').className = mode === 'especes'
+                ? 'p-4 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white text-center transition-all'
+                : 'p-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 text-center transition-all';
+            document.getElementById('btn-checkout-mobile').className = mode === 'mobile'
+                ? 'p-4 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white text-center transition-all'
+                : 'p-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 text-center transition-all';
+        }
+
+        async function submitOrder() {
+            const nom = document.getElementById('checkout-nom').value.trim();
+            const tel = document.getElementById('checkout-tel').value.trim();
+            const adresse = document.getElementById('checkout-adresse').value.trim();
+            const referralCode = document.getElementById('checkout-referral-code').value.trim().toUpperCase();
+            
+            if (!nom || !tel) {
+                alert('Veuillez remplir votre nom et téléphone');
+                return;
+            }
+            
+            const btn = document.getElementById('btn-submit-order');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"></span>Envoi...';
+            
+            const orderId = 'YRD-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const deliveryFee = checkoutDelivery === 'domicile' ? 2000 : 0;
+            
+            // Appliquer la réduction parrainage si applicable
+            let discountAmount = 0;
+            const hasReferralDiscount = document.getElementById('referral-discount-row').style.display !== 'none';
+            if (hasReferralDiscount) {
+                discountAmount = Math.min(subtotal * 0.1, 5000); // 10% max 5000 FCFA
+            }
+            
+            const total = subtotal + deliveryFee - discountAmount;
+            
+            const cartSummary = cart.map(i => `${i.quantity}x ${i.name}`).join(', ');
+            
+            try {
+                await _supabase.from('commande').insert([{
+                    order_id: orderId,
+                    client_nom: nom,
+                    client_phone: tel,
+                    client_adresse: adresse,
+                    article: cartSummary,
+                    montant_total: total,
+                    mode_livraison: checkoutDelivery,
+                    mode_paiement: checkoutPayment,
+                    statut: 'en_attente',
+                    code_parrainage: referralCode || null,
+                    reduction_parrainage: discountAmount
+                }]);
+                
+                // Si code parrainage appliqué, enregistrer le filleul
+                if (referralCode && window.referralSystem) {
+                    await window.referralSystem.registerReferee(referralCode, tel);
+                }
+                
+            } catch (e) {
+                console.error('Erreur sauvegarde commande:', e);
+            }
+            
+            const msg = `*NOUVELLE COMMANDE YARID* 🛒\n\n` +
+                        `*N° Commande :* ${orderId}\n\n` +
+                        `*Client :* ${nom}\n` +
+                        `*Téléphone :* ${tel}\n` +
+                        `*Adresse :* ${adresse || 'Non précisée'}\n` +
+                        (referralCode ? `*Code Parrainage :* ${referralCode}\n` : '') +
+                        (discountAmount > 0 ? `*Réduction :* -${discountAmount.toLocaleString()} FCFA\n` : '') +
+                        `\n` +
+                        `*Articles :*\n${cart.map(i => `• ${i.quantity}x ${i.name}`).join('\n')}\n\n` +
+                        `*Sous-total :* ${subtotal.toLocaleString()} FCFA\n` +
+                        `*Livraison :* ${checkoutDelivery === 'domicile' ? '2000 FCFA' : 'Gratuit (retrait)'}\n` +
+                        `*Mode de paiement :* ${checkoutPayment === 'especes' ? 'Espèces' : 'Mobile Money'}\n` +
+                        `*TOTAL :* ${total.toLocaleString()} FCFA\n\n` +
+                        `Merci de confirmer ma commande !`;
+            
+            cart = [];
+            saveCart();
+            updateCartUI();
+            
+            window.location.href = `https://wa.me/237655959284?text=${encodeURIComponent(msg)}`;
+        }
+
+        // ==========================================
+        // COMPTE UTILISATEUR
+        // ==========================================
+        async function loadUserData() {
+            const savedPhone = localStorage.getItem('yarid_user_phone');
+            if (savedPhone) {
+                try {
+                    const { data: user } = await _supabase
+                        .from('parrainage')
+                        .select('*')
+                        .eq('telephone_parrain', savedPhone)
+                        .single();
+                    
+                    if (user) {
+                        currentUser = user;
+                        document.getElementById('user-name').textContent = `Client ${savedPhone}`;
+                        document.getElementById('user-phone').textContent = savedPhone;
+                        document.getElementById('user-initial').textContent = savedPhone.charAt(0).toUpperCase();
+                        document.getElementById('user-points').textContent = (user.visites || 0) * 2;
+                        
+                        // Afficher section parrainage activé
+                        document.getElementById('referral-not-activated').style.display = 'none';
+                        document.getElementById('referral-activated').style.display = 'block';
+                        
+                        // Mettre à jour les infos parrainage
+                        document.getElementById('referral-code').textContent = user.code_ref || '---';
+                        document.getElementById('referral-count').textContent = user.filleuls || 0;
+                        document.getElementById('wallet-balance-display').textContent = `${(user.wallet_solde || 0).toLocaleString()} FCFA`;
+                        document.getElementById('parrainage-code').value = user.code_ref || 'YARID-ELITE-2025';
+                        
+                        // Mettre à jour le tableau de bord parrain
+                        document.getElementById('wallet-balance').textContent = `${(user.wallet_solde || 0).toLocaleString()} FCFA`;
+                        document.getElementById('dashboard-filleuls').textContent = user.filleuls || 0;
+                        document.getElementById('dashboard-actifs').textContent = user.filleuls_actifs || 0;
+                        document.getElementById('dashboard-gains').textContent = Math.floor((user.gains_totaux || 0) / 1000);
+                        document.getElementById('dashboard-code').textContent = user.code_ref || '---';
+                        
+                        // Progress bar mensuelle
+                        const monthlyProgress = Math.min((user.gains_mois || 0) / 50000 * 100, 100);
+                        document.getElementById('monthly-progress-bar').style.width = `${monthlyProgress}%`;
+                        document.getElementById('monthly-progress-text').textContent = `${(user.gains_mois || 0).toLocaleString()} / 50 000 F`;
+                        
+                        // Charger l'historique du wallet
+                        loadWalletHistory(user.id);
+                    } else {
+                        // Utilisateur non parrain - afficher bouton d'activation
+                        document.getElementById('referral-not-activated').style.display = 'block';
+                        document.getElementById('referral-activated').style.display = 'none';
+                    }
+                } catch (e) {
+                    console.error('Erreur chargement utilisateur:', e);
+                }
+            }
+            
+            loadUserOrders();
+        }
+
+        async function loadUserOrders() {
+            const savedPhone = localStorage.getItem('yarid_user_phone');
+            if (!savedPhone) return;
+            
+            try {
+                const { data: orders } = await _supabase
+                    .from('commande')
+                    .select('*')
+                    .eq('client_phone', savedPhone)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                const container = document.getElementById('user-orders');
+                if (orders && orders.length > 0) {
+                    container.innerHTML = orders.map(o => `
+                        <div class="bg-slate-50 rounded-xl p-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-sm text-sky-600">#${o.order_id}</span>
+                                <span class="text-[10px] px-2 py-1 rounded-full ${getStatusColor(o.statut)}">${getStatusLabel(o.statut)}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 truncate">${o.article}</p>
+                            <p class="text-sm font-bold mt-1">${o.montant_total?.toLocaleString() || 0} FCFA</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) {
+                console.error('Erreur chargement commandes:', e);
+            }
+        }
+        
+        async function loadWalletHistory(parrainId) {
+            try {
+                const { data: history } = await _supabase
+                    .from('wallet_history')
+                    .select('*')
+                    .eq('parrain_id', parrainId)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                
+                const container = document.getElementById('wallet-history-list');
+                if (history && history.length > 0) {
+                    container.innerHTML = history.map(h => `
+                        <div class="wallet-history-item">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full ${h.type === 'credit' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'} flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        ${h.type === 'credit' 
+                                            ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>'
+                                            : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>'
+                                        }
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-700">${h.description}</p>
+                                    <p class="text-xs text-slate-400">${new Date(h.created_at).toLocaleDateString('fr-FR')}</p>
+                                </div>
+                            </div>
+                            <span class="${h.type === 'credit' ? 'wallet-credit' : 'wallet-debit'}">
+                                ${h.type === 'credit' ? '+' : ''}${h.amount.toLocaleString()} F
+                            </span>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">Aucune transaction</p>';
+                }
+            } catch (e) {
+                console.error('Erreur chargement historique wallet:', e);
+            }
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'en_attente': 'bg-yellow-100 text-yellow-700',
+                'en_cours': 'bg-blue-100 text-blue-700',
+                'livree': 'bg-green-100 text-green-700',
+                'annulee': 'bg-red-100 text-red-700'
+            };
+            return colors[status] || 'bg-slate-100 text-slate-700';
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'en_attente': 'En attente',
+                'en_cours': 'En cours',
+                'livree': 'Livrée',
+                'annulee': 'Annulée'
+            };
+            return labels[status] || status;
+        }
+
+        function openAccountModal() {
+            document.getElementById('account-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            loadUserData();
+        }
+
+        function closeAccountModal() {
+            document.getElementById('account-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function shareReferralCode() {
+            const code = document.getElementById('referral-code').textContent;
+            const link = window.location.origin + '/promo.html?ref=' + code;
+            const msg = `Salut ! Découvre la boutique YARID, ils ont des produits incroyables. Utilise mon code *${code}* pour avoir -10% sur ta première commande : ${link}`;
+            window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        }
+
+        // ==========================================
+        // PARRAINAGE
+        // ==========================================
+        function openParrainage() {
+            closeAccountModal();
+            document.getElementById('parrainage-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeParrainageModal() {
+            document.getElementById('parrainage-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function copyParrainageCode() {
+            const input = document.getElementById('parrainage-code');
+            input.select();
+            document.execCommand('copy');
+            alert('Code copié !');
+        }
+
+        function shareParrainageCode() {
+            const code = document.getElementById('parrainage-code').value;
+            const link = window.location.origin + '/promo.html?ref=' + code;
+            const msg = `Salut ! Découvre la boutique YARID, ils ont des produits incroyables. Utilise mon code *${code}* pour avoir -10% sur ta première commande : ${link}`;
+            window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        }
+
+        // ==========================================
+        // NOUVEAU: FONCTIONS SYSTÈME DE PARRAINAGE
+        // ==========================================
+        
+        function openReferralActivation() {
+            document.getElementById('referral-activation-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeReferralActivation() {
+            document.getElementById('referral-activation-modal').classList.remove('active');
+            document.body.style.overflow = '';
+            // Reset form
+            document.getElementById('phone-section').style.display = 'block';
+            document.getElementById('otp-section').style.display = 'none';
+            document.getElementById('referral-phone').value = '';
+            document.getElementById('referral-otp').value = '';
+        }
+        
+        function backToPhone() {
+            document.getElementById('phone-section').style.display = 'block';
+            document.getElementById('otp-section').style.display = 'none';
+        }
+        
+        function openReferralDashboard() {
+            document.getElementById('referral-dashboard-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            loadUserData(); // Refresh data
+        }
+        
+        function closeReferralDashboard() {
+            document.getElementById('referral-dashboard-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        function copyDashboardCode() {
+            const code = document.getElementById('dashboard-code').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copié : ' + code);
+            });
+        }
+        
+        async function applyReferralCodeAtCheckout() {
+            const codeInput = document.getElementById('checkout-referral-code');
+            const code = codeInput.value.trim().toUpperCase();
+            const statusEl = document.getElementById('referral-code-status');
+            
+            if (!code) {
+                statusEl.textContent = 'Veuillez entrer un code';
+                statusEl.className = 'text-xs text-red-500';
+                return;
+            }
+            
+            // Vérifier si le code existe via le système de parrainage
+            if (window.referralSystem) {
+                const parrain = await window.referralSystem.getParrainByCode(code);
+                if (parrain) {
+                    document.getElementById('referral-discount-row').style.display = 'flex';
+                    statusEl.textContent = 'Code valide ! -10% de réduction appliquée';
+                    statusEl.className = 'text-xs text-emerald-500';
+                    
+                    // Recalculer le total
+                    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                    const deliveryFee = checkoutDelivery === 'domicile' ? 2000 : 0;
+                    const discount = Math.min(subtotal * 0.1, 5000);
+                    document.getElementById('checkout-total').textContent = `${(subtotal + deliveryFee - discount).toLocaleString()} FCFA`;
+                } else {
+                    statusEl.textContent = 'Code invalide';
+                    statusEl.className = 'text-xs text-red-500';
+                    document.getElementById('referral-discount-row').style.display = 'none';
+                }
+            }
+        }
+        
+        function shareMyReferralCode() {
+            if (window.referralSystem) {
+                window.referralSystem.shareReferralCode();
+            }
+        }
+        
+        async function requestOTP() {
+            const phone = document.getElementById('referral-phone').value.trim();
+            if (!phone) {
+                alert('Veuillez entrer votre numéro');
+                return;
+            }
+            
+            if (window.referralSystem) {
+                const result = await window.referralSystem.requestParrainAccount(phone);
+                if (result.success) {
+                    document.getElementById('phone-section').style.display = 'none';
+                    document.getElementById('otp-section').style.display = 'block';
+                    if (result.devOtp) {
+                        document.getElementById('dev-otp-display').textContent = `Code (dev): ${result.devOtp}`;
+                    }
+                } else {
+                    alert(result.error);
+                }
+            }
+        }
+        
+        async function verifyOTP() {
+            const otp = document.getElementById('referral-otp').value.trim();
+            if (!otp || otp.length !== 6) {
+                alert('Veuillez entrer le code à 6 chiffres');
+                return;
+            }
+            
+            if (window.referralSystem) {
+                const result = await window.referralSystem.verifyOTPAndCreateAccount(otp);
+                if (result.success) {
+                    alert('Compte parrain activé ! Votre code: ' + result.code);
+                    closeReferralActivation();
+                    openReferralDashboard();
+                } else {
+                    alert(result.error);
+                }
+            }
+        }
+
+        // ==========================================
+        // SERVICES
+        // ==========================================
+        function openServicesPage() {
+            window.location.href = 'services.html';
+        }
+
+        function openServicesModal() {
+            document.getElementById('services-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeServicesModal() {
+            document.getElementById('services-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ==========================================
+        // À PROPOS MODAL
+        // ==========================================
+        function openAboutModal() {
+            document.getElementById('about-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            trackYaridEvent('about_modal_open');
+        }
+        
+        function closeAboutModal() {
+            document.getElementById('about-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        // ==========================================
+        // TRACKING FONCTIONS
+        // ==========================================
+        function addToCartWithTracking(productId, productName, price) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                addToCart(product, 1);
+                trackAddToCart(productId, productName, 1, price);
+                trackFunnelStep('cart_add', { product_id: productId, product_name: productName });
+            }
+        }
+        
+        function buyNowFromCard(productId, productName, price) {
+            trackProductView(productId, productName, price, 'direct_buy');
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                const msg = `Bonjour YARID ! 👋\n\nJe souhaite commander : *${productName}*\n\nPrix : ${price?.toLocaleString() || 0} FCFA\n\nMerci de confirmer ma commande !`;
+                window.location.href = `https://wa.me/237655959284?text=${encodeURIComponent(msg)}`;
+            }
+        }
+        
+        // ==========================================
+        // ANALYTICS
+        // ==========================================
+        async function trackEvent(eventName, eventDetails = {}) {
+            const device = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Ordinateur';
+            const sessionId = sessionStorage.getItem('yarid_session_id') || Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('yarid_session_id', sessionId);
+            
+            try {
+                await _supabase.from('site_analytics').insert([{
+                    event_type: eventName,
+                    page_url: 'index',
+                    device_type: device,
+                    session_id: sessionId,
+                    details: eventDetails
+                }]);
+            } catch (e) {}
+        }
+
+        window.addEventListener('load', () => trackEvent('page_view'));
+    </script>
+    
+    <!-- À Propos Modal -->
+    <div class="modal" id="about-modal">
+        <div class="modal-content absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                <h2 class="text-xl font-black italic uppercase">À Propos de <span class="text-sky-500">YARID</span></h2>
+                <button onclick="closeAboutModal()" class="p-2 rounded-full hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="p-5 space-y-6">
+                <!-- Logo et tagline -->
+                <div class="text-center">
+                    <h1 class="text-4xl font-black italic tracking-tighter uppercase mb-2">YARID<span class="text-sky-500">.</span></h1>
+                    <p class="text-slate-500 text-sm">L'excellence au service de vos projets</p>
+                </div>
+                
+                <!-- Histoire -->
+                <div class="bg-slate-50 rounded-2xl p-5">
+                    <h3 class="font-bold text-slate-900 mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Notre Histoire
+                    </h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Fondée au Cameroun, YARID Group est née d'une vision simple : offrir l'accès à des produits premium et des services professionnels de qualité internationale. De la boutique en ligne aux solutions BTP et digitales, nous accompagnons nos clients avec excellence.
+                    </p>
+                </div>
+                
+                <!-- Vision -->
+                <div class="bg-slate-50 rounded-2xl p-5">
+                    <h3 class="font-bold text-slate-900 mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        Notre Vision
+                    </h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Devenir la référence camerounaise pour l'accès à des produits et services de qualité, en combinant expertise locale et standards internationaux.
+                    </p>
+                </div>
+                
+                <!-- Expertise -->
+                <div class="bg-slate-50 rounded-2xl p-5">
+                    <h3 class="font-bold text-slate-900 mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                        </svg>
+                        Notre Expertise
+                    </h3>
+                    <ul class="space-y-2 text-sm text-slate-600">
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Distribution de produits premium
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Solutions BTP & Matériaux
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Studio digital & Web
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Sourcing international
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Réseaux Sociaux -->
+                <div>
+                    <h3 class="font-bold text-slate-900 mb-4 text-center">Suivez-nous</h3>
+                    <div class="flex justify-center gap-4">
+                        <a href="https://www.facebook.com/share/18Pc3Umzfb/?mibextid=wwXIfr" target="_blank" class="w-14 h-14 bg-[#1877F2] rounded-2xl flex items-center justify-center text-white hover:scale-110 transition-transform">
+                            <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </a>
+                        <a href="https://www.instagram.com/yarid_cm237?igsh=MTE2enF4Nmt5NnI0Nw%3D%3D&utm_source=qr" target="_blank" class="w-14 h-14 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 rounded-2xl flex items-center justify-center text-white hover:scale-110 transition-transform">
+                            <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                            </svg>
+                        </a>
+                        <a href="https://linkedin.com/company/yaridgroup" target="_blank" class="w-14 h-14 bg-[#0A66C2] rounded-2xl flex items-center justify-center text-white hover:scale-110 transition-transform">
+                            <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Contact -->
+                <div class="bg-slate-900 rounded-2xl p-5 text-white text-center">
+                    <p class="text-sm text-slate-300 mb-2">Besoin d'aide ?</p>
+                    <a href="https://wa.me/237655959284" class="text-xl font-bold text-sky-400 hover:text-sky-300 transition">
+                        +237 655 959 284
+                    </a>
+                    <p class="text-xs text-slate-500 mt-2">Yaoundé, Cameroun</p>
+                </div>
+                
+                <!-- Version -->
+                <p class="text-center text-xs text-slate-400">Version 1.0.0 - © 2025 YARID Group</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
