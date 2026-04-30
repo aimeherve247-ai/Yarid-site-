@@ -89,33 +89,96 @@ async function sendOTPWhatsApp(phone, otp) {
 }
 
 /**
- * Demande la création d'un compte parrain
+ * Connexion simplifiee pour parrains existants (Modification #4)
  */
-async function requestParrainAccount(phone) {
-  // Valider le numéro
+async function loginParrain(phone) {
   const validation = validatePhoneNumber(phone);
   if (!validation.valid) {
     return { success: false, error: validation.error };
   }
-  
+
+  const formattedPhone = validation.formatted;
+
+  try {
+    const { data: existing, error } = await referralClient
+      .from('parrainage')
+      .select('*')
+      .eq('telephone_parrain', formattedPhone)
+      .single();
+
+    if (error || !existing) {
+      return { success: false, error: 'Aucun compte trouve avec ce numero. Veuillez vous inscrire.' };
+    }
+
+    // Validation automatique: s'assurer que le compte est actif (Modification #5)
+    if (!existing.is_active) {
+      await referralClient
+        .from('parrainage')
+        .update({ is_active: true, date_activation: new Date().toISOString() })
+        .eq('id', existing.id);
+    }
+
+    // Connecter dans la session locale
+    localStorage.setItem('yarid_user_phone', formattedPhone);
+    localStorage.setItem('yarid_referral_code', existing.code_ref);
+
+    return {
+      success: true,
+      code: existing.code_ref,
+      message: 'Connexion reussie ! Votre code: ' + existing.code_ref,
+      parrain: existing
+    };
+
+  } catch (e) {
+    console.error('[Referral] Erreur connexion:', e);
+    return { success: false, error: 'Erreur lors de la connexion' };
+  }
+}
+
+/**
+ * Demande la creation d'un compte parrain
+ * Modification #5: validation automatique
+ */
+async function requestParrainAccount(phone) {
+  // Valider le numero
+  const validation = validatePhoneNumber(phone);
+  if (!validation.valid) {
+    return { success: false, error: validation.error };
+  }
+
   pendingPhone = validation.formatted;
-  
-  // Vérifier si le numéro existe déjà
+
+  // Verifier si le numero existe deja -> connexion auto (Modification #4)
   try {
     const { data: existing } = await referralClient
       .from('parrainage')
       .select('*')
       .eq('telephone_parrain', pendingPhone)
       .single();
-    
+
     if (existing) {
-      return { 
-        success: false, 
-        error: 'Ce numéro est déjà inscrit au programme de parrainage' 
+      // Connexion automatique
+      localStorage.setItem('yarid_user_phone', pendingPhone);
+      localStorage.setItem('yarid_referral_code', existing.code_ref);
+
+      // S'assurer que le compte est actif (Modification #5)
+      if (!existing.is_active) {
+        await referralClient
+          .from('parrainage')
+          .update({ is_active: true, date_activation: new Date().toISOString() })
+          .eq('id', existing.id);
+      }
+
+      return {
+        success: true,
+        alreadyRegistered: true,
+        code: existing.code_ref,
+        message: 'Vous etes deja inscrit ! Connexion automatique...',
+        parrain: existing
       };
     }
   } catch (e) {
-    // Pas d'erreur, le numéro n'existe pas
+    // Numero n'existe pas -> continuer l'inscription
   }
   
   // Générer et envoyer l'OTP
@@ -219,6 +282,8 @@ async function verifyOTPAndCreateAccount(otp) {
         gains_totaux: 0,
         gains_mois: 0,
         visites: 1,
+        is_active: true,
+        date_activation: new Date().toISOString(),
         date_inscription: new Date().toISOString()
       }])
       .select()
@@ -410,6 +475,7 @@ async function resendOTP() {
 window.referralSystem = {
   requestParrainAccount,
   verifyOTPAndCreateAccount,
+  loginParrain,
   getParrainByCode,
   registerReferee,
   creditParrainWallet,
@@ -419,7 +485,8 @@ window.referralSystem = {
   generateReferralCode
 };
 
-// Fonctions individuelles pour compatibilité
+// Fonctions individuelles pour compatibilite
 window.requestOTP = requestParrainAccount;
 window.verifyOTP = verifyOTPAndCreateAccount;
+window.loginParrain = loginParrain;
 window.resendOTPCode = resendOTP;

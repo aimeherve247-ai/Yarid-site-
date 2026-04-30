@@ -6,12 +6,15 @@
     <title>Nos Services | YARID GROUP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="cart-global.js"></script>
     <script src="analytics.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .service-card:hover img { transform: scale(1.05); }
         #cart-drawer { transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        #cart-drawer.open { transform: translateX(0) !important; }
+        #overlay.active { display: block !important; opacity: 1 !important; }
     </style>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0f172a">
@@ -156,14 +159,14 @@
         </div>
     </footer>
 
-    <div id="cart-overlay" class="fixed inset-0 bg-black/60 z-[150] hidden backdrop-blur-sm"></div>
+    <div id="cart-overlay" class="fixed inset-0 bg-black/60 z-[150] hidden backdrop-blur-sm" onclick="toggleCart()"></div>
     <div id="cart-drawer" class="fixed right-0 top-0 h-full w-full max-w-md bg-white z-[200] transform translate-x-full shadow-2xl p-8 flex flex-col">
         <div class="flex justify-between items-center mb-10">
             <h2 class="text-3xl font-black italic uppercase tracking-tighter">Mon Panier</h2>
             <button onclick="toggleCart()" class="text-slate-400 font-black uppercase text-[10px] hover:text-slate-950 transition">Fermer ×</button>
         </div>
 
-        <div id="cart-items-container" class="flex-1 overflow-y-auto space-y-2">
+        <div id="cart-items" class="flex-1 overflow-y-auto space-y-2">
             </div>
 
         <div class="border-t border-slate-100 pt-8 mt-6 space-y-6">
@@ -175,10 +178,10 @@
 
             <div class="flex justify-between items-center font-black text-2xl italic uppercase">
                 <span>Total:</span>
-                <span id="summary-total" class="text-sky-500">0 F</span>
+                <span id="cart-total" class="text-sky-500">0 FCFA</span>
             </div>
 
-            <button id="btn-valider" onclick="validerCommande()" class="w-full bg-slate-950 text-white py-6 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] hover:bg-sky-500 transition-all shadow-xl active:scale-95">
+            <button id="btn-valider" onclick="orderViaWhatsApp()" class="w-full bg-slate-950 text-white py-6 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] hover:bg-sky-500 transition-all shadow-xl active:scale-95">
                 Commander via WhatsApp
             </button>
         </div>
@@ -189,7 +192,12 @@
         // Remplace par tes vrais identifiants si tu utilises Supabase
         const _supabase = supabase.createClient('https://votre-url.supabase.co', 'votre-cle-anon');
     </script>
-    <script src="cart.js"></script>
+    <script>
+        // Initialiser le panier au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof updateCartUI === 'function') updateCartUI();
+        });
+    </script>
 
 </body>
 </html>
