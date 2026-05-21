@@ -1,13 +1,23 @@
 // ============================================================
-// YARID - Module Panier Global
+// YARID - Module Panier Global + WhatsApp
 // Partagé par toutes les pages (index.html, category-view.html, services.html)
-// Ce fichier contient UNIQUEMENT la logique JS du panier.
+// Ce fichier contient la logique JS du panier ET tout le systeme WhatsApp.
 // Chaque page garde son propre HTML de drawer panier.
 // ============================================================
 
-let cart = JSON.parse(localStorage.getItem('yarid_cart')) || [];
-let checkoutDelivery = 'retrait';
-let checkoutPayment = 'especes';
+// ==========================================
+// WHATSAPP - Ouvre directement l'app native
+// ==========================================
+// Charger le panier avec protection contre les donnees corrompues
+var cart = [];
+try {
+    var saved = localStorage.getItem('yarid_cart');
+    if (saved) cart = JSON.parse(saved);
+} catch (e) { cart = []; }
+if (!Array.isArray(cart)) cart = [];
+
+var checkoutDelivery = 'retrait';
+var checkoutPayment = 'especes';
 
 function addToCart(product, qty) {
     if (!product || !product.id) return;
@@ -118,7 +128,7 @@ function orderViaWhatsApp() {
     const cartSummary = cart.map(i => '• ' + i.quantity + 'x ' + i.name + ' = ' + (i.price * i.quantity).toLocaleString() + ' FCFA').join('\n');
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const msg = '*COMMANDE YARID* 🛒\n\n' + cartSummary + '\n\n*TOTAL : ' + total.toLocaleString() + ' FCFA*\n\nMerci de confirmer ma commande !';
-    window.location.href = 'https://wa.me/237655959284?text=' + encodeURIComponent(msg);
+    window.location.href = 'https://api.whatsapp.com/send?phone=237655959284&text=' + encodeURIComponent(msg);
 }
 
 function applyPromo() {
@@ -268,7 +278,7 @@ async function submitOrder() {
     saveCart();
     updateCartUI();
 
-    window.location.href = 'https://wa.me/237655959284?text=' + encodeURIComponent(msg);
+    window.location.href = 'https://api.whatsapp.com/send?phone=237655959284&text=' + encodeURIComponent(msg);
 }
 
 // ========== SYNC INTER-ONGLETS ==========

@@ -1,386 +1,412 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f172a">
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('YARID PWA : Prête !'))
-            .catch(err => console.log('Erreur PWA :', err));
-        });
-      }
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YARID | Dashboard Admin Expert</title>
+    <title>YARID | Dashboard Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0f172a">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="YARID">
-
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon_32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon_16.png">
-<link rel="apple-touch-icon" href="/icons/ios.png">
-
-<meta property="og:type" content="website">
-<meta property="og:title" content="YARID - Boutique Premium">
-<meta property="og:description" content="Votre destination exclusive pour des produits d'exception au Cameroun.">
-<meta property="og:image" content="/icons/icon_512.png">
-<meta property="og:url" content="https://votre-site.netlify.app">
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('Service Worker enregistré !'))
-        .catch(err => console.log('Erreur SW:', err));
-    });
-  }
-</script>
-
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #f8fafc; }
+        .input-admin { width:100%; background:#f1f5f9; border:none; border-radius:16px; padding:1rem; font-size:12px; font-weight:700; color:#0f172a; outline:none; transition:all .2s; }
+        .input-admin:focus { box-shadow:0 0 0 3px rgba(14,165,233,.15); background:#fff; }
+        .card-admin { background:#fff; border-radius:24px; padding:1.5rem; box-shadow:0 1px 3px rgba(0,0,0,.04); border:1px solid #f1f5f9; }
+        .tab-btn { padding:0.6rem 1.2rem; border-radius:12px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; transition:all .2s; border:none; cursor:pointer; }
+        .tab-btn.active { background:#0f172a; color:#fff; }
+        .tab-btn:not(.active) { background:#f1f5f9; color:#94a3b8; }
+        .tab-btn:not(.active):hover { background:#e2e8f0; }
+        .section-panel { display:none; }
+        .section-panel.active { display:block; }
+    </style>
 </head>
-<body class="bg-slate-50 p-4 md:p-10 font-sans text-slate-900">
-
-    <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
-                <h1 class="text-2xl font-black italic uppercase tracking-tighter text-slate-900">YARID <span class="text-sky-500 underline">ADMIN</span></h1>
-                <p id="stats-ca" class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Calcul du flux financier...</p>
+                <h1 class="text-2xl font-black italic uppercase tracking-tighter">YARID <span class="text-sky-500">ADMIN</span></h1>
+                <p id="stats-ca" class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Chargement...</p>
             </div>
-            <div class="flex flex-wrap gap-3">
-                <a href="index.html" class="text-[9px] font-bold uppercase bg-white px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 transition shadow-sm">Accéder au site</a>
-                <a href="livreurs-gestion.html" class="text-[9px] font-bold uppercase bg-slate-900 text-white px-5 py-2.5 rounded-full shadow-lg hover:bg-sky-500 transition-all">Logistique Livreurs</a>
+            <div class="flex gap-2">
+                <a href="index.html" class="text-[10px] font-bold uppercase bg-white px-4 py-2 rounded-full border border-slate-200 hover:bg-slate-50 transition">Boutique</a>
+                <a href="suivi.html" class="text-[10px] font-bold uppercase bg-slate-900 text-white px-4 py-2 rounded-full hover:bg-sky-500 transition">Suivi des commandes</a>
             </div>
         </div>
 
-        <div class="grid lg:grid-cols-12 gap-8">
-            
-            <div class="lg:col-span-4 space-y-6">
-                
-                <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100">
-                    <h2 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6 text-center">Gestion Stock & Inventaire</h2>
-                    <form id="productForm" class="space-y-3">
-                        <input type="text" id="name" placeholder="Nom du produit" required class="w-full p-4 bg-slate-50 rounded-2xl text-xs font-bold border-none outline-none focus:ring-2 focus:ring-sky-500">
-                        
-                        <div class="relative">
-                            <input type="text" id="categorie" list="categoryOptions" placeholder="Catégorie (Taper pour créer ou choisir)" required class="w-full p-4 bg-slate-50 rounded-2xl text-xs font-bold border-none outline-none focus:ring-2 focus:ring-sky-500">
-                            <datalist id="categoryOptions">
-                                <option value="Construction">
-                                <option value="Digital">
-                                <option value="Boutique">
-                            </datalist>
-                        </div>
+        <!-- Tabs -->
+        <div class="flex gap-2 mb-6 overflow-x-auto pb-1">
+            <button class="tab-btn active" onclick="showTab('produits', this)">Produits</button>
+            <button class="tab-btn" onclick="showTab('categories', this)">Categories</button>
+            <button class="tab-btn" onclick="showTab('commandes', this)">Commandes</button>
+            <button class="tab-btn" onclick="showTab('avis', this)">Avis</button>
+        </div>
 
-                        <input type="number" id="price" placeholder="Prix (FCFA)" required class="w-full p-4 bg-slate-50 rounded-2xl text-xs font-bold border-none outline-none focus:ring-2 focus:ring-sky-500">
-                        <textarea id="description" placeholder="Détails techniques..." required class="w-full p-4 bg-slate-50 rounded-2xl text-xs font-bold border-none outline-none focus:ring-2 focus:ring-sky-500 h-20"></textarea>
-                        <input type="text" id="image_url" placeholder="URL de l'image" required class="w-full p-4 bg-slate-50 rounded-2xl text-xs font-bold border-none outline-none focus:ring-2 focus:ring-sky-500">
-                        
-                        <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl">
-                            <input type="checkbox" id="is_star" class="w-4 h-4 accent-sky-500">
-                            <label for="is_star" class="text-[9px] font-black uppercase text-slate-500">Produit Vedette</label>
-                        </div>
-                        <button type="submit" id="btnSubmit" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:scale-[1.02] transition-all">Enregistrer le produit</button>
-                    </form>
-                </div>
-
-                <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100">
-                    <h2 class="text-[10px] font-black uppercase tracking-[0.2em] text-sky-500 mb-6 text-center">Nouveau Service</h2>
-                    <form id="serviceForm" class="space-y-3">
-                        <select id="servicePage" class="w-full p-4 bg-slate-50 rounded-2xl text-xs font-bold border-none outline-none">
-                            <option value="digital-details.html">Page Digital</option>
-                            <option value="btp-details.html">Page BTP</option>
-                            <option value="index.html">Page Accueil</option>
-                        </select>
-                        <input type="text" id="serviceNom" placeholder="Nom du service" required class="w-full p-4 bg-slate-50 rounded-2xl text-xs font-bold border-none outline-none">
-                        <button type="submit" class="w-full bg-sky-500 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest">Ajouter le service</button>
-                    </form>
-                </div>
-
-                <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100">
-                    <h2 class="text-[10px] font-black uppercase tracking-[0.2em] text-orange-400 mb-6 text-center">Flash Promotion</h2>
-                    <div class="space-y-3">
-                        <input type="text" id="promoTitre" placeholder="Libellé (ex: Promo Ramadan)" class="w-full p-4 bg-slate-50 rounded-2xl text-xs font-bold border-none outline-none">
-                        <input type="text" id="promoImg" placeholder="URL Image (1920x1080 conseillé)" class="w-full p-4 bg-slate-50 rounded-2xl text-xs font-bold border-none outline-none">
-                        <div class="grid grid-cols-2 gap-2">
+        <!-- TAB: Produits -->
+        <div id="tab-produits" class="section-panel active">
+            <div class="grid lg:grid-cols-12 gap-6">
+                <!-- Sidebar -->
+                <div class="lg:col-span-4 space-y-4">
+                    <div class="card-admin">
+                        <h2 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 text-center">Ajouter un produit</h2>
+                        <form id="productForm" class="space-y-3">
+                            <input type="text" id="name" placeholder="Nom du produit" required class="input-admin">
+                            <select id="categorie" required class="input-admin" style="appearance:auto;padding-right:1rem;">
+                                <option value="">Choisir une categorie...</option>
+                            </select>
+                            <input type="number" id="price" placeholder="Prix (FCFA)" required class="input-admin">
+                            <textarea id="description" placeholder="Description" required class="input-admin" style="min-height:80px"></textarea>
+                            <input type="text" id="image_url" placeholder="URL image principale" required class="input-admin">
                             <div>
-                                <label class="text-[8px] font-bold uppercase ml-2 text-slate-400">Début</label>
-                                <input type="date" id="promoStart" class="w-full p-3 bg-slate-50 rounded-xl text-[10px] font-bold border-none outline-none">
+                                <label class="text-[9px] font-bold uppercase text-slate-400 ml-1">Images additionnelles (JSON)</label>
+                                <textarea id="images_json" placeholder='["https://exemple.com/img2.jpg","https://exemple.com/img3.jpg"]' class="input-admin font-mono text-[11px]" style="min-height:60px"></textarea>
+                                <p class="text-[8px] text-slate-400 mt-1 ml-1">Tableau JSON d'URLs d'images (2-3 max)</p>
                             </div>
+                            <select id="statut_stock" required class="input-admin" style="appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=%2364748b%3E%3Cpath stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 12px center;background-size:16px;padding-right:40px;">
+                                <option value="en_stock" selected>En stock</option>
+                                <option value="rupture">Rupture de stock</option>
+                                <option value="sur_commande">Sur commande</option>
+                            </select>
                             <div>
-                                <label class="text-[8px] font-bold uppercase ml-2 text-slate-400">Fin</label>
-                                <input type="date" id="promoEnd" class="w-full p-3 bg-slate-50 rounded-xl text-[10px] font-bold border-none outline-none">
+                                <label class="text-[9px] font-bold uppercase text-slate-400 ml-1">Variantes (JSON)</label>
+                                <textarea id="variantes" placeholder='[{"nom":"XL","prix":5000}]' class="input-admin font-mono text-[11px]" style="min-height:60px"></textarea>
+                                <p class="text-[8px] text-slate-400 mt-1 ml-1">Format JSON: [{"nom":"Taille","prix":0}]</p>
                             </div>
-                        </div>
-                        <button onclick="ajouterPromo()" class="w-full bg-orange-400 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest">Publier sur le site</button>
+                            <div class="flex items-center gap-2 px-2">
+                                <input type="checkbox" id="is_star" class="w-4 h-4 accent-sky-500 rounded">
+                                <label for="is_star" class="text-[10px] font-bold text-slate-600 uppercase">Produit Vedette</label>
+                            </div>
+                            <button type="submit" id="btnSubmit" class="w-full bg-slate-900 text-white py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-sky-500 transition">Enregistrer</button>
+                        </form>
+                    </div>
+                </div>
+                <!-- Main -->
+                <div class="lg:col-span-8">
+                    <div class="card-admin">
+                        <h2 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Inventaire</h2>
+                        <div id="stockList" class="space-y-3 max-h-[500px] overflow-y-auto pr-1"></div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="lg:col-span-8 space-y-8">
-                
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-                    <h2 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Inventaire des Produits</h2>
-                    <div id="stockList" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2"></div>
-                </div>
-
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-                    <h2 class="text-[10px] font-black uppercase tracking-[0.2em] text-orange-400 mb-6 italic">Promotions en diffusion (Carrousel Index)</h2>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <tbody id="promoList"></tbody>
-                        </table>
+        <!-- TAB: Categories -->
+        <div id="tab-categories" class="section-panel">
+            <div class="grid lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-4">
+                    <div class="card-admin">
+                        <h2 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 text-center">Nouvelle categorie</h2>
+                        <form id="categoryForm" class="space-y-3">
+                            <input type="text" id="cat-nom" placeholder="Nom (ex: Parfums)" required class="input-admin">
+                            <input type="text" id="cat-filtre" placeholder="Filtre (ex: parfums)" required class="input-admin">
+                            <input type="number" id="cat-ordre" placeholder="Ordre d'affichage" value="0" class="input-admin">
+                            <label class="flex items-center gap-2 px-2">
+                                <input type="checkbox" id="cat-active" checked class="w-4 h-4 accent-sky-500 rounded">
+                                <span class="text-[10px] font-bold text-slate-600 uppercase">Active</span>
+                            </label>
+                            <button type="submit" id="btnCatSubmit" class="w-full bg-slate-900 text-white py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-sky-500 transition">Ajouter</button>
+                        </form>
                     </div>
                 </div>
-
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Flux des Commandes</h2>
-                        <button onclick="fetchOrders()" class="bg-slate-50 text-sky-500 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest">Actualiser</button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead>
-                                <tr class="text-[9px] font-black uppercase text-slate-400 border-b border-slate-50">
-                                    <th class="pb-4">Facture</th>
-                                    <th class="pb-4">Client</th>
-                                    <th class="pb-4">Livreur</th>
-                                    <th class="pb-4 text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="orderList"></tbody>
-                        </table>
+                <div class="lg:col-span-8">
+                    <div class="card-admin">
+                        <h2 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Categories actives</h2>
+                        <div id="categoryList" class="space-y-2 max-h-[500px] overflow-y-auto pr-1"></div>
                     </div>
                 </div>
+            </div>
+        </div>
 
+        <!-- TAB: Commandes -->
+        <div id="tab-commandes" class="section-panel">
+            <div class="card-admin">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-[10px] font-black uppercase tracking-widest text-slate-400">Commandes</h2>
+                    <button onclick="fetchOrders()" class="text-sky-500 text-[10px] font-black uppercase bg-sky-50 px-3 py-1.5 rounded-full">Actualiser</button>
+                </div>
+                <div id="orderList" class="space-y-2 max-h-[500px] overflow-y-auto pr-1"></div>
+            </div>
+        </div>
+
+        <!-- TAB: Avis -->
+        <div id="tab-avis" class="section-panel">
+            <div class="card-admin">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-[10px] font-black uppercase tracking-widest text-slate-400">Avis clients</h2>
+                    <button onclick="fetchAvis()" class="text-sky-500 text-[10px] font-black uppercase bg-sky-50 px-3 py-1.5 rounded-full">Actualiser</button>
+                </div>
+                <div id="avisList" class="space-y-2 max-h-[500px] overflow-y-auto pr-1"></div>
             </div>
         </div>
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://whcpugnkldbmuqzgqxbe.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk'; 
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const SUPABASE_URL = 'https://whcpugnkldbmuqzgqxbe.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- DYNAMISME DES CATÉGORIES ---
-        async function refreshCategories() {
-            const { data } = await _supabase.from('PRODUITS').select('categorie');
-            if (data) {
-                const uniqueCats = [...new Set(data.map(i => i.categorie))];
-                document.getElementById('categoryOptions').innerHTML = uniqueCats.map(c => `<option value="${c}">`).join('');
-            }
+    // ========== TABS ==========
+    function showTab(tabId, btn) {
+        document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        btn.classList.add('active');
+        if (tabId === 'categories') fetchCategories();
+        if (tabId === 'avis') fetchAvis();
+    }
+
+    // ========== CATEGORIES ==========
+    // Categories de fallback (affichees si Supabase ne repond pas)
+    const defaultCategories = [
+        { id: 1, nom: 'Parfums', filtre: 'parfums', ordre: 1, active: true },
+        { id: 2, nom: 'Tech', filtre: 'tech', ordre: 2, active: true },
+        { id: 3, nom: 'Mode', filtre: 'mode', ordre: 3, active: true },
+        { id: 4, nom: 'Chaussures', filtre: 'chaussures', ordre: 4, active: true },
+        { id: 5, nom: 'Sacs', filtre: 'sacs', ordre: 5, active: true },
+        { id: 6, nom: 'Montres', filtre: 'montres', ordre: 6, active: true },
+        { id: 7, nom: 'Maison', filtre: 'maison', ordre: 7, active: true }
+    ];
+    let categoriesData = [];
+
+    async function fetchCategories() {
+        const { data, error } = await _supabase.from('categories').select('*').order('ordre', { ascending: true });
+
+        // Utiliser les donnees Supabase, ou fallback local si erreur/vide
+        categoriesData = (data && data.length > 0) ? data : defaultCategories;
+
+        if (error) { 
+            console.warn('[Admin] Erreur Supabase categories:', error.message, '- Utilisation des categories locales');
         }
 
-        // --- GESTION DU STOCK ---
-        async function fetchProducts() {
-            const { data, error } = await _supabase.from('PRODUITS').select('*').order('id', { ascending: false });
-            if (error) return console.error(error);
-            const stockList = document.getElementById('stockList');
-            stockList.innerHTML = data.map(item => `
-                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-[1.5rem] border border-slate-100">
-                    <div class="flex items-center gap-4">
-                        <div class="relative">
-                            <img src="${item.image_url}" class="w-12 h-12 object-cover rounded-xl shadow-md">
-                            ${item.is_star ? '<span class="absolute -top-2 -left-2 bg-yellow-400 w-4 h-4 rounded-full border-2 border-white"></span>' : ''}
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-black uppercase leading-none">${item.name}</p>
-                            <p class="text-sky-500 text-[9px] font-bold mt-1">${item.categorie}</p>
-                            <p class="text-slate-400 text-[9px] font-bold">${item.price} FCFA</p>
-                        </div>
+        // Populate select in product form
+        const select = document.getElementById('categorie');
+        select.innerHTML = '<option value="">Choisir une categorie...</option>';
+        categoriesData.forEach(c => {
+            select.innerHTML += `<option value="${c.nom}">${c.nom}</option>`;
+        });
+
+        // Render list
+        const list = document.getElementById('categoryList');
+        list.innerHTML = categoriesData.map(c => `
+            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center text-sky-600 font-black text-sm">${(c.nom || '?').charAt(0)}</div>
+                    <div>
+                        <p class="text-[11px] font-black">${c.nom}</p>
+                        <p class="text-[10px] text-slate-400 font-bold">Filtre: ${c.filtre || c.nom.toLowerCase()} | Ordre: ${c.ordre !== null ? c.ordre : '-'}</p>
+                        ${c.active !== false ? '<span class="text-[9px] font-black text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full">Active</span>' : '<span class="text-[9px] font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Inactive</span>'}
                     </div>
-                    <button onclick="deleteProduct(${item.id})" class="bg-white p-2 rounded-lg text-red-400 hover:text-red-600 transition shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </div>
+                <div class="flex gap-1">
+                    <button onclick="toggleCategory(${c.id}, ${c.active === false ? true : false})" class="p-2 rounded-xl hover:bg-sky-100 text-sky-500" title="${c.active !== false ? 'Desactiver' : 'Activer'}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${c.active !== false ? 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636' : 'M15 12a3 3 0 11-6 0 3 3 0 016 0z'}"/></svg>
+                    </button>
+                    <button onclick="deleteCategory(${c.id})" class="p-2 rounded-xl hover:bg-red-100 text-red-400 hover:text-red-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                     </button>
                 </div>
-            `).join('');
-            refreshCategories();
-        }
-
-        document.getElementById('productForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSubmit');
-            btn.innerText = "TRANSFERT EN COURS...";
-            const newProduct = {
-                name: document.getElementById('name').value,
-                price: parseInt(document.getElementById('price').value),
-                description: document.getElementById('description').value,
-                categorie: document.getElementById('categorie').value,
-                image_url: document.getElementById('image_url').value,
-                is_star: document.getElementById('is_star').checked
-            };
-            await _supabase.from('PRODUITS').insert([newProduct]);
-            document.getElementById('productForm').reset();
-            btn.innerText = "Enregistrer le produit";
-            fetchProducts();
-        };
-
-        window.deleteProduct = async (id) => {
-            if(confirm("Confirmer la suppression de cet article ?")) {
-                await _supabase.from('PRODUITS').delete().eq('id', id);
-                fetchProducts();
-            }
-        };
-
-        // --- GESTION DES SERVICES ---
-        document.getElementById('serviceForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const data = {
-                nom: document.getElementById('serviceNom').value,
-                page_cible: document.getElementById('servicePage').value
-            };
-            await _supabase.from('SERVICES').insert([data]);
-            alert("Service ajouté avec succès !");
-            document.getElementById('serviceForm').reset();
-        };
-
-        // --- PROMOTIONS AVEC DATES ---
-        async function ajouterPromo() {
-            const titre = document.getElementById('promoTitre').value;
-            const img = document.getElementById('promoImg').value;
-            const start = document.getElementById('promoStart').value;
-            const end = document.getElementById('promoEnd').value;
-
-            if(!titre || !img || !start || !end) return alert("Veuillez remplir tous les champs de la promotion.");
-
-            const { error } = await _supabase.from('PROMOTIONS').insert([{ 
-                titre: titre, 
-                image_url: img,
-                date_debut: start,
-                date_fin: end
-            }]);
-            
-            if (error) {
-                console.error(error);
-                alert("Erreur lors de l'ajout : " + error.message);
-            } else {
-                alert("Promotion programmée ! Elle sera visible sur le carrousel.");
-                // Reset des champs
-                document.getElementById('promoTitre').value = '';
-                document.getElementById('promoImg').value = '';
-                document.getElementById('promoStart').value = '';
-                document.getElementById('promoEnd').value = '';
-                fetchPromos();
-            }
-        }
-
-      // --- PROMOTIONS (CORRIGÉ EN MINUSCULES) ---
-async function ajouterPromo() {
-    const titre = document.getElementById('promoTitre').value;
-    const img = document.getElementById('promoImg').value;
-    const start = document.getElementById('promoStart').value;
-    const end = document.getElementById('promoEnd').value;
-
-    if(!titre || !img || !start || !end) return alert("Veuillez remplir tous les champs.");
-
-    // Changement ici : 'promotions' au lieu de 'PROMOTIONS'
-    const { error } = await _supabase.from('promotions').insert([{ 
-        titre: titre, 
-        image_url: img,
-        date_debut: start,
-        date_fin: end
-    }]);
-    
-    if (error) {
-        console.error("Erreur Supabase :", error);
-        alert("Erreur : " + error.message);
-    } else {
-        alert("Promotion publiée !");
-        document.getElementById('promoTitre').value = '';
-        document.getElementById('promoImg').value = '';
-        fetchPromos();
-    }
-}
-
-async function fetchPromos() {
-    // Changement ici : 'promotions' au lieu de 'PROMOTIONS'
-    const { data: promos, error } = await _supabase.from('promotions').select('*').order('id', { ascending: false });
-    if (error) return console.error(error);
-    
-    const promoList = document.getElementById('promoList');
-    if (!promos || promos.length === 0) {
-        promoList.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-slate-400 text-[10px]">Aucune promo</td></tr>';
-        return;
+            </div>
+        `).join('');
     }
 
-    promoList.innerHTML = promos.map(p => `
-        <tr class="border-b border-slate-50 text-[11px] group">
-            <td class="py-4"><img src="${p.image_url}" class="w-16 h-10 object-cover rounded-xl shadow-sm"></td>
-            <td class="py-4 px-4">
-                <p class="font-black uppercase text-[10px]">${p.titre}</p>
-                <p class="text-[8px] text-orange-400 font-bold">Du ${new Date(p.date_debut).toLocaleDateString()} au ${new Date(p.date_fin).toLocaleDateString()}</p>
-            </td>
-            <td class="py-4 text-right">
-                <button onclick="deletePromo(${p.id})" class="text-red-400 font-black uppercase text-[9px] bg-red-50 px-3 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition">Supprimer</button>
-            </td>
-        </tr>
-    `).join('');
-}
+    document.getElementById('categoryForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnCatSubmit');
+        const nom = document.getElementById('cat-nom').value.trim();
+        const filtre = document.getElementById('cat-filtre').value.trim();
 
-window.deletePromo = async (id) => {
-    if(confirm("Retirer cette promotion ?")) {
-        // Changement ici : 'promotions' au lieu de 'PROMOTIONS'
-        await _supabase.from('promotions').delete().eq('id', id);
-        fetchPromos();
-    }
-};
-
-        // --- COMMANDES & CA ---
-        async function fetchOrders() {
-            const { data: commandes } = await _supabase.from('commande').select('*').order('created_at', { ascending: false });
-            const { data: livreurs } = await _supabase.from('livreur').select('nom');
-            
-            let totalCA = 0;
-            const orderList = document.getElementById('orderList');
-            
-            if (!commandes) return;
-
-            orderList.innerHTML = commandes.map(o => {
-                totalCA += parseInt(o.montant_total || 0);
-                return `
-                <tr class="border-b border-slate-50 text-[11px] hover:bg-slate-50 transition">
-                    <td class="py-5 font-bold text-sky-500 uppercase">#${o.order_id}</td>
-                    <td class="py-5">
-                        <p class="font-black uppercase">${o.client_nom || 'Anonyme'}</p>
-                        <p class="text-slate-400 text-[9px]">${o.client_phone || 'Pas de numéro'}</p>
-                    </td>
-                    <td class="py-5">
-                        <select onchange="updateLivreur(${o.id}, this.value)" class="bg-white border border-slate-100 p-2 rounded-xl font-bold uppercase text-[8px] shadow-sm outline-none">
-                            <option value="">En attente...</option>
-                            ${livreurs ? livreurs.map(l => `<option value="${l.nom}" ${o.livreur === l.nom ? 'selected' : ''}>${l.nom}</option>`).join('') : ''}
-                        </select>
-                    </td>
-                    <td class="py-5 text-right">
-                        <button onclick="sendWhatsApp('${o.client_phone}', '${o.order_id}')" class="bg-green-500 text-white px-4 py-2 rounded-full font-black uppercase text-[8px] shadow-lg shadow-green-100">Envoyer Ticket</button>
-                    </td>
-                </tr>
-            `}).join('');
-
-            document.getElementById('stats-ca').innerHTML = `CA GLOBAL : <span class="text-sky-500 underline">${totalCA.toLocaleString()} FCFA</span>`;
+        if (!nom || !filtre) {
+            alert('Veuillez remplir le nom et le filtre de la categorie');
+            return;
         }
 
-        // --- UTILITAIRES MANQUANTS ---
-        window.updateLivreur = async (id, nomLivreur) => {
-            const { error } = await _supabase.from('commande').update({ livreur: nomLivreur }).eq('id', id);
-            if (!error) alert("Livreur assigné avec succès !");
-            else alert("Erreur lors de l'assignation.");
-        };
+        btn.innerText = 'En cours...';
+        btn.disabled = true;
 
-        window.sendWhatsApp = (phone, orderId) => {
-            if(!phone) return alert("Numéro de téléphone manquant.");
-            const message = encodeURIComponent(`Bonjour, votre commande #${orderId} sur YARID est en cours de traitement.`);
-            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
-        };
+        const { data, error } = await _supabase.from('categories').insert([{
+            nom: nom,
+            filtre: filtre,
+            ordre: parseInt(document.getElementById('cat-ordre').value) || 0,
+            active: document.getElementById('cat-active').checked
+        }]).select();
 
-        // Lancement initial
+        btn.innerText = 'Ajouter';
+        btn.disabled = false;
+
+        if (error) {
+            console.error('[Admin] Erreur ajout categorie:', error);
+            alert('Erreur lors de l\'ajout: ' + error.message + '\n\nVerifiez les permissions (RLS) de votre table Supabase.');
+            return;
+        }
+
+        alert('Categorie "' + nom + '" ajoutee avec succes !');
+        document.getElementById('categoryForm').reset();
+        document.getElementById('cat-ordre').value = '0';
+        document.getElementById('cat-active').checked = true;
+        fetchCategories();
+    };
+
+    window.toggleCategory = async (id, active) => {
+        const { error } = await _supabase.from('categories').update({ active }).eq('id', id);
+        if (error) { alert('Erreur: ' + error.message); return; }
+        fetchCategories();
+    };
+
+    window.deleteCategory = async (id) => {
+        if (confirm('Supprimer cette categorie ?')) {
+            const { error } = await _supabase.from('categories').delete().eq('id', id);
+            if (error) { alert('Erreur suppression: ' + error.message); return; }
+            fetchCategories();
+        }
+    };
+
+    // ========== PRODUITS ==========
+    async function fetchProducts() {
+        const { data, error } = await _supabase.from('PRODUITS').select('*').order('id', { ascending: false });
+        if (error) { console.error(error); return; }
+        const list = document.getElementById('stockList');
+        if (!data || !data.length) { list.innerHTML = '<p class="text-center text-slate-400 text-xs py-4">Aucun produit</p>'; return; }
+        list.innerHTML = data.map(item => {
+            let badge = '';
+            if (item.statut_stock === 'rupture') badge = '<span class="text-[9px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded-full">✕ Rupture</span>';
+            else if (item.statut_stock === 'sur_commande') badge = '<span class="text-[9px] font-black text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full">⏳ Sur cmd</span>';
+            else badge = '<span class="text-[9px] font-black text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full">● En stock</span>';
+            const hasVariants = item.variantes && item.variantes.length > 0 ? '<span class="text-[9px] text-violet-500 font-bold ml-1">🎨 ' + item.variantes.length + ' var.</span>' : '';
+            return `
+            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl">
+                <div class="flex items-center gap-3">
+                    <img src="${item.image_url}" class="w-12 h-12 object-cover rounded-xl" onerror="this.style.display='none'">
+                    <div>
+                        <p class="text-[11px] font-black uppercase">${item.name}</p>
+                        <p class="text-[10px] text-slate-400 font-bold">${(item.price || 0).toLocaleString()} FCFA | ${item.categorie || '-'}</p>
+                        <div class="flex items-center gap-1 mt-0.5">
+                            ${badge}
+                            ${hasVariants}
+                            <span class="text-[9px] text-slate-400 font-bold">👁 ${item.vues || 0}</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="deleteProduct(${item.id})" class="text-red-400 hover:text-red-600 p-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+            </div>`;
+        }).join('');
+    }
+
+    document.getElementById('productForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmit');
+
+        // Validation des champs obligatoires
+        const name = document.getElementById('name').value.trim();
+        const price = parseInt(document.getElementById('price').value);
+        const categorie = document.getElementById('categorie').value;
+        const image_url = document.getElementById('image_url').value.trim();
+
+        if (!name) { alert('Veuillez entrer le nom du produit'); return; }
+        if (!price || price <= 0) { alert('Veuillez entrer un prix valide'); return; }
+        if (!categorie) { alert('Veuillez choisir une categorie'); return; }
+        if (!image_url) { alert('Veuillez entrer l\'URL de l\'image'); return; }
+
+        btn.innerText = 'En cours...';
+        btn.disabled = true;
+
+        let variantes = null;
+        const vRaw = document.getElementById('variantes').value.trim();
+        if (vRaw) { try { variantes = JSON.parse(vRaw); } catch(err) { alert('JSON variantes invalide'); btn.innerText='Enregistrer'; btn.disabled=false; return; } }
+        let images = null;
+        const iRaw = document.getElementById('images_json').value.trim();
+        if (iRaw) { try { images = JSON.parse(iRaw); } catch(err) { alert('JSON images invalide'); btn.innerText='Enregistrer'; btn.disabled=false; return; } }
+
+        const { data, error } = await _supabase.from('PRODUITS').insert([{
+            name: name,
+            price: price,
+            description: document.getElementById('description').value.trim(),
+            categorie: categorie,
+            image_url: image_url,
+            images: images,
+            statut_stock: document.getElementById('statut_stock').value,
+            variantes: variantes,
+            is_star: document.getElementById('is_star').checked,
+            vues: 0
+        }]).select();
+
+        btn.innerText = 'Enregistrer';
+        btn.disabled = false;
+
+        if (error) {
+            console.error('[Admin] Erreur ajout produit:', error);
+            alert('Erreur lors de l\'ajout du produit: ' + error.message + '\n\nVerifiez que:\n1. Vous etes connecte a Supabase\n2. Les permissions (RLS) permettent l\'insertion\n3. Tous les champs obligatoires sont remplis');
+            return;
+        }
+
+        alert('Produit "' + name + '" ajoute avec succes !');
+        document.getElementById('productForm').reset();
         fetchProducts();
-        fetchOrders();
-        fetchPromos();
+    };
+
+    window.deleteProduct = async (id) => {
+        if (confirm('Supprimer ?')) {
+            const { error } = await _supabase.from('PRODUITS').delete().eq('id', id);
+            if (error) { alert('Erreur suppression: ' + error.message); return; }
+            fetchProducts();
+        }
+    };
+
+    // ========== COMMANDES ==========
+    async function fetchOrders() {
+        const { data } = await _supabase.from('commande').select('*').order('created_at', { ascending: false });
+        const list = document.getElementById('orderList');
+        if (!data || !data.length) { list.innerHTML = '<p class="text-center text-slate-400 text-xs py-4">Aucune commande</p>'; return; }
+        let total = 0;
+        list.innerHTML = data.map(o => { total += parseInt(o.montant_total || 0); return `
+            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl text-[11px]">
+                <div>
+                    <p class="font-black text-sky-500 uppercase">#${o.order_id}</p>
+                    <p class="text-slate-500">${o.client_nom || 'Anonyme'} | ${(o.montant_total || 0).toLocaleString()} FCFA</p>
+                    <p class="text-[9px] text-slate-400">${o.statut || 'en_attente'}</p>
+                </div>
+                <button onclick="window.open('https://wa.me/${o.client_phone || '237655959284'}?text=Commande%20'+encodeURIComponent('${o.order_id}'),'_blank')" class="bg-emerald-500 text-white px-3 py-1.5 rounded-full text-[9px] font-black uppercase">WhatsApp</button>
+            </div>`; }).join('');
+        document.getElementById('stats-ca').innerHTML = 'CA: <span class="text-sky-500 font-black">' + total.toLocaleString() + ' FCFA</span>';
+    }
+
+    // ========== AVIS ==========
+    async function fetchAvis() {
+        const { data, error } = await _supabase.from('avis').select('*').order('created_at', { ascending: false }).limit(50);
+        if (error) { console.error(error); return; }
+        const list = document.getElementById('avisList');
+        if (!data || !data.length) { list.innerHTML = '<p class="text-center text-slate-400 text-xs py-4">Aucun avis</p>'; return; }
+        list.innerHTML = data.map(a => {
+            const stars = '★'.repeat(a.rating || a.note || 0) + '☆'.repeat(5 - (a.rating || a.note || 0));
+            return `
+            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl text-[11px]">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                        <span class="text-yellow-400 text-sm">${stars}</span>
+                        <span class="font-bold text-slate-700">${a.client_nom || 'Client'}</span>
+                    </div>
+                    <p class="text-slate-500 mt-1">${a.comment || a.commentaire || ''}</p>
+                    <p class="text-[9px] text-slate-400 mt-0.5">Produit #${a.produit_id} | ${a.created_at ? new Date(a.created_at).toLocaleDateString('fr-FR') : ''}</p>
+                </div>
+                <button onclick="deleteAvis(${a.id})" class="text-red-400 hover:text-red-600 p-2 ml-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+            </div>`;
+        }).join('');
+    }
+
+    window.deleteAvis = async (id) => {
+        if (confirm('Supprimer cet avis ?')) { await _supabase.from('avis').delete().eq('id', id); fetchAvis(); }
+    };
+
+    // Init
+    fetchProducts();
+    fetchOrders();
+    fetchCategories();
     </script>
 </body>
 </html>

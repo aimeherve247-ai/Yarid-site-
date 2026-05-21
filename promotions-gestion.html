@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Gérer les Promotions | YARID</title>
     
     <link rel="manifest" href="manifest.json">
@@ -24,10 +24,17 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
         
+        :root {
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
         
         body { 
             background: #f1f5f9; 
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
         }
         
         .btn-primary { 

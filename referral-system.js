@@ -136,6 +136,79 @@ async function loginParrain(phone) {
 }
 
 /**
+ * Inscription directe sans OTP
+ * Cree immediatement un compte parrain avec statut actif
+ */
+async function registerParrainDirectly(phone, nom) {
+  const validation = validatePhoneNumber(phone);
+  if (!validation.valid) {
+    return { success: false, error: validation.error };
+  }
+
+  const formattedPhone = validation.formatted;
+  const userName = nom && nom.trim() ? nom.trim() : 'Parrain';
+
+  try {
+    const { data: existing } = await referralClient
+      .from('parrainage')
+      .select('id, telephone_parrain, code_ref')
+      .eq('telephone_parrain', formattedPhone)
+      .single();
+
+    if (existing) {
+      return { success: false, error: 'Ce numero existe deja. Utilisez \'Se connecter\'.' };
+    }
+
+    let code = generateReferralCode();
+    let isUnique = false;
+    let attempts = 0;
+    while (!isUnique && attempts < 10) {
+      const { data: dup } = await referralClient
+        .from('parrainage')
+        .select('id')
+        .eq('code_ref', code)
+        .single();
+      if (!dup) {
+        isUnique = true;
+      } else {
+        code = generateReferralCode();
+        attempts++;
+      }
+    }
+
+    const { data, error } = await referralClient
+      .from('parrainage')
+      .insert([{
+        telephone_parrain: formattedPhone,
+        nom: userName,
+        code_ref: code,
+        statut: 'active',
+        is_active: true,
+        date_creation: new Date().toISOString(),
+        date_activation: new Date().toISOString()
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    localStorage.setItem('yarid_user_phone', formattedPhone);
+    localStorage.setItem('yarid_referral_code', code);
+
+    return {
+      success: true,
+      code: code,
+      message: 'Compte cree avec succes ! Votre code: ' + code,
+      parrain: data
+    };
+
+  } catch (e) {
+    console.error('[Referral] Erreur inscription directe:', e);
+    return { success: false, error: 'Erreur lors de la creation du compte' };
+  }
+}
+
+/**
  * Demande la creation d'un compte parrain
  * Modification #5: validation automatique
  */
@@ -476,6 +549,7 @@ window.referralSystem = {
   requestParrainAccount,
   verifyOTPAndCreateAccount,
   loginParrain,
+  registerParrainDirectly,
   getParrainByCode,
   registerReferee,
   creditParrainWallet,
@@ -489,4 +563,5 @@ window.referralSystem = {
 window.requestOTP = requestParrainAccount;
 window.verifyOTP = verifyOTPAndCreateAccount;
 window.loginParrain = loginParrain;
+window.registerParrainDirectly = registerParrainDirectly;
 window.resendOTPCode = resendOTP;

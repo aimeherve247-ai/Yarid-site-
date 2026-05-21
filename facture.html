@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>YARID | Facture</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: #f8fafc; margin: 0; }
+        
+        .app-layout { display: flex; flex-direction: column; min-height: 100vh; }
+        @media (min-width: 1024px) { .app-layout { flex-direction: row; height: 100vh; overflow: hidden; } }
+
+        .sidebar { width: 100%; background: #0f172a; border-bottom: 1px solid #1e293b; padding: 1.5rem; flex-shrink: 0; }
+        @media (min-width: 1024px) { .sidebar { width: 380px; height: 100vh; border-right: 1px solid #1e293b; padding: 2rem; overflow-y: auto; } }
+
+        .preview-area { flex: 1; background: #1e293b; padding: 1rem; display: flex; justify-content: center; align-items: flex-start; overflow: auto; }
+
+        #facture-wrapper { transform-origin: top center; transition: transform 0.3s ease; margin-bottom: 50px; }
+        #facture-pdf {
+            background: white; color: #0f172a; width: 794px; min-height: 1123px;
+            padding: 4rem; position: relative; overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .watermark-bg {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 140px; font-weight: 900; color: rgba(15, 23, 42, 0.03);
+            pointer-events: none; z-index: 0; white-space: nowrap; font-style: italic;
+        }
+
+        .input-box { width: 100%; background: #020617; border: 1px solid #334155; padding: 0.7rem; border-radius: 0.6rem; font-size: 0.85rem; color: white; outline: none; transition: border-color 0.2s; }
+        .input-box:focus { border-color: #0ea5e9; }
+        .label-style { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 0.3rem; display: block; }
+        
+        .btn { width: 100%; padding: 0.8rem; border-radius: 0.6rem; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; cursor: pointer; transition: 0.2s; border: none; }
+        .btn-nav { background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); padding: 0.5rem; font-size: 0.6rem; }
+        .btn-nav:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        /* Statut badges */
+        .statut-badge { display: inline-block; padding: 0.4rem 1rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+        .statut-en_attente      { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
+        .statut-paye            { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+        .statut-a_regler        { background: #dbeafe; color: #1e40af; border: 1px solid #60a5fa; }
+        .statut-en_preparation  { background: #ede9fe; color: #5b21b6; border: 1px solid #a78bfa; }
+        .statut-en_livraison    { background: #ffedd5; color: #9a3412; border: 1px solid #fb923c; }
+        .statut-livre           { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+        .statut-annule          { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+
+        /* Safe area mobile */
+        @supports (padding-top: env(safe-area-inset-top)) {
+            .sidebar { padding-top: calc(1.5rem + env(safe-area-inset-top)); }
+        }
+
+        /* Loader */
+        .loader { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.1); border-top-color: #0ea5e9; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Pulse animation for live status */
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.5); }
+        }
+        .pulse-live { animation: pulse-dot 2s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="flex gap-2 mb-6">
+                <button onclick="window.location.href='index.html'" class="btn btn-nav flex-1 uppercase">← Boutique</button>
+                <button onclick="window.location.href='suivi.html'" class="btn btn-nav flex-1 uppercase">Suivi</button>
+                <button onclick="window.location.href='livreur-app.html'" class="btn btn-nav flex-1 uppercase">Livreur</button>
+            </div>
+
+            <div class="mb-6">
+                <h1 class="text-2xl font-black italic tracking-tighter uppercase">YARID<span class="text-sky-500">.</span></h1>
+                <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Module Facturation</p>
+            </div>
+
+            <!-- Info commande chargée -->
+            <div id="order-info" class="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hidden">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 pulse-live"></div>
+                    <p class="text-xs font-bold text-emerald-400 uppercase">Commande chargée</p>
+                </div>
+                <p class="text-[10px] text-emerald-300/70 mt-1" id="order-info-text">ID: YRD-0000</p>
+            </div>
+
+            <!-- Loader -->
+            <div id="loader" class="flex items-center justify-center gap-3 py-8 hidden">
+                <div class="loader"></div>
+                <p class="text-xs font-bold text-slate-500 uppercase">Chargement...</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="label-style">N° Commande</label>
+                        <input type="text" id="in_id" placeholder="YRD-001" class="input-box" oninput="updateUI()">
+                    </div>
+                    <div>
+                        <label class="label-style">Statut</label>
+                        <select id="in_status" class="input-box" onchange="updateUI()">
+                            <option value="en_attente">En attente</option>
+                            <option value="paye">Paye (Marchand)</option>
+                            <option value="a_regler_livraison">A regler livraison</option>
+                            <option value="en_preparation">En preparation</option>
+                            <option value="en_livraison">En livraison</option>
+                            <option value="livre">Livre</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="label-style">Client</label>
+                        <input type="text" id="in_nom" placeholder="Nom complet" class="input-box" oninput="updateUI()">
+                    </div>
+                    <div>
+                        <label class="label-style">WhatsApp</label>
+                        <input type="tel" id="in_tel" placeholder="2376XXXXXXXX" class="input-box" oninput="updateUI()">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="label-style">Adresse de livraison</label>
+                    <input type="text" id="in_adresse" placeholder="Yaounde, Cameroun" class="input-box" oninput="updateUI()">
+                </div>
+
+                <div>
+                    <label class="label-style">Articles (un par ligne)</label>
+                    <textarea id="in_items" rows="4" placeholder="iPhone 15 Pro - 650000 FCFA x1&#10;AirPods Pro 2 - 150000 FCFA x1" class="input-box" oninput="updateUI()"></textarea>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                    <div><label class="label-style">Sous-total</label><input type="number" id="in_sous_total" class="input-box" value="0" oninput="updateUI()"></div>
+                    <div><label class="label-style">Livraison</label><input type="number" id="in_livraison" class="input-box" value="0" oninput="updateUI()"></div>
+                    <div><label class="label-style">Remise</label><input type="number" id="in_promo" class="input-box text-orange-400" value="0" oninput="updateUI()"></div>
+                </div>
+
+                <div>
+                    <label class="label-style">Mode de paiement</label>
+                    <select id="in_paiement" class="input-box" onchange="updateUI()">
+                        <option value="livraison">Paiement a la livraison</option>
+                        <option value="mobile_money">Mobile Money</option>
+                        <option value="carte">Carte bancaire</option>
+                        <option value="wallet">Wallet YARID</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-2 pt-4 border-t border-white/5">
+                    <button onclick="saveToSupabase(this)" class="btn bg-emerald-500 text-white hover:bg-emerald-600">Enregistrer Commande</button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="downloadPDF()" class="btn bg-sky-500 text-white hover:bg-sky-600">Telecharger PDF</button>
+                        <button onclick="sharePDF()" class="btn border border-slate-700 text-slate-400 hover:text-white">Partager PDF</button>
+                    </div>
+                    <button onclick="sendWhatsApp()" class="btn border border-emerald-500/50 text-emerald-500 font-extrabold flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.067 2.877 1.215 3.076.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        Envoyer WhatsApp
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Preview -->
+        <main class="preview-area">
+            <div id="facture-wrapper">
+                <div id="facture-pdf">
+                    <div class="watermark-bg">YARID GROUP</div>
+
+                    <!-- EN-TETE -->
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start border-b-4 border-slate-900 pb-6 mb-6">
+                            <div>
+                                <h2 class="text-5xl font-black italic tracking-tighter uppercase text-slate-900 leading-none">YARID<span class="text-sky-500">.</span></h2>
+                                <p class="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-400 mt-2">Logistics & Technology</p>
+                                <p class="text-[10px] text-slate-400 mt-1">Douala / Yaounde, Cameroun</p>
+                                <p class="text-[10px] font-bold text-slate-900 mt-1">+237 655 959 284</p>
+                            </div>
+                            <div class="text-right">
+                                <div id="out_statut_badge" class="statut-badge statut-en_attente mb-3">EN ATTENTE</div>
+                                <p class="font-black text-slate-900 text-lg">Facture <span id="out_id">---</span></p>
+                                <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase">Date: <span id="out_date" class="text-slate-900"></span></p>
+                                <p class="text-[10px] text-slate-400 mt-1">Mode: <span id="out_paiement" class="text-slate-900 font-bold">Paiement a la livraison</span></p>
+                            </div>
+                        </div>
+
+                        <!-- INFOS CLIENT -->
+                        <div class="grid grid-cols-2 gap-8 mb-8">
+                            <div class="text-[11px] space-y-1">
+                                <p class="font-black text-slate-300 uppercase tracking-widest text-[10px] mb-2">Emetteur</p>
+                                <p class="font-bold text-slate-900 text-sm">YARID GROUP SARL</p>
+                                <p class="text-slate-500">Douala / Yaounde, Cameroun</p>
+                                <p class="text-slate-500">RCCM: CM-DLA-2024-B-XXXX</p>
+                                <p class="font-black text-slate-900">+237 655 959 284</p>
+                            </div>
+                            <div class="text-[11px] text-right space-y-1">
+                                <p class="font-black text-sky-500 uppercase tracking-widest text-[10px] mb-2">Client</p>
+                                <p id="out_nom" class="font-black text-slate-900 text-lg uppercase leading-tight">---</p>
+                                <p id="out_tel" class="font-bold text-slate-500">---</p>
+                                <p id="out_adresse" class="text-slate-400 text-[10px] max-w-[200px] ml-auto">---</p>
+                            </div>
+                        </div>
+
+                        <!-- TABLEAU DES ARTICLES -->
+                        <div class="mb-8">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="text-[10px] font-black uppercase text-slate-400 border-b-2 border-slate-200">
+                                        <th class="py-3 text-left w-[60%]">Designation</th>
+                                        <th class="py-3 text-center">Qte</th>
+                                        <th class="py-3 text-right">Prix Unitaire</th>
+                                        <th class="py-3 text-right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="out_items_body" class="text-xs">
+                                    <tr class="border-b border-slate-100">
+                                        <td class="py-4 text-slate-600">Aucun article</td>
+                                        <td class="py-4 text-center text-slate-400">-</td>
+                                        <td class="py-4 text-right text-slate-400">-</td>
+                                        <td class="py-4 text-right font-bold text-slate-900">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- RECAPITULATIF -->
+                        <div class="flex justify-end mb-8">
+                            <div class="w-72 space-y-2">
+                                <div class="flex justify-between text-xs font-bold text-slate-400">
+                                    <span>SOUS-TOTAL</span>
+                                    <span id="out_sous_total" class="text-slate-900">0 FCFA</span>
+                                </div>
+                                <div class="flex justify-between text-xs font-bold text-slate-400">
+                                    <span>FRAIS DE LIVRAISON</span>
+                                    <span id="out_livraison" class="text-slate-900">0 FCFA</span>
+                                </div>
+                                <div id="row_promo" class="hidden flex justify-between text-xs font-bold text-orange-500">
+                                    <span>REMISE</span>
+                                    <span id="out_promo">- 0 FCFA</span>
+                                </div>
+                                <div class="flex justify-between items-center pt-3 border-t-4 border-slate-900 mt-2">
+                                    <span class="text-[10px] font-black uppercase tracking-wider">NET A PAYER</span>
+                                    <span id="out_total" class="text-2xl font-black italic text-sky-500 tracking-tighter">0 FCFA</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- QR CODE & VALIDATION -->
+                        <div class="flex justify-between items-end mb-8 p-4 bg-slate-50 rounded-2xl">
+                            <div class="flex items-center gap-4">
+                                <div id="qr_container">
+                                    <img id="out_qr_api" crossorigin="anonymous" class="w-24 h-24 p-1 border border-slate-200 rounded-lg bg-white" src="" alt="QR Code">
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-bold uppercase text-slate-400 leading-tight">Scannez pour valider<br><span class="text-slate-900 font-black">la livraison</span></p>
+                                    <p class="text-[8px] text-slate-400 mt-1" id="qr_url_text">URL securisee</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[9px] font-bold uppercase text-slate-400">Statut paiement</p>
+                                <p class="text-sm font-black text-slate-900 mt-1" id="out_statut_paiement">A regler a la livraison</p>
+                            </div>
+                        </div>
+
+                        <!-- CONDITIONS DE RETOUR -->
+                        <div class="border-t-2 border-slate-200 pt-6">
+                            <h4 class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-3">Conditions de retour & Garantie</h4>
+                            <div class="grid grid-cols-2 gap-4 text-[9px] text-slate-500 leading-relaxed">
+                                <div class="space-y-1">
+                                    <p><span class="font-bold text-slate-700">Delai de retour :</span> 7 jours ouvres apres reception de la commande. Le produit doit etre dans son emballage d'origine, non utilise et accompagne de la facture.</p>
+                                    <p><span class="font-bold text-slate-700">Produits exclus :</span> Les articles personnalises, les produits d'hygiene (parfums ouverts, cosmetiques) et les produits en promotion ne sont pas eligibles au retour.</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <p><span class="font-bold text-slate-700">Garantie YARID :</span> Tous nos produits electroniques beneficient d'une garantie de 3 mois contre les defauts de fabrication. Les accessoires de mode ont une garantie de 30 jours.</p>
+                                    <p><span class="font-bold text-slate-700">Contact SAV :</span> +237 655 959 284 (WhatsApp) ou sav@yarid.cm. Traitement sous 48h ouvrees.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FOOTER -->
+                        <div class="mt-8 pt-4 border-t border-slate-200 text-center">
+                            <p class="text-[8px] text-slate-400 font-bold uppercase tracking-[0.3em]">YARID GROUP SARL - Yaounde, Cameroun - RC: 24YRD789</p>
+                            <p class="text-[8px] text-slate-300 mt-1">Cette facture est un document contractuel. Conservez-la pour toute reclamation.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ==========================================
+        // SUPABASE CONFIG
+        // ==========================================
+        const SB_URL = 'https://whcpugnkldbmuqzgqxbe.supabase.co';
+        const SB_KEY = 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk';
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+
+        let currentCommandeId = null;
+
+        // ==========================================
+        // CHARGEMENT AUTO VIA URL
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            const params = new URLSearchParams(window.location.search);
+            const orderId = params.get('order_id');
+
+            if (orderId) {
+                document.getElementById('loader').classList.remove('hidden');
+                await loadOrderFromSupabase(orderId);
+                document.getElementById('loader').classList.add('hidden');
+            } else {
+                updateUI();
+            }
+        });
+
+        async function loadOrderFromSupabase(orderId) {
+            try {
+                const { data: commande, error } = await _supabase
+                    .from('commandes')
+                    .select(`*, commande_items(*)`)
+                    .or(`order_id.eq.${orderId},numero_facture.eq.${orderId}`)
+                    .single();
+
+                if (error || !commande) {
+                    console.warn('Commande non trouvee:', orderId);
+                    return;
+                }
+
+                currentCommandeId = commande.id;
+
+                // Remplir les inputs
+                document.getElementById('in_id').value = commande.order_id || '';
+                document.getElementById('in_status').value = commande.statut || 'en_attente';
+                document.getElementById('in_nom').value = commande.client_nom || '';
+                document.getElementById('in_tel').value = commande.client_phone || '';
+                document.getElementById('in_adresse').value = commande.client_adresse || '';
+                document.getElementById('in_sous_total').value = commande.sous_total || 0;
+                document.getElementById('in_livraison').value = commande.frais_livraison || 0;
+                document.getElementById('in_promo').value = commande.remise || 0;
+                document.getElementById('in_paiement').value = commande.mode_paiement || 'livraison';
+
+                // Remplir les articles
+                if (commande.commande_items && commande.commande_items.length > 0) {
+                    const itemsText = commande.commande_items.map(item => {
+                        return `${item.produit_nom} - ${item.prix_unitaire.toLocaleString()} FCFA x${item.quantite}`;
+                    }).join('\n');
+                    document.getElementById('in_items').value = itemsText;
+                }
+
+                // Info panel
+                document.getElementById('order-info').classList.remove('hidden');
+                document.getElementById('order-info-text').textContent = `ID: ${commande.order_id} | ${(commande.montant_total || 0).toLocaleString()} FCFA`;
+
+                updateUI();
+            } catch (e) {
+                console.error('Erreur chargement commande:', e);
+            }
+        }
+
+        // ==========================================
+        // MISE A JOUR UI
+        // ==========================================
+        function updateUI() {
+            const id        = document.getElementById('in_id').value || '---';
+            const nom       = document.getElementById('in_nom').value || '---';
+            const tel       = document.getElementById('in_tel').value || '---';
+            const adresse   = document.getElementById('in_adresse').value || '';
+            const itemsText = document.getElementById('in_items').value || '';
+            const statut    = document.getElementById('in_status').value;
+            const paiement  = document.getElementById('in_paiement').value;
+            const sousTotal = parseInt(document.getElementById('in_sous_total').value) || 0;
+            const livraison = parseInt(document.getElementById('in_livraison').value) || 0;
+            const promo     = parseInt(document.getElementById('in_promo').value) || 0;
+
+            // Header
+            document.getElementById('out_id').textContent = id.toUpperCase();
+            document.getElementById('out_date').textContent = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            document.getElementById('out_nom').textContent = nom;
+            document.getElementById('out_tel').textContent = tel;
+            document.getElementById('out_adresse').textContent = adresse;
+
+            // Mode paiement
+            const paiementLabels = { livraison: 'Paiement a la livraison', mobile_money: 'Mobile Money', carte: 'Carte bancaire', wallet: 'Wallet YARID' };
+            document.getElementById('out_paiement').textContent = paiementLabels[paiement] || paiement;
+
+            // Statut badge
+            const badge = document.getElementById('out_statut_badge');
+            const statutLabels = {
+                en_attente: 'EN ATTENTE',
+                paye: 'PAYE',
+                a_regler_livraison: 'A REGLER LIVRAISON',
+                en_preparation: 'EN PREPARATION',
+                en_livraison: 'EN LIVRAISON',
+                livre: 'LIVRE',
+                annule: 'ANNULE'
+            };
+            badge.textContent = statutLabels[statut] || statut.toUpperCase();
+            badge.className = 'statut-badge mb-3 statut-' + statut;
+
+            // Statut paiement
+            const statutPaiementLabels = {
+                en_attente: 'A regler a la livraison',
+                paye_marchand: 'Paye au marchand',
+                a_regler_livraison: 'A regler a la livraison'
+            };
+            document.getElementById('out_statut_paiement').textContent = statutPaiementLabels[statut] || 'En attente';
+
+            // Articles
+            renderItems(itemsText);
+
+            // Totaux
+            document.getElementById('out_sous_total').textContent = sousTotal.toLocaleString() + ' FCFA';
+            document.getElementById('out_livraison').textContent = livraison.toLocaleString() + ' FCFA';
+
+            if (promo > 0) {
+                document.getElementById('row_promo').classList.remove('hidden');
+                document.getElementById('out_promo').textContent = '- ' + promo.toLocaleString() + ' FCFA';
+            } else {
+                document.getElementById('row_promo').classList.add('hidden');
+            }
+
+            const total = Math.max(0, sousTotal + livraison - promo);
+            document.getElementById('out_total').textContent = total.toLocaleString() + ' FCFA';
+
+            // QR Code
+            generateQRCode(id, statut);
+
+            // Zoom mobile
+            const wrapper = document.getElementById('facture-wrapper');
+            const previewArea = document.querySelector('.preview-area');
+            const scale = Math.min((previewArea.clientWidth - 20) / 794, 1);
+            wrapper.style.transform = (window.innerWidth < 1024) ? `scale(${scale})` : `scale(0.8)`;
+        }
+
+        function renderItems(text) {
+            const tbody = document.getElementById('out_items_body');
+            if (!text.trim()) {
+                tbody.innerHTML = `
+                    <tr class="border-b border-slate-100">
+                        <td class="py-4 text-slate-600">Aucun article</td>
+                        <td class="py-4 text-center text-slate-400">-</td>
+                        <td class="py-4 text-right text-slate-400">-</td>
+                        <td class="py-4 text-right font-bold text-slate-900">-</td>
+                    </tr>`;
+                return;
+            }
+
+            const lines = text.split('\n').filter(l => l.trim());
+            let html = '';
+            let grandTotal = 0;
+
+            lines.forEach((line, idx) => {
+                const parts = line.split(/\s*[x×]\s*|\s+-\s+/);
+                const name = parts[0]?.trim() || 'Article ' + (idx + 1);
+                const priceMatch = line.match(/(\d[\d\s]*)/);
+                const price = priceMatch ? parseInt(priceMatch[1].replace(/\s/g, '')) : 0;
+                const qtyMatch = line.match(/x\s*(\d+)/i);
+                const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+                const total = price * qty;
+                grandTotal += total;
+
+                html += `
+                    <tr class="border-b border-slate-100 ${idx % 2 === 0 ? 'bg-slate-50/50' : ''}">
+                        <td class="py-3 text-slate-700 font-medium">${name}</td>
+                        <td class="py-3 text-center text-slate-500">${qty}</td>
+                        <td class="py-3 text-right text-slate-500">${price.toLocaleString()} FCFA</td>
+                        <td class="py-3 text-right font-bold text-slate-900">${total.toLocaleString()} FCFA</td>
+                    </tr>`;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        function generateQRCode(orderId, statut) {
+            const container = document.getElementById('qr_container');
+            const baseUrl = window.location.origin + window.location.pathname.replace('facture.html', '');
+            const validationUrl = `${baseUrl}livreur-app.html?validate=${orderId}&token=${btoa(orderId + '_YARID_' + new Date().toISOString().slice(0,10)).replace(/=/g,'')}`;
+
+            // Utiliser QRCode.js pour generer un QR local
+            container.innerHTML = '<div id="qr_local"></div>';
+            try {
+                new QRCode(document.getElementById('qr_local'), {
+                    text: validationUrl,
+                    width: 96,
+                    height: 96,
+                    colorDark: '#0f172a',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+                document.getElementById('qr_url_text').textContent = 'Scan pour validation livreur';
+            } catch (e) {
+                // Fallback API
+                container.innerHTML = `<img id="out_qr_api" crossorigin="anonymous" class="w-24 h-24 p-1 border border-slate-200 rounded-lg bg-white" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(validationUrl)}&color=0f172a" alt="QR">`;
+            }
+        }
+
+        // ==========================================
+        // PDF EXPORT
+        // ==========================================
+        const pdfOptions = {
+            margin: 0,
+            filename: 'Facture_YARID.pdf',
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: { scale: 3, useCORS: true, logging: false },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        function downloadPDF() {
+            const element = document.getElementById('facture-pdf');
+            const clone = element.cloneNode(true);
+            clone.style.boxShadow = 'none';
+            const opt = { ...pdfOptions, filename: `Facture_${document.getElementById('in_id').value || 'YARID'}.pdf` };
+            html2pdf().set(opt).from(clone).save();
+        }
+
+        async function sharePDF() {
+            const element = document.getElementById('facture-pdf');
+            const clone = element.cloneNode(true);
+            clone.style.boxShadow = 'none';
+            const pdfBlob = await html2pdf().set(pdfOptions).from(clone).output('blob');
+            const file = new File([pdfBlob], `Facture_${document.getElementById('in_id').value || 'YARID'}.pdf`, { type: 'application/pdf' });
+            if (navigator.share) {
+                await navigator.share({ files: [file], title: 'Facture YARID' });
+            } else {
+                downloadPDF();
+            }
+        }
+
+        // ==========================================
+        // WHATSAPP
+        // ==========================================
+        function sendWhatsApp() {
+            const rawTel = document.getElementById('in_tel').value.replace(/\D/g, '');
+            if (!rawTel) return alert("Numero requis.");
+            const tel = (rawTel.length === 9 && rawTel.startsWith('6')) ? '237' + rawTel : rawTel;
+            const nom = document.getElementById('in_nom').value;
+            const total = document.getElementById('out_total').textContent;
+            const orderId = document.getElementById('in_id').value;
+
+            const msg = `*YARID GROUP - FACTURE*\n\nBonjour *${nom}*,\nVotre commande *${orderId}* est prete.\nTotal: *${total}*\n\nSuivez votre livraison: ${window.location.origin}${window.location.pathname.replace('facture.html', 'suivi.html')}?order_id=${orderId}\n\nMerci pour votre confiance !`;
+
+            window.location.assign(`https://api.whatsapp.com/send?phone=${tel}&text=${encodeURIComponent(msg)}`);
+        }
+
+        // ==========================================
+        // SUPABASE SAVE
+        // ==========================================
+        async function saveToSupabase(btn) {
+            btn.innerText = "EN COURS..."; btn.disabled = true;
+
+            const orderId = document.getElementById('in_id').value;
+            if (!orderId) { alert("ID commande requis"); btn.disabled = false; btn.innerText = "Enregistrer Commande"; return; }
+
+            const sousTotal = parseInt(document.getElementById('in_sous_total').value) || 0;
+            const livraison = parseInt(document.getElementById('in_livraison').value) || 0;
+            const promo     = parseInt(document.getElementById('in_promo').value) || 0;
+            const total     = Math.max(0, sousTotal + livraison - promo);
+
+            const payload = {
+                order_id: orderId,
+                client_nom: document.getElementById('in_nom').value,
+                client_phone: document.getElementById('in_tel').value,
+                client_adresse: document.getElementById('in_adresse').value,
+                sous_total: sousTotal,
+                frais_livraison: livraison,
+                remise: promo,
+                montant_total: total,
+                statut: document.getElementById('in_status').value,
+                mode_paiement: document.getElementById('in_paiement').value
+            };
+
+            const { data, error } = await _supabase.from('commandes').upsert([payload], { onConflict: 'order_id' }).select();
+
+            if (error) {
+                alert("Erreur: " + error.message);
+            } else {
+                currentCommandeId = data[0].id;
+                // Sauvegarder les items
+                await saveItems(data[0].id);
+                alert("Commande synchronisee avec succes !");
+            }
+            btn.innerText = "Enregistrer Commande"; btn.disabled = false;
+        }
+
+        async function saveItems(commandeId) {
+            const text = document.getElementById('in_items').value;
+            if (!text.trim()) return;
+
+            const lines = text.split('\n').filter(l => l.trim());
+            const items = lines.map(line => {
+                const parts = line.split(/\s*[x×]\s*|\s+-\s+/);
+                const name = parts[0]?.trim() || 'Article';
+                const priceMatch = line.match(/(\d[\d\s]*)/);
+                const price = priceMatch ? parseInt(priceMatch[1].replace(/\s/g, '')) : 0;
+                const qtyMatch = line.match(/x\s*(\d+)/i);
+                const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+                return {
+                    commande_id: commandeId,
+                    produit_nom: name,
+                    quantite: qty,
+                    prix_unitaire: price,
+                    total_ligne: price * qty
+                };
+            });
+
+            await _supabase.from('commande_items').delete().eq('commande_id', commandeId);
+            await _supabase.from('commande_items').insert(items);
+        }
+
+        window.onload = () => updateUI();
+        window.onresize = () => updateUI();
+    </script>
+</body>
+</html>

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>YARID | Services Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: #f8fafc; -webkit-font-smoothing: antialiased; }
+        .safe-top { padding-top: env(safe-area-inset-top, 0px); }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+        /* Animations */
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideRight { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+        @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        .anim-fade-up { animation: fadeUp 0.6s ease-out forwards; opacity: 0; }
+        .anim-d1 { animation-delay: 0.1s; }
+        .anim-d2 { animation-delay: 0.2s; }
+        .anim-d3 { animation-delay: 0.3s; }
+        .anim-d4 { animation-delay: 0.4s; }
+
+        /* Service card */
+        .service-card-premium {
+            background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,41,59,0.6));
+            border: 1px solid rgba(255,255,255,0.06);
+            backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .service-card-premium:hover {
+            border-color: rgba(14,165,233,0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px -20px rgba(14,165,233,0.2);
+        }
+
+        /* Zone badge */
+        .zone-badge {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.2s;
+        }
+        .zone-badge.active {
+            background: rgba(14,165,233,0.15);
+            border-color: rgba(14,165,233,0.4);
+            color: #38bdf8;
+        }
+
+        /* Form input */
+        .input-premium {
+            width: 100%;
+            background: rgba(15,23,42,0.8);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 1rem 1.25rem;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .input-premium:focus {
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.1);
+        }
+        .input-premium::placeholder { color: #475569; font-weight: 500; }
+
+        /* Select */
+        .select-premium {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.25rem;
+            padding-right: 3rem;
+        }
+
+        /* Textarea */
+        .textarea-premium { min-height: 120px; resize: vertical; }
+
+        /* Button */
+        .btn-premium {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            border: none;
+            border-radius: 16px;
+            padding: 1rem 2rem;
+            color: white;
+            font-weight: 800;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .btn-premium::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.5s;
+        }
+        .btn-premium:hover::before { left: 100%; }
+        .btn-premium:hover { transform: translateY(-2px); box-shadow: 0 12px 40px -12px rgba(14,165,233,0.4); }
+        .btn-premium:active { transform: scale(0.98); }
+        .btn-premium:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Status badge */
+        .status-verified { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+        .status-pending { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            z-index: 200; display: none; align-items: flex-end; justify-content: center;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content {
+            background: linear-gradient(180deg, #0f172a, #020617);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 32px 32px 0 0;
+            width: 100%; max-width: 640px; max-height: 92vh;
+            overflow-y: auto; padding: 2rem;
+            transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+
+        /* Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        /* Score ring */
+        .score-ring { position: relative; width: 48px; height: 48px; }
+        .score-ring svg { transform: rotate(-90deg); }
+        .score-ring circle { fill: none; stroke-width: 3; }
+        .score-bg { stroke: rgba(255,255,255,0.06); }
+        .score-fill { stroke: #0ea5e9; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+    </style>
+</head>
+<body class="safe-top safe-bottom">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-[#020617]/80 backdrop-blur-xl border-b border-white/[0.04]">
+        <div class="flex items-center justify-between px-4 h-14 max-w-lg mx-auto">
+            <button onclick="goHome()" class="flex items-center gap-2 text-slate-400 hover:text-white transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                <span class="text-xs font-bold">Retour</span>
+            </button>
+            <h1 class="text-sm font-black italic uppercase tracking-tight">Services <span class="text-sky-500">YARID</span></h1>
+            <div class="w-16"></div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-sky-500/10 via-transparent to-[#020617] z-10 pointer-events-none"></div>
+        <div id="hero-bg" class="h-56 bg-cover bg-center opacity-40"></div>
+        <div class="relative z-20 px-5 -mt-20 pb-6 max-w-lg mx-auto">
+            <div class="anim-fade-up anim-d1">
+                <span id="hero-cat" class="text-[10px] font-black uppercase tracking-[0.3em] text-sky-400 mb-2 block">Chargement...</span>
+                <h1 id="hero-title" class="text-3xl font-black italic uppercase tracking-tighter text-white leading-tight mb-3">Services</h1>
+                <p id="hero-desc" class="text-sm text-slate-400 leading-relaxed">Selectionnez un service pour commencer.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Zones actives -->
+    <section id="zones-section" class="px-5 mb-6 max-w-lg mx-auto anim-fade-up anim-d2" style="display:none">
+        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 mb-3">Zones desservies</p>
+        <div id="zones-list" class="flex flex-wrap gap-2"></div>
+    </section>
+
+    <!-- Liste des services -->
+    <section id="services-list" class="px-5 pb-6 max-w-lg mx-auto space-y-4">
+        <div class="text-center py-12">
+            <div class="w-8 h-8 border-2 border-sky-500/20 border-t-sky-500 rounded-full animate-spin mx-auto"></div>
+        </div>
+    </section>
+
+    <!-- Modal Formulaire -->
+    <div id="form-modal" class="modal-overlay" onclick="closeFormModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <!-- Close -->
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <span class="text-[10px] font-black uppercase tracking-[0.3em] text-sky-500">Nouvelle demande</span>
+                    <h2 id="form-title" class="text-xl font-black italic uppercase text-white mt-1">Service</h2>
+                </div>
+                <button onclick="closeFormModal()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Form dynamique -->
+            <form id="dynamic-form" onsubmit="handleFormSubmit(event)">
+                <div id="form-fields" class="space-y-4 mb-6"></div>
+
+                <!-- Client info -->
+                <div class="border-t border-white/[0.06] pt-4 space-y-3 mb-6">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">Vos coordonnees</p>
+                    <input type="text" id="client-nom" placeholder="Votre nom complet" class="input-premium" required>
+                    <input type="tel" id="client-phone" placeholder="Numero WhatsApp" class="input-premium" required>
+                    <input type="text" id="client-zone" placeholder="Votre quartier" class="input-premium" required>
+                </div>
+
+                <button type="submit" id="submit-btn" class="btn-premium flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.067 2.877 1.215 3.076.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    Valider sur WhatsApp
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/[0.04] py-6 text-center">
+        <p class="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-600">YARID GROUP - Prestataires verifies</p>
+    </footer>
+
+    <script src="services-algorithm.js"></script>
+    <script>
+    // ==========================================
+    // CATALOGUE CLIENT - Chargement & Rendu
+    // ==========================================
+
+    let currentCategory = null;
+    let currentService = null;
+    const schemaUrl = 'services-schema.json';
+
+    // Icon mapping (lucide-style SVG paths)
+    const ICONS = {
+        HardHat: 'M12 2L2 7v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V7l-10-5z',
+        Package: 'M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z M3.3 7l8.7-5 8.7 5 M12 22V12',
+        Layers: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
+        Users: 'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 7a4 4 0 100-8 4 4 0 000 8z M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75',
+        DraftingCompass: 'M12.1 22.5L12 22l-.1.5M2 12l10-10 10 10M12 2v20',
+        Globe: 'M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z',
+        Palette: 'M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c1.3 0 2.5-.2 3.6-.7M12 2c1.7 0 3.3.5 4.7 1.3M16.7 3.3l1.6 1.6M20.4 7l-1.6 1.6M17 12a2 2 0 114 0 2 2 0 01-4 0z',
+        Plane: 'M2 12h20M13 2l9 10-9 10M2 12l11-10',
+        Ship: 'M2 21c.6.5 1.2 1 2.5 1 2 0 3-1 5-1s3 1 5 1 3-1 5-1c1.3 0 1.9.5 2.5 1M12 3v4M8 7h8M4 15l1.5-8h13L20 15',
+        Monitor: 'M5 3h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2zM12 17v4M8 21h8'
+    };
+
+    function getIcon(name) {
+        return ICONS[name] || ICONS.Package;
+    }
+
+    // Charger le schema
+    async function loadSchema() {
+        try {
+            const res = await fetch(schemaUrl + '?v=' + Date.now());
+            const schema = await res.json();
+            renderCatalogue(schema.categories);
+        } catch (e) {
+            console.error('Erreur chargement schema:', e);
+            document.getElementById('services-list').innerHTML =
+                '<p class="text-center text-slate-500 py-8">Erreur de chargement. <button onclick="loadSchema()" class="text-sky-500 underline">Reessayer</button></p>';
+        }
+    }
+
+    function renderCatalogue(categories) {
+        const container = document.getElementById('services-list');
+        container.innerHTML = '';
+
+        categories.forEach((cat, catIdx) => {
+            // Section categorie
+            const catSection = document.createElement('div');
+            catSection.className = 'mb-8';
+
+            // Titre de categorie
+            catSection.innerHTML = `
+                <div class="flex items-center gap-3 mb-4 anim-fade-up anim-d${catIdx + 1}">
+                    <div class="w-10 h-10 rounded-2xl flex items-center justify-center" style="background: ${cat.couleur}15">
+                        <svg class="w-5 h-5" style="color: ${cat.couleur}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="${getIcon(cat.icon_lucide)}"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black italic uppercase text-white">${cat.titre}</h2>
+                        <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">${cat.services.length} services</p>
+                    </div>
+                </div>
+            `;
+
+            // Grid de services
+            const grid = document.createElement('div');
+            grid.className = 'space-y-3';
+
+            cat.services.forEach((svc, svcIdx) => {
+                const card = document.createElement('div');
+                card.className = 'service-card-premium rounded-3xl p-5 anim-fade-up';
+                card.style.animationDelay = (0.1 * (catIdx + svcIdx + 1)) + 's';
+                card.innerHTML = `
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-2xl flex items-center justify-center" style="background: ${cat.couleur}15">
+                                <svg class="w-5 h-5" style="color: ${cat.couleur}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="${getIcon(svc.icon)}"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-white">${svc.titre}</h3>
+                                <p class="text-[10px] text-slate-500">${svc.duree_estimee}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-black text-white">${svc.prix_base.toLocaleString()}</p>
+                            <p class="text-[9px] text-slate-500">FCFA/${svc.unite}</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-4">${svc.description}</p>
+                    <div class="flex items-center gap-2">
+                        <button onclick="openServiceForm('${cat.id}', '${svc.id}')" class="btn-premium text-[11px] py-3.5" style="flex: 1; background: linear-gradient(135deg, ${cat.couleur}, ${cat.couleur}cc)">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Demander
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            catSection.appendChild(grid);
+            container.appendChild(catSection);
+
+            // Mettre a jour le hero avec la premiere categorie
+            if (catIdx === 0) {
+                document.getElementById('hero-bg').style.backgroundImage = `url(${cat.image_hero})`;
+                document.getElementById('hero-cat').textContent = cat.sous_titre;
+                document.getElementById('hero-title').textContent = cat.titre;
+                document.getElementById('hero-desc').textContent = cat.description;
+
+                // Zones actives
+                if (cat.zones_actives && cat.zones_actives.length > 0) {
+                    document.getElementById('zones-section').style.display = 'block';
+                    const zonesList = document.getElementById('zones-list');
+                    zonesList.innerHTML = cat.zones_actives.map(z =>
+                        `<span class="zone-badge text-[10px] font-semibold text-slate-400 px-3 py-1.5 rounded-full">${z}</span>`
+                    ).join('');
+                }
+            }
+        });
+    }
+
+    // Ouvrir le formulaire d'un service
+    async function openServiceForm(catId, svcId) {
+        try {
+            const res = await fetch(schemaUrl + '?v=' + Date.now());
+            const schema = await res.json();
+            const cat = schema.categories.find(c => c.id === catId);
+            const svc = cat.services.find(s => s.id === svcId);
+
+            // Si le service a des produits, rediriger vers la page produits
+            if (svc.produits && svc.produits.length > 0) {
+                window.location.href = 'service-produits.html?cat=' + encodeURIComponent(catId) + '&service=' + encodeURIComponent(svcId);
+                return;
+            }
+
+            // Sinon, formulaire classique
+            currentCategory = cat;
+            currentService = svc;
+
+            document.getElementById('form-title').textContent = svc.titre;
+
+            // Generer les champs du formulaire
+            const fieldsContainer = document.getElementById('form-fields');
+            fieldsContainer.innerHTML = '';
+
+            svc.config_formulaire.champs.forEach(champ => {
+                const wrapper = document.createElement('div');
+
+                // Label
+                const label = document.createElement('label');
+                label.className = 'block text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2';
+                label.textContent = champ.label + (champ.requis ? ' *' : '');
+                wrapper.appendChild(label);
+
+                // Input selon le type
+                let input;
+                switch (champ.type) {
+                    case 'select':
+                        input = document.createElement('select');
+                        input.className = 'input-premium select-premium';
+                        input.innerHTML = '<option value="" disabled selected>Selectionnez...</option>' +
+                            champ.options.map(o => `<option value="${o}">${o}</option>`).join('');
+                        break;
+                    case 'textarea':
+                        input = document.createElement('textarea');
+                        input.className = 'input-premium textarea-premium';
+                        input.placeholder = champ.placeholder || '';
+                        break;
+                    case 'number':
+                        input = document.createElement('input');
+                        input.type = 'number';
+                        input.className = 'input-premium';
+                        input.placeholder = champ.placeholder || '';
+                        break;
+                    default:
+                        input = document.createElement('input');
+                        input.type = 'text';
+                        input.className = 'input-premium';
+                        input.placeholder = champ.placeholder || '';
+                }
+                input.id = 'field-' + champ.id;
+                input.name = champ.id;
+                if (champ.requis) input.required = true;
+
+                wrapper.appendChild(input);
+                fieldsContainer.appendChild(wrapper);
+            });
+
+            // Ouvrir le modal
+            document.getElementById('form-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+        } catch (e) {
+            console.error(e);
+            alert('Erreur de chargement du formulaire');
+        }
+    }
+
+    function closeFormModal(event) {
+        if (!event || event.target === document.getElementById('form-modal')) {
+            document.getElementById('form-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
+    // Soumettre le formulaire -> WhatsApp
+    function handleFormSubmit(event) {
+        event.preventDefault();
+
+        const btn = document.getElementById('submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>';
+
+        // Collecter les reponses
+        const reponses = {};
+        currentService.config_formulaire.champs.forEach(champ => {
+            const el = document.getElementById('field-' + champ.id);
+            reponses[champ.id] = el ? el.value : '';
+        });
+
+        const nom = document.getElementById('client-nom').value;
+        const phone = document.getElementById('client-phone').value;
+        const zone = document.getElementById('client-zone').value;
+
+        // Generer le message WhatsApp
+        let msg = `*NOUVELLE DEMANDE YARID* \n\n`;
+        msg += `*Service:* ${currentService.titre}\n`;
+        msg += `*Categorie:* ${currentCategory.titre}\n`;
+        msg += `*Reference:* ${currentService.id.toUpperCase()}\n\n`;
+
+        msg += `*Details de la demande:*\n`;
+        currentService.config_formulaire.champs.forEach(champ => {
+            const val = reponses[champ.id];
+            if (val) msg += `${champ.label}: ${val}\n`;
+        });
+
+        msg += `\n*Client:* ${nom}\n`;
+        msg += `*Telephone:* ${phone}\n`;
+        msg += `*Zone:* ${zone}\n`;
+        msg += `\nMerci de me contacter pour confirmer.`;
+
+        // Envoyer via WhatsApp (methode fiable: creer un lien et cliquer)
+        const encodedMsg = encodeURIComponent(msg);
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const url = isMobile
+            ? 'whatsapp://send?phone=237655959284&text=' + encodedMsg
+            : 'https://api.whatsapp.com/send?phone=237655959284&text=' + encodedMsg;
+
+        // Creer un lien invisible et cliquer dessus
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Reset
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.067 2.877 1.215 3.076.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> Valider sur WhatsApp`;
+            closeFormModal();
+        }, 1500);
+    }
+
+    function goHome() {
+        window.location.href = 'index.html';
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', loadSchema);
+    </script>
+</body>
+</html>

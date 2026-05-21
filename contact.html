@@ -15,13 +15,21 @@
 </script>
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Consultation | YARID GROUP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="analytics.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        :root {
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+        }
         .input-focus:focus { border-color: #0ea5e9; outline: none; box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1); }
         select { appearance: none; -webkit-appearance: none; }
     </style>

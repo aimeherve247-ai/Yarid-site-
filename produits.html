@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Yarid - Produits</title>
     <link rel="stylesheet" href="style.css"> 
 <link rel="manifest" href="/manifest.json">
@@ -32,6 +32,16 @@
   }
 </script>
 
+    <style>
+        :root {
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        body {
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+        }
+    </style>
 </head>
 <body>
     <header style="padding: 20px; display: flex; align-items: center;">
