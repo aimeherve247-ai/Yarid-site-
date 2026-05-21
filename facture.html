@@ -70,11 +70,7 @@
         }
         .pulse-live { animation: pulse-dot 2s ease-in-out infinite; }
 
-        /* Livreur card selector */
-        .livreur-card { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem; border-radius: 0.6rem; border: 1px solid #1e293b; background: #020617; cursor: pointer; transition: all 0.2s; }
-        .livreur-card:hover { border-color: #0ea5e9; background: rgba(14,165,233,0.05); }
-        .livreur-card.selected { border-color: #0ea5e9; background: rgba(14,165,233,0.1); }
-        .livreur-card.offline { opacity: 0.4; cursor: not-allowed; }
+        /* Livreur recap */
         .livreur-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #0ea5e9, #0284c7); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: white; flex-shrink: 0; }
         .livreur-status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
         .dot-online { background: #10b981; }
@@ -153,35 +149,27 @@
                 </div>
 
                 <!-- ===================== ASSIGNATION LIVREUR ===================== -->
-                <div class="rounded-xl border border-[#1e293b] bg-[#0a1122] p-3">
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="label-style mb-0">Assigner un livreur</label>
-                        <button onclick="loadLivreurs()" class="text-[9px] font-bold text-sky-400 hover:text-sky-300 uppercase tracking-wider" title="Actualiser">
-                            <svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="label-style mb-0">Livreur assigné</label>
+                        <button onclick="loadLivreurs()" type="button" class="text-[9px] font-bold text-sky-400 hover:text-sky-300 uppercase tracking-wider flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                             Actualiser
                         </button>
                     </div>
-
-                    <!-- Livreur list -->
-                    <div id="livreurs-list" class="space-y-1.5 max-h-40 overflow-y-auto pr-0.5">
-                        <div class="text-[10px] text-slate-500 text-center py-3">
-                            <div class="loader mx-auto mb-1" style="width:14px;height:14px;border-width:1.5px;"></div>
-                            Chargement...
-                        </div>
-                    </div>
-
-                    <!-- Selected livreur display -->
-                    <div id="livreur-selected-info" class="hidden mt-2 flex items-center gap-2 p-2 bg-sky-500/10 rounded-lg border border-sky-500/20">
-                        <div id="livreur-sel-avatar" class="livreur-avatar" style="width:24px;height:24px;font-size:9px;">L</div>
+                    <select id="in_livreur_id" class="input-box" onchange="onLivreurChange()">
+                        <option value="">— Aucun livreur —</option>
+                    </select>
+                    <!-- Recap livreur sélectionné -->
+                    <div id="livreur-recap" class="hidden mt-1.5 flex items-center gap-2 px-2 py-1.5 bg-sky-500/10 rounded-lg border border-sky-500/20">
+                        <div id="livreur-recap-avatar" class="livreur-avatar" style="width:22px;height:22px;font-size:9px;flex-shrink:0;">L</div>
                         <div class="flex-1 min-w-0">
-                            <p id="livreur-sel-name" class="text-[10px] font-black text-sky-400 leading-tight truncate">---</p>
-                            <p id="livreur-sel-vehicle" class="text-[9px] text-sky-300/60 leading-tight">---</p>
+                            <p id="livreur-recap-name" class="text-[10px] font-black text-sky-400 leading-tight truncate">---</p>
+                            <p id="livreur-recap-detail" class="text-[9px] text-sky-300/50 leading-tight truncate">---</p>
                         </div>
-                        <button onclick="clearLivreur()" class="text-slate-500 hover:text-red-400 transition text-[10px]">✕</button>
+                        <div id="livreur-recap-dot" class="livreur-status-dot dot-online"></div>
+                        <span id="livreur-recap-status" class="text-[8px] font-bold text-emerald-400">Dispo</span>
                     </div>
-
-                    <!-- Hidden input to store selected livreur_id -->
-                    <input type="hidden" id="in_livreur_id">
                 </div>
                 <!-- =============================================================== -->
 
@@ -361,90 +349,101 @@
         // LIVREURS - CHARGEMENT & SELECTION
         // ==========================================
         let livreursList = [];
-        let selectedLivreur = null;
 
         async function loadLivreurs() {
-            const container = document.getElementById('livreurs-list');
-            container.innerHTML = '<div class="text-[10px] text-slate-500 text-center py-3"><div class="loader mx-auto mb-1" style="width:14px;height:14px;border-width:1.5px;"></div>Chargement...</div>';
+            const select = document.getElementById('in_livreur_id');
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">Chargement...</option>';
+            select.disabled = true;
 
             try {
                 const { data, error } = await _supabase
                     .from('livreurs')
                     .select('id, nom, prenom, phone, vehicule_type, vehicule_plaque, statut')
-                    .order('statut', { ascending: true });
+                    .order('nom', { ascending: true });
+
+                select.innerHTML = '<option value="">— Aucun livreur —</option>';
+                select.disabled = false;
 
                 if (error || !data || data.length === 0) {
-                    container.innerHTML = '<p class="text-[10px] text-slate-600 text-center py-3">Aucun livreur disponible</p>';
+                    select.innerHTML += '<option disabled>Aucun livreur enregistré</option>';
                     return;
                 }
 
                 livreursList = data;
 
-                const statusOrder = { online: 0, en_course: 1, offline: 2 };
-                data.sort((a, b) => (statusOrder[a.statut] ?? 3) - (statusOrder[b.statut] ?? 3));
+                // Trier : disponibles en premier
+                const order = { online: 0, en_course: 1, offline: 2 };
+                data.sort((a, b) => (order[a.statut] ?? 3) - (order[b.statut] ?? 3));
 
-                const statusDotClass = { online: 'dot-online', en_course: 'dot-en_course', offline: 'dot-offline' };
-                const statusLabel = { online: 'Disponible', en_course: 'En course', offline: 'Hors ligne' };
+                const statusLabel = { online: '🟢', en_course: '🟡', offline: '⚫' };
+                data.forEach(l => {
+                    const opt = document.createElement('option');
+                    opt.value = l.id;
+                    const name = `${l.prenom || ''} ${l.nom}`.trim();
+                    const vehicle = `${(l.vehicule_type || 'Moto').toUpperCase()} ${l.vehicule_plaque || ''}`.trim();
+                    opt.textContent = `${statusLabel[l.statut] || '⚫'} ${name} — ${vehicle}`;
+                    if (l.statut === 'offline') opt.style.color = '#64748b';
+                    select.appendChild(opt);
+                });
 
-                container.innerHTML = data.map(l => {
-                    const initials = ((l.prenom?.[0] || '') + (l.nom?.[0] || '')).toUpperCase() || 'L';
-                    const isSelected = selectedLivreur && selectedLivreur.id === l.id;
-                    const isOffline = l.statut === 'offline';
-                    return `
-                        <div class="livreur-card ${isSelected ? 'selected' : ''} ${isOffline ? 'offline' : ''}"
-                             onclick="${isOffline ? '' : `selectLivreur('${l.id}')`}"
-                             id="livreur-card-${l.id}">
-                            <div class="livreur-avatar">${initials}</div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-[11px] font-bold text-white leading-tight truncate">${(l.prenom || '')} ${l.nom}</p>
-                                <p class="text-[9px] text-slate-500 leading-tight truncate">${(l.vehicule_type || 'Moto').toUpperCase()} · ${l.vehicule_plaque || 'N/A'}</p>
-                            </div>
-                            <div class="flex flex-col items-end gap-1">
-                                <div class="livreur-status-dot ${statusDotClass[l.statut] || 'dot-offline'}"></div>
-                                <span class="text-[8px] font-bold ${l.statut === 'online' ? 'text-emerald-400' : l.statut === 'en_course' ? 'text-amber-400' : 'text-slate-600'}">${statusLabel[l.statut] || l.statut}</span>
-                            </div>
-                        </div>`;
-                }).join('');
+                // Restaurer la sélection précédente si elle existe
+                if (currentVal) {
+                    select.value = currentVal;
+                    onLivreurChange();
+                }
 
             } catch (e) {
-                container.innerHTML = '<p class="text-[10px] text-red-400 text-center py-3">Erreur de chargement</p>';
+                select.innerHTML = '<option value="">Erreur de chargement</option>';
+                select.disabled = false;
             }
         }
 
-        function selectLivreur(livreurId) {
-            selectedLivreur = livreursList.find(l => l.id === livreurId);
-            if (!selectedLivreur) return;
+        function onLivreurChange() {
+            const select = document.getElementById('in_livreur_id');
+            const livreurId = select.value;
+            const recap = document.getElementById('livreur-recap');
 
-            // Highlight selected card
-            document.querySelectorAll('.livreur-card').forEach(c => c.classList.remove('selected'));
-            const card = document.getElementById('livreur-card-' + livreurId);
-            if (card) card.classList.add('selected');
+            if (!livreurId) {
+                recap.classList.add('hidden');
+                return;
+            }
 
-            // Update hidden input
-            document.getElementById('in_livreur_id').value = livreurId;
+            const l = livreursList.find(x => x.id === livreurId);
+            if (!l) { recap.classList.add('hidden'); return; }
 
-            // Show selected livreur info
-            const initials = ((selectedLivreur.prenom?.[0] || '') + (selectedLivreur.nom?.[0] || '')).toUpperCase() || 'L';
-            document.getElementById('livreur-sel-avatar').textContent = initials;
-            document.getElementById('livreur-sel-name').textContent = (selectedLivreur.prenom || '') + ' ' + selectedLivreur.nom;
-            document.getElementById('livreur-sel-vehicle').textContent = (selectedLivreur.vehicule_type || 'Moto').toUpperCase() + ' · ' + (selectedLivreur.vehicule_plaque || 'N/A') + ' · ' + selectedLivreur.phone;
-            document.getElementById('livreur-selected-info').classList.remove('hidden');
+            const initials = ((l.prenom?.[0] || '') + (l.nom?.[0] || '')).toUpperCase() || 'L';
+            document.getElementById('livreur-recap-avatar').textContent = initials;
+            document.getElementById('livreur-recap-name').textContent = `${l.prenom || ''} ${l.nom}`.trim();
+            document.getElementById('livreur-recap-detail').textContent = `${(l.vehicule_type || 'Moto').toUpperCase()} · ${l.vehicule_plaque || 'N/A'} · ${l.phone || ''}`;
+
+            const dotClass = { online: 'dot-online', en_course: 'dot-en_course', offline: 'dot-offline' };
+            const statusTxt = { online: 'Disponible', en_course: 'En course', offline: 'Hors ligne' };
+            const statusColor = { online: 'text-emerald-400', en_course: 'text-amber-400', offline: 'text-slate-500' };
+
+            const dot = document.getElementById('livreur-recap-dot');
+            dot.className = 'livreur-status-dot ' + (dotClass[l.statut] || 'dot-offline');
+            const statusEl = document.getElementById('livreur-recap-status');
+            statusEl.textContent = statusTxt[l.statut] || l.statut;
+            statusEl.className = 'text-[8px] font-bold ' + (statusColor[l.statut] || 'text-slate-500');
+
+            recap.classList.remove('hidden');
         }
 
-        function clearLivreur() {
-            selectedLivreur = null;
-            document.getElementById('in_livreur_id').value = '';
-            document.getElementById('livreur-selected-info').classList.add('hidden');
-            document.querySelectorAll('.livreur-card').forEach(c => c.classList.remove('selected'));
-        }
+        function notifyLivreurWhatsApp() {
+            const livreurId = document.getElementById('in_livreur_id').value;
+            const l = livreursList.find(x => x.id === livreurId);
+            if (!l || !l.phone) { alert('Numéro livreur non disponible'); return; }
 
-        function notifyLivreurWhatsApp(livreur, orderId, clientNom, adresse, montantTotal) {
-            if (!livreur || !livreur.phone) return;
-            const rawTel = livreur.phone.replace(/\D/g, '');
-            const tel = (rawTel.length === 9 && rawTel.startsWith('6')) ? '237' + rawTel : rawTel;
-            const baseUrl = window.location.origin + window.location.pathname.replace('facture.html', '');
-            const livreurUrl = `${baseUrl}livreur-app.html`;
-            const msg = `*YARID - Nouvelle course assignee* 🚀\n\nBonjour *${(livreur.prenom || '')} ${livreur.nom}*,\nUne nouvelle commande vous a ete assignee :\n\n📦 Commande: *${orderId}*\n👤 Client: ${clientNom}\n📍 Adresse: ${adresse}\n💰 Montant: *${montantTotal.toLocaleString()} FCFA*\n\nConnectez-vous a votre espace livreur :\n${livreurUrl}\n\nBonne livraison !`;
+            const orderId  = document.getElementById('in_id').value;
+            const clientNom = document.getElementById('in_nom').value;
+            const adresse  = document.getElementById('in_adresse').value;
+            const total    = document.getElementById('out_total').textContent;
+            const rawTel   = l.phone.replace(/\D/g, '');
+            const tel      = (rawTel.length === 9 && rawTel.startsWith('6')) ? '237' + rawTel : rawTel;
+            const baseUrl  = window.location.origin + window.location.pathname.replace('facture.html', '');
+
+            const msg = `*YARID - Nouvelle course assignée* 🚀\n\nBonjour *${(l.prenom || '')} ${l.nom}*,\nUne nouvelle commande vous a été assignée :\n\n📦 Commande: *${orderId}*\n👤 Client: ${clientNom}\n📍 Adresse: ${adresse}\n💰 Montant: *${total}*\n\nConnectez-vous à votre espace livreur :\n${baseUrl}livreur-app.html\n\nBonne livraison !`;
             window.open(`https://api.whatsapp.com/send?phone=${tel}&text=${encodeURIComponent(msg)}`, '_blank');
         }
 
@@ -503,15 +502,16 @@
 
                 // Pré-sélectionner le livreur si déjà assigné
                 if (commande.livreur_id) {
-                    document.getElementById('in_livreur_id').value = commande.livreur_id;
-                    // Charger et sélectionner après que la liste soit disponible
-                    const waitAndSelect = async () => {
-                        if (livreursList.length === 0) {
+                    // Attendre que loadLivreurs() soit terminé puis sélectionner
+                    const trySelect = async () => {
+                        const sel = document.getElementById('in_livreur_id');
+                        if (!sel.querySelector(`option[value="${commande.livreur_id}"]`)) {
                             await loadLivreurs();
                         }
-                        selectLivreur(commande.livreur_id);
+                        sel.value = commande.livreur_id;
+                        onLivreurChange();
                     };
-                    waitAndSelect();
+                    trySelect();
                 }
 
                 // Info panel
@@ -715,48 +715,58 @@
         async function saveToSupabase(btn) {
             btn.innerText = "EN COURS..."; btn.disabled = true;
 
-            const orderId = document.getElementById('in_id').value;
-            if (!orderId) { alert("ID commande requis"); btn.disabled = false; btn.innerText = "Enregistrer Commande"; return; }
+            const orderId = document.getElementById('in_id').value.trim();
+            if (!orderId) {
+                alert("ID commande requis");
+                btn.disabled = false; btn.innerText = "Enregistrer Commande";
+                return;
+            }
 
-            const sousTotal = parseInt(document.getElementById('in_sous_total').value) || 0;
-            const livraison = parseInt(document.getElementById('in_livraison').value) || 0;
-            const promo     = parseInt(document.getElementById('in_promo').value) || 0;
-            const total     = Math.max(0, sousTotal + livraison - promo);
-            const livreurId = document.getElementById('in_livreur_id').value || null;
+            const sousTotal  = parseInt(document.getElementById('in_sous_total').value) || 0;
+            const livraison  = parseInt(document.getElementById('in_livraison').value) || 0;
+            const promo      = parseInt(document.getElementById('in_promo').value) || 0;
+            const total      = Math.max(0, sousTotal + livraison - promo);
+            const livreurId  = document.getElementById('in_livreur_id').value || null;
 
+            // Construction du payload — livreur_id uniquement si renseigné
             const payload = {
-                order_id: orderId,
-                client_nom: document.getElementById('in_nom').value,
-                client_phone: document.getElementById('in_tel').value,
-                client_adresse: document.getElementById('in_adresse').value,
-                sous_total: sousTotal,
+                order_id:        orderId,
+                client_nom:      document.getElementById('in_nom').value,
+                client_phone:    document.getElementById('in_tel').value,
+                client_adresse:  document.getElementById('in_adresse').value,
+                sous_total:      sousTotal,
                 frais_livraison: livraison,
-                remise: promo,
-                montant_total: total,
-                statut: document.getElementById('in_status').value,
-                mode_paiement: document.getElementById('in_paiement').value,
-                livreur_id: livreurId
+                remise:          promo,
+                montant_total:   total,
+                statut:          document.getElementById('in_status').value,
+                mode_paiement:   document.getElementById('in_paiement').value
             };
+            if (livreurId) payload.livreur_id = livreurId;
 
-            const { data, error } = await _supabase.from('commandes').upsert([payload], { onConflict: 'order_id' }).select();
+            const { data, error } = await _supabase
+                .from('commandes')
+                .upsert([payload], { onConflict: 'order_id' })
+                .select();
 
             if (error) {
-                alert("Erreur: " + error.message);
+                alert("Erreur enregistrement:\n" + error.message);
+                console.error('Supabase error:', error);
             } else {
                 currentCommandeId = data[0].id;
                 await saveItems(data[0].id);
                 showAssignmentBanner(orderId, total, livreurId);
             }
+
             btn.innerText = "Enregistrer Commande"; btn.disabled = false;
         }
 
         function showAssignmentBanner(orderId, total, livreurId) {
-            // Retirer l'ancien banner si existant
             const old = document.getElementById('assignment-banner');
             if (old) old.remove();
 
-            const livreur = livreurId ? livreursList.find(l => l.id === livreurId) : null;
-            const baseUrl = window.location.origin + window.location.pathname.replace('facture.html', '');
+            const livreur  = livreurId ? livreursList.find(l => l.id === livreurId) : null;
+            const baseUrl  = window.location.origin + window.location.pathname.replace('facture.html', '');
+            const suiviUrl = baseUrl + 'suivi.html?order_id=' + encodeURIComponent(orderId);
 
             const banner = document.createElement('div');
             banner.id = 'assignment-banner';
@@ -764,46 +774,42 @@
 
             if (livreur) {
                 const initials = ((livreur.prenom?.[0] || '') + (livreur.nom?.[0] || '')).toUpperCase() || 'L';
-                banner.style.cssText = 'border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.06);';
+                banner.style.cssText = 'border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.06);';
                 banner.innerHTML = `
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 rounded-full bg-emerald-500 pulse-live"></div>
-                        <p class="text-[10px] font-black text-emerald-400 uppercase tracking-wider">Commande enregistree & Livreur assigne</p>
+                        <p class="text-[10px] font-black text-emerald-400 uppercase tracking-wider">Enregistrée · Livreur assigné ✓</p>
                     </div>
                     <div class="flex items-center gap-2 p-2 bg-emerald-500/10 rounded-lg">
-                        <div class="livreur-avatar" style="width:28px;height:28px;font-size:10px;">${initials}</div>
+                        <div class="livreur-avatar" style="width:26px;height:26px;font-size:10px;">${initials}</div>
                         <div class="flex-1 min-w-0">
                             <p class="text-[11px] font-black text-white">${(livreur.prenom || '')} ${livreur.nom}</p>
-                            <p class="text-[9px] text-emerald-300/70">${(livreur.vehicule_type || 'Moto').toUpperCase()} · ${livreur.vehicule_plaque || 'N/A'}</p>
+                            <p class="text-[9px] text-emerald-300/60">${(livreur.vehicule_type || 'Moto').toUpperCase()} · ${livreur.vehicule_plaque || 'N/A'}</p>
                         </div>
-                        <span class="text-[8px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full">ASSIGNE</span>
+                        <span class="text-[8px] font-bold text-emerald-400 px-2 py-1 bg-emerald-500/10 rounded-full">ASSIGNÉ</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-1.5 pt-1">
-                        <button onclick="notifyLivreurWhatsApp(livreursList.find(l=>l.id==='${livreur.id}'), '${orderId}', '${document.getElementById('in_nom').value}', '${document.getElementById('in_adresse').value}', ${total})"
-                            class="btn btn-nav text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 flex items-center justify-center gap-1">
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button id="btn-notify-livreur" onclick="notifyLivreurWhatsApp()" class="btn btn-nav text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 flex items-center justify-center gap-1">
                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.067 2.877 1.215 3.076.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                             Notifier livreur
                         </button>
-                        <button onclick="window.open('${baseUrl}suivi.html?order_id=${orderId}', '_blank')"
-                            class="btn btn-nav text-sky-400 border-sky-500/30 hover:bg-sky-500/10">
+                        <a href="${suiviUrl}" target="_blank" class="btn btn-nav text-sky-400 border-sky-500/30 hover:bg-sky-500/10 flex items-center justify-center">
                             Voir suivi →
-                        </button>
+                        </a>
                     </div>`;
             } else {
-                banner.style.cssText = 'border-color: rgba(14,165,233,0.2); background: rgba(14,165,233,0.05);';
+                banner.style.cssText = 'border-color:rgba(14,165,233,0.2);background:rgba(14,165,233,0.05);';
                 banner.innerHTML = `
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 rounded-full bg-sky-500 pulse-live"></div>
-                        <p class="text-[10px] font-black text-sky-400 uppercase tracking-wider">Commande enregistree</p>
+                        <p class="text-[10px] font-black text-sky-400 uppercase tracking-wider">Commande enregistrée ✓</p>
                     </div>
-                    <p class="text-[10px] text-slate-500">Aucun livreur assigne. Selectionnez un livreur ci-dessus et re-enregistrez.</p>
-                    <button onclick="window.open('${baseUrl}suivi.html?order_id=${orderId}', '_blank')"
-                        class="btn btn-nav text-sky-400 border-sky-500/30 hover:bg-sky-500/10 w-full">
+                    <p class="text-[10px] text-slate-500">Sélectionnez un livreur dans la liste puis ré-enregistrez pour l'assigner.</p>
+                    <a href="${suiviUrl}" target="_blank" class="btn btn-nav text-sky-400 border-sky-500/30 hover:bg-sky-500/10 flex items-center justify-center">
                         Voir suivi →
-                    </button>`;
+                    </a>`;
             }
 
-            // Insérer après le bouton WhatsApp (fin des boutons)
             const buttonsSection = document.querySelector('.flex.flex-col.gap-2.pt-4');
             if (buttonsSection) buttonsSection.after(banner);
         }
