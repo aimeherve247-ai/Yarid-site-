@@ -341,6 +341,11 @@
            ============================================================ */
 
         /* Carte produit avec perspective 3D */
+        @keyframes cardFadeIn {
+            from { opacity: 0; transform: translateY(18px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
         .product-card-animated {
             background: white;
             border-radius: 24px;
@@ -350,9 +355,8 @@
             flex-direction: column;
             height: 100%;
             box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            transform-style: preserve-3d;
-            opacity: 0;
-            transform: translateY(60px) scale(0.92);
+            opacity: 1;
+            animation: cardFadeIn 0.35s ease both;
         }
 
         .product-card-animated.is-visible {
@@ -399,8 +403,66 @@
             opacity: 1;
         }
 
-        /* Badge flottant avec animation */
-        .float-badge {
+        /* ========== CAROUSELS CATÉGORIES PHARES ========== */
+        .cat-carousel-section { margin-bottom: 28px; }
+        .cat-carousel-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px; margin-bottom: 12px;
+        }
+        .cat-carousel-title { font-size: 16px; font-weight: 900; color: #0f172a; letter-spacing: -0.02em; }
+        .cat-carousel-sub   { font-size: 10px; font-weight: 600; color: #94a3b8; margin-top: 1px; }
+        .cat-carousel-link  {
+            font-size: 11px; font-weight: 800; color: #0ea5e9; text-decoration: none;
+            display: flex; align-items: center; gap: 3px; white-space: nowrap;
+        }
+        .cat-carousel-scroll {
+            display: flex; gap: 12px; overflow-x: auto; padding: 4px 16px 12px;
+            scrollbar-width: none; -webkit-overflow-scrolling: touch;
+        }
+        .cat-carousel-scroll::-webkit-scrollbar { display: none; }
+
+        /* Carte produit carousel — style BackMarket */
+        .bm-card {
+            flex-shrink: 0; width: 160px;
+            background: white; border-radius: 18px; overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            border: 1px solid #f1f5f9;
+            cursor: pointer; transition: transform 0.22s, box-shadow 0.22s;
+            display: flex; flex-direction: column;
+        }
+        .bm-card:active { transform: scale(0.96); }
+        .bm-card:hover  { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(14,165,233,0.14); }
+        .bm-img-wrap {
+            position: relative; width: 100%; aspect-ratio: 1 / 1;
+            background: #f8fafc; overflow: hidden;
+        }
+        .bm-img-wrap img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .bm-card:hover .bm-img-wrap img { transform: scale(1.07); }
+        .bm-badge-star {
+            position: absolute; top: 7px; left: 7px;
+            background: #facc15; color: #713f12;
+            font-size: 8px; font-weight: 900; padding: 2px 7px; border-radius: 999px;
+        }
+        .bm-badge-disc {
+            position: absolute; top: 7px; right: 7px;
+            background: #ef4444; color: white;
+            font-size: 8px; font-weight: 900; padding: 2px 7px; border-radius: 999px;
+        }
+        .bm-info { padding: 10px 11px 12px; flex: 1; display: flex; flex-direction: column; }
+        .bm-name {
+            font-size: 12px; font-weight: 800; color: #0f172a; line-height: 1.35;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; min-height: 2.7em; margin-bottom: 6px;
+        }
+        .bm-price     { font-size: 14px; font-weight: 900; color: #0f172a; }
+        .bm-old-price { font-size: 10px; color: #94a3b8; text-decoration: line-through; margin-left: 4px; font-weight: 600; }
+        .bm-action {
+            margin-top: 8px; display: flex; align-items: center; gap: 4px;
+            font-size: 10px; font-weight: 800; color: #0ea5e9;
+        }
             animation: floatBadge 3s ease-in-out infinite;
         }
 
@@ -408,6 +470,55 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-4px); }
         }
+
+        /* ========== CARROUSELS CATÉGORIES ========== */
+        .cat-carousel-section { margin-bottom: 0; }
+        .cat-carousel-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px; margin-bottom: 12px;
+        }
+        .cat-carousel-title { font-size: 16px; font-weight: 900; color: #0f172a; letter-spacing: -0.02em; }
+        .cat-carousel-title span { color: #0ea5e9; }
+        .cat-carousel-link {
+            font-size: 11px; font-weight: 800; color: #0ea5e9;
+            text-decoration: none; display: flex; align-items: center; gap: 3px; flex-shrink: 0;
+        }
+        .cat-carousel-track {
+            display: flex; gap: 12px; overflow-x: auto;
+            padding: 4px 16px 14px; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+        }
+        .cat-carousel-track::-webkit-scrollbar { display: none; }
+        .cc-card {
+            flex-shrink: 0; width: 152px; background: white; border-radius: 20px;
+            overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.07); cursor: pointer;
+            transition: transform 0.22s, box-shadow 0.22s; border: 1px solid rgba(0,0,0,0.04);
+        }
+        .cc-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(14,165,233,0.14); }
+        .cc-card:active { transform: scale(0.97); }
+        .cc-img-wrap {
+            position: relative; width: 100%; aspect-ratio: 1 / 1;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0); overflow: hidden;
+        }
+        .cc-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+        .cc-card:hover .cc-img-wrap img { transform: scale(1.07); }
+        .cc-badge-star {
+            position: absolute; top: 7px; left: 7px; background: #facc15; color: #713f12;
+            font-size: 8px; font-weight: 900; padding: 2px 7px; border-radius: 999px;
+        }
+        .cc-badge-promo {
+            position: absolute; top: 7px; right: 7px; background: #ef4444; color: white;
+            font-size: 8px; font-weight: 900; padding: 2px 7px; border-radius: 999px;
+        }
+        .cc-info { padding: 9px 11px 12px; }
+        .cc-cat { font-size: 8px; font-weight: 800; color: #0ea5e9; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 3px; }
+        .cc-name {
+            font-size: 11.5px; font-weight: 800; color: #0f172a; line-height: 1.35;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; min-height: 31px; margin-bottom: 6px;
+        }
+        .cc-price { font-size: 13px; font-weight: 900; color: #0f172a; display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+        .cc-old { font-size: 10px; font-weight: 600; color: #94a3b8; text-decoration: line-through; }
+        .cc-divider { height: 8px; background: #f1f5f9; margin: 4px 0 24px; }
 
         /* Shimmer doré sur les cartes STAR */
         .star-shimmer {
@@ -793,8 +904,8 @@
         /* Search Bar Styles */
         .search-container {
             flex: 1;
-            max-width: 500px;
-            margin: 0 1rem;
+            max-width: 600px;
+            margin: 0 0.5rem;
             position: relative;
         }
         
@@ -990,6 +1101,11 @@
             z-index: 1050;
             display: none;
         }
+        .overlay.active { display: block; }
+
+        /* Checkout modal index.html */
+        .modal { display: none; position: fixed; inset: 0; z-index: 1200; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); align-items: flex-end; justify-content: center; }
+        .modal.active { display: flex; }
         
         .overlay.active { display: block; }
         
@@ -1319,7 +1435,7 @@
             <!-- Logo -->
             <a href="index.html" class="text-xl font-black italic tracking-tighter uppercase flex-shrink-0">YARID<span class="text-sky-500">.</span></a>
             
-            <!-- Barre de Recherche Centrale -->
+            <!-- Barre de Recherche + Panier intégré -->
             <div class="search-container">
                 <div class="search-input-wrapper">
                     <svg class="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1331,7 +1447,7 @@
                            placeholder="Rechercher un produit..."
                            autocomplete="off"
                            onkeydown="if(event.key==='Enter'){event.preventDefault();handleSearch();}">
-                    <button class="p-1.5 rounded-full hover:bg-sky-100 transition flex-shrink-0 mr-0.5" onclick="handleSearch()" title="Rechercher">
+                    <button class="p-1.5 rounded-full hover:bg-sky-100 transition flex-shrink-0" onclick="handleSearch()" title="Rechercher">
                         <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                         </svg>
@@ -1340,6 +1456,15 @@
                         <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
                         </svg>
+                    </button>
+                    <!-- Séparateur -->
+                    <div style="width:1px;height:20px;background:#e2e8f0;flex-shrink:0;margin:0 2px;"></div>
+                    <!-- Panier intégré -->
+                    <button onclick="toggleCart()" class="relative flex-shrink-0 p-1.5 rounded-full hover:bg-slate-200 transition" title="Mon panier">
+                        <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                        </svg>
+                        <span id="cart-count" class="absolute -top-0.5 -right-0.5 bg-sky-500 text-white text-[8px] font-black rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5 hidden leading-none">0</span>
                     </button>
                 </div>
                 
@@ -1386,16 +1511,6 @@
                 </div>
             </div>
             
-            <!-- À Propos + Panier -->
-            <div class="flex items-center gap-2 flex-shrink-0">
-             
-                <button onclick="toggleCart()" class="relative p-2 rounded-full hover:bg-slate-100 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                    </svg>
-                    <span id="cart-count" class="absolute -top-1 -right-1 bg-sky-500 text-white text-[9px] font-black rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
-                </button>
-            </div>
         </div>
     </header>
 
@@ -1453,19 +1568,11 @@
         </div>
         </section>
 
-        <!-- Categories - DÉPLACÉ AVANT le parrainage -->
-        <section class="mb-6 pt-4">
-            <div class="flex items-center justify-between px-4 mb-3">
-                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400" data-i18n="categories.title">Explorer</h3>
-                <a href="categories.html" class="text-xs font-semibold text-sky-500 flex items-center gap-1">
-                    <span data-i18n="action.see_all">Voir tout</span>
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </a>
-
-            </div>
+        <!-- Category pills -->
+        <section class="mb-4 pt-2">
           <div class="category-scroll" id="categories">
-                <!-- Categories injected by renderCategories() -->
-            </div>
+            <!-- Injecté par renderCategories() -->
+          </div>
         </section>
 
         <!-- Hero Carousel Parrainage - DÉPLACÉ APRÈS les catégories -->
@@ -1487,6 +1594,11 @@
                 <div class="swiper-pagination !bottom-3"></div>
             </div>
         </section>
+
+        <!-- ===== 4 CARROUSELS CATÉGORIES ===== -->
+        <div id="category-carousels">
+            <!-- Injecté par renderCategoryCarousels() après chargement des produits -->
+        </div>
 
         <!-- Products Grid -->
         <section class="px-4 mb-8" id="products-section">
@@ -1583,7 +1695,7 @@
                     <button onclick="applyPromo()" class="bg-slate-900 text-white px-4 rounded-xl text-xs font-bold uppercase">OK</button>
                 </div>
                 
-                <button onclick="openCheckout()" class="btn-primary w-full py-4 rounded-2xl text-white font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2">
+                <button onclick="openCheckoutFromCart()" class="btn-primary w-full py-4 rounded-2xl text-white font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2">
                     Commander
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </button>
@@ -2241,6 +2353,27 @@
         // ==========================================
         // INITIALISATION
         // ==========================================
+        // ==========================================
+        // PANIER — fonctions autonomes (ne dépend pas de cart-global.js)
+        // ==========================================
+        function toggleCart() {
+            var drawer  = document.getElementById('cart-drawer');
+            var overlay = document.getElementById('cart-overlay');
+            if (!drawer) return;
+            var isOpen  = drawer.classList.contains('open');
+            drawer.classList.toggle('open', !isOpen);
+            if (overlay) {
+                overlay.style.display = isOpen ? 'none' : 'block';
+                overlay.classList.toggle('active', !isOpen);
+            }
+            if (typeof renderCartItems === 'function') renderCartItems();
+        }
+
+        function openCheckoutFromCart() {
+            if (typeof openCheckout === 'function') { openCheckout(); }
+            else if (typeof orderViaWhatsApp === 'function') { orderViaWhatsApp(); }
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 console.log('[YARID] Initialisation commence');
@@ -2328,24 +2461,8 @@
 
             gsap.registerPlugin(ScrollTrigger);
 
-            // 1. REVEAL des cartes produits avec stagger
-            var productCards = document.querySelectorAll('.product-card-animated');
-            if (productCards.length > 0) {
-                gsap.fromTo(productCards,
-                    { y: 60, opacity: 0, scale: 0.92 },
-                    {
-                        y: 0, opacity: 1, scale: 1,
-                        duration: 0.6,
-                        stagger: 0.08,
-                        ease: 'back.out(1.2)',
-                        scrollTrigger: {
-                            trigger: '#products-grid',
-                            start: 'top 85%',
-                            once: true
-                        }
-                    }
-                );
-            }
+            // NOTE: L'animation des product-card-animated est gérée par CSS (.is-visible)
+            // GSAP ne touche plus aux cartes produits pour éviter de forcer opacity:0
 
             // 2. Animation du titre de section
             var sectionTitle = document.querySelector('#products-section h3');
@@ -2395,20 +2512,7 @@
                 });
             }
 
-            // 5. Animation des mini-cartes du carrousel
-            var miniCards = document.querySelectorAll('.mini-card-animated');
-            if (miniCards.length > 0) {
-                gsap.fromTo(miniCards,
-                    { x: 40, opacity: 0 },
-                    {
-                        x: 0, opacity: 1,
-                        duration: 0.4,
-                        stagger: 0.06,
-                        ease: 'power2.out',
-                        delay: 0.5
-                    }
-                );
-            }
+            // NOTE: Les mini-cards s'animent via CSS (transition), pas GSAP
 
             // 6. Effet magnétique sur les boutons d'action (desktop uniquement)
             if (window.innerWidth > 768) {
@@ -2436,54 +2540,23 @@
         // MINI HERO PRODUCTS GRID
         // ==========================================
         async function loadMiniHeroProducts() {
-            console.log('[YARID] Chargement carrousel produits stars...');
-            let data = null;
+            // Utiliser les produits déjà chargés en mémoire (plus rapide, pas de double requête)
+            var data = window.allProducts || [];
 
-            // NIVEAU 1 : Essayer de charger les produits "featured"
-            try {
-                const result = await _supabase
-                    .from('PRODUITS')
-                    .select('*')
-                    .eq('featured', true)
-                    .order('id', { ascending: false })
-                    .limit(20);
-                if (result.data && result.data.length > 0) {
-                    data = result.data;
-                    console.log('[YARID] Carrousel featured:', data.length, 'produits stars');
-                }
-            } catch (e) {
-                console.log('[YARID] Colonne featured non disponible, fallback niveau 2');
-            }
-
-            // NIVEAU 2 : Charger les derniers produits (si niveau 1 vide ou en erreur)
+            // Fallback Supabase si allProducts pas encore dispo
             if (!data || data.length === 0) {
                 try {
-                    const result = await _supabase
-                        .from('PRODUITS')
-                        .select('*')
-                        .order('id', { ascending: false })
-                        .limit(20);
-                    if (result.data && result.data.length > 0) {
-                        data = result.data;
-                        console.log('[YARID] Carrousel fallback:', data.length, 'produits recents');
-                    }
-                } catch (e) {
-                    console.log('[YARID] Erreur fallback Supabase');
-                }
+                    var res = await _supabase.from('PRODUITS').select('*').order('id', { ascending: false }).limit(20);
+                    if (res.data && res.data.length > 0) data = res.data;
+                } catch (e) { console.warn('[YARID] hero carousel fallback failed', e); }
             }
 
-            // NIVEAU 3 : Utiliser products deja charges en memoire (si les requetes ont echoue)
-            if ((!data || data.length === 0) && products && products.length > 0) {
-                data = products.slice(0, 20);
-                console.log('[YARID] Carrousel memoire:', data.length, 'produits du cache');
-            }
-
-            // Rendu final
             if (data && data.length > 0) {
                 renderSingleCarousel(data);
             } else {
-                console.log('[YARID] Aucun produit disponible pour le carrousel');
-                // Garder les skeletons visibles
+                // Masquer les skeletons si vraiment rien
+                var wrap = document.getElementById('hero-mini-products-wrap');
+                if (wrap) wrap.style.display = 'none';
             }
         }
 
@@ -2508,7 +2581,7 @@
                 var pid = p.id || 0;
                 var pname = (p.name || 'Produit').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
                 var pprice = (p.price || 0).toLocaleString() + ' FCFA';
-                var pimg = p.image_url || '';
+                var pimg = (p.image_url && p.image_url.trim()) ? p.image_url.trim() : 'https://via.placeholder.com/200x200?text=YARID';
                 var discountBadge = '';
                 if (p.old_price && p.old_price > p.price) {
                     var pct = Math.round((1 - p.price / p.old_price) * 100);
@@ -2520,7 +2593,7 @@
                 }
                 html += '<div class="mini-card-animated" onclick="window.location.href=\'produit-detail.html?id=' + pid + '\'">';
                 html += '<div class="mini-img-wrap">';
-                html += '<img src="' + pimg + '" alt="' + pname + '" loading="lazy" onerror="this.style.display=\'none\';this.parentNode.style.background=\'#f1f5f9\';">';
+                html += '<img src="' + pimg + '" alt="' + pname + '" loading="lazy" onerror="this.src=\'https://via.placeholder.com/200x200?text=YARID\';">';
                 html += discountBadge;
                 html += starBadge;
                 html += '</div>';
@@ -2694,7 +2767,7 @@
                     return '<div class="search-suggestion" onclick="goToProduct(' + p.id + ')">' +
                         '<div class="search-suggestion-icon"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></div>' +
                         '<div class="flex items-center gap-2 flex-1 min-w-0">' +
-                        '<img src="' + escapeHtml(p.image_url || '') + '" class="w-8 h-8 object-cover rounded-lg flex-shrink-0" onerror="this.style.display=\'none\'">' +
+                        '<img src="' + (p.image_url || '') + '" class="w-8 h-8 object-cover rounded-lg flex-shrink-0" onerror="this.style.display=\'none\'">' +
                         '<div class="flex-1 min-w-0">' +
                         '<p class="text-xs font-bold text-slate-900 truncate">' + escapeHtml(p.name || '') + '</p>' +
                         '<p class="text-[10px] text-slate-400">' + escapeHtml(p.categorie || '') + ' &middot; ' + (p.price || 0).toLocaleString() + ' FCFA</p>' +
@@ -2784,7 +2857,7 @@
         async function loadProducts() {
             try {
                 console.log('[YARID] Chargement des produits...');
-                var res = await _supabase.from('PRODUITS').select('*').order('id', { ascending: false }).limit(20);
+                var res = await _supabase.from('PRODUITS').select('*').order('id', { ascending: false }).limit(200);
                 var data = res.data;
                 var error = res.error;
 
@@ -2799,6 +2872,7 @@
 
                 renderProducts(products);
                 renderCategories();
+                renderCategoryCarousels();
 
             } catch (e) {
                 console.error('[YARID] Erreur loadProducts:', e);
@@ -2817,58 +2891,71 @@
         function renderProducts(items) {
             const grid = document.getElementById('products-grid');
             if (!grid) return;
+
             if (!items || items.length === 0) {
-                grid.innerHTML = '<p class="col-span-2 text-center py-10 text-slate-400">Aucun produit disponible</p>';
+                grid.innerHTML = '<p style="grid-column:span 2;text-align:center;padding:40px;color:#94a3b8;">Aucun produit dans cette catégorie</p>';
                 return;
+            }
+
+            // Diagnostic : log du premier produit pour vérifier la structure
+            if (items[0]) {
+                console.log('[YARID] Premier produit:', JSON.stringify({
+                    id: items[0].id,
+                    name: items[0].name,
+                    price: items[0].price,
+                    image_url: items[0].image_url,
+                    categorie: items[0].categorie
+                }));
             }
 
             var html = '';
             for (var i = 0; i < items.length; i++) {
-                try {
-                    var p = items[i];
-                    var pid = p.id || 0;
-                    var pname = escapeHtml(p.name || 'Produit');
-                    var pprice = p.price || 0;
-                    var pimage = escapeHtml(p.image_url) || 'https://via.placeholder.com/400x400?text=YARID';
-                    var pcat = escapeHtml(p.categorie || '');
-                    var pold = p.old_price || 0;
-                    var isStar = p.is_star ? '<span style="position:absolute;top:8px;left:8px;background:#facc15;color:#713f12;font-size:9px;font-weight:800;padding:2px 8px;border-radius:9999px;z-index:10;">STAR</span>' : '';
-                    var discountBadge = '';
-                    if (pold && pold > pprice) {
-                        var pct = Math.round((1 - pprice / pold) * 100);
-                        discountBadge = '<span style="position:absolute;top:8px;right:8px;background:#ef4444;color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:9999px;z-index:10;">-' + pct + '%</span>';
-                    }
-                    var oldPriceHtml = '';
-                    if (pold && pold > pprice) {
-                        oldPriceHtml = '<span class="product-old-price">' + pold.toLocaleString() + ' F</span>';
-                    }
-                    var priceStr = pprice.toLocaleString() + ' FCFA';
-                    var nameSafe = pname.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                var p = items[i];
+                if (!p) continue;
 
-                    var isStarProd = p.is_star ? 'star-shimmer' : '';
-                    html += '<div class="product-card-animated ' + isStarProd + '" data-product-id="' + pid + '" onclick="window.location.href=\'produit-detail.html?id=' + pid + '\'" style="cursor:pointer;">';
-                    html += '  <div class="product-image-container">';
-                    html += '    <img src="' + pimage + '" alt="' + pname + '" loading="lazy" onerror="this.style.display=\'none\';this.parentNode.style.background=\'#f1f5f9\';">';
-                    html += isStar;
-                    html += discountBadge;
-                    html += '  </div>';
-                    html += '  <div class="product-info-v2">';
-                    html += '    <p class="product-cat-v2">' + pcat + '</p>';
-                    html += '    <h4 class="product-title-v2">' + pname + '</h4>';
-                    html += '    <div class="product-price-row-v2">';
-                    html += '      <span class="product-price-v2">' + priceStr + '</span>';
-                    html += oldPriceHtml;
-                    html += '    </div>';
-                    html += '    <div class="product-arrow-hint">';
-                    html += '      <span>Voir le produit</span>';
-                    html += '      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>';
-                    html += '    </div>';
-                    html += '  </div>';
-                    html += '</div>';
-                } catch (e) {
-                    console.error('Erreur rendu produit ' + i + ':', e);
+                var pid   = p.id || 0;
+                var pname = (p.name || 'Produit').substring(0, 60);
+                var pprice = Number(p.price) || 0;
+                var pold   = Number(p.old_price) || 0;
+                var pcat   = p.categorie || '';
+                // URL image directe — pas d'escapeHtml pour ne pas casser les &
+                var pimg = (p.image_url && String(p.image_url).trim().length > 4)
+                    ? p.image_url.trim()
+                    : '';
+
+                var starBadge = p.is_star
+                    ? '<div style="position:absolute;top:8px;left:8px;background:#facc15;color:#713f12;font-size:8px;font-weight:900;padding:2px 8px;border-radius:999px;z-index:5;">★ STAR</div>'
+                    : '';
+                var promoBadge = (pold > 0 && pold > pprice)
+                    ? '<div style="position:absolute;top:8px;right:8px;background:#ef4444;color:#fff;font-size:8px;font-weight:900;padding:2px 7px;border-radius:999px;z-index:5;">-' + Math.round((1-pprice/pold)*100) + '%</div>'
+                    : '';
+                var oldPriceStr = (pold > 0 && pold > pprice)
+                    ? '<span style="font-size:10px;color:#94a3b8;text-decoration:line-through;margin-left:4px;">' + pold.toLocaleString() + ' F</span>'
+                    : '';
+
+                html += '<div onclick="window.location.href=\'produit-detail.html?id=' + pid + '\'" style="background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.07);cursor:pointer;display:flex;flex-direction:column;border:1px solid rgba(0,0,0,0.04);">';
+
+                // Image
+                html += '<div style="position:relative;width:100%;aspect-ratio:1/1;background:linear-gradient(135deg,#f8fafc,#e2e8f0);overflow:hidden;">';
+                if (pimg) {
+                    html += '<img src="' + pimg + '" alt="" loading="eager" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.onerror=null;this.style.display=\'none\';">';
                 }
+                html += starBadge + promoBadge;
+                html += '</div>';
+
+                // Info
+                html += '<div style="padding:10px 12px 12px;flex:1;">';
+                if (pcat) html += '<p style="font-size:8px;font-weight:800;color:#0ea5e9;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 3px;">' + pcat + '</p>';
+                html += '<h4 style="font-size:12px;font-weight:800;color:#0f172a;line-height:1.35;margin:0 0 6px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + pname + '</h4>';
+                html += '<div style="display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;">';
+                html += '<span style="font-size:13px;font-weight:900;color:#0f172a;">' + pprice.toLocaleString() + ' FCFA</span>';
+                html += oldPriceStr;
+                html += '</div>';
+                html += '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9;display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:#94a3b8;">Voir le produit <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></div>';
+                html += '</div>';
+                html += '</div>';
             }
+
             grid.innerHTML = html;
         }
 
@@ -3124,71 +3211,153 @@
         }
 
         // ==========================================
-        // FILTRES CATÉGORIES
+        // 4 CARROUSELS CATÉGORIES
+        // ==========================================
+        function renderCategoryCarousels() {
+            var prods = window.allProducts || [];
+            if (!prods.length) return;
+
+            // Grouper par catégorie
+            var catMap = {};
+            prods.forEach(function(p) {
+                var cat = (p.categorie || '').trim();
+                if (!cat) return;
+                if (!catMap[cat]) catMap[cat] = [];
+                catMap[cat].push(p);
+            });
+
+            // Trier les catégories par nombre de produits décroissant → prendre les 4 premières
+            var sortedCats = Object.keys(catMap).sort(function(a, b) {
+                return catMap[b].length - catMap[a].length;
+            }).slice(0, 4);
+
+            if (!sortedCats.length) return;
+
+            var container = document.getElementById('category-carousels');
+            if (!container) return;
+
+            var html = '';
+            sortedCats.forEach(function(cat, idx) {
+                var items = catMap[cat];
+                // Stars en premier, puis tous les autres — max 8
+                var starred = items.filter(function(p) { return p.is_star; });
+                var rest    = items.filter(function(p) { return !p.is_star; });
+                var display = starred.concat(rest).slice(0, 8);
+
+                var catUrl = 'category-view.html?cat=' + encodeURIComponent(cat) + '&name=' + encodeURIComponent(cat);
+
+                // Titre avec mise en valeur du dernier mot
+                var words = cat.trim().split(' ');
+                var lastWord = words.pop();
+                var titleHtml = words.length
+                    ? words.join(' ') + ' <span>' + lastWord + '</span>'
+                    : '<span>' + cat + '</span>';
+
+                html += '<section class="cat-carousel-section">';
+                if (idx > 0) html += '<div class="cc-divider"></div>';
+                html += '<div class="cat-carousel-header">'
+                      + '<h3 class="cat-carousel-title">' + titleHtml + '</h3>'
+                      + '<a href="' + catUrl + '" class="cat-carousel-link">Voir tout <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></a>'
+                      + '</div>'
+                      + '<div class="cat-carousel-track">';
+
+                display.forEach(function(p) {
+                    var pid   = p.id || 0;
+                    var pname = escapeHtml(p.name || 'Produit');
+                    var pimg  = (p.image_url && p.image_url.trim()) ? p.image_url.trim() : 'https://via.placeholder.com/300?text=YARID';
+                    var pcat  = escapeHtml(p.categorie || '');
+                    var ppr   = p.price || 0;
+                    var pold  = p.old_price || 0;
+                    var priceStr = ppr.toLocaleString() + ' FCFA';
+                    var oldHtml  = (pold && pold > ppr) ? '<span class="cc-old">' + pold.toLocaleString() + ' F</span>' : '';
+                    var starB    = p.is_star ? '<div class="cc-badge-star">★ STAR</div>' : '';
+                    var promoB   = (pold && pold > ppr) ? '<div class="cc-badge-promo">-' + Math.round((1 - ppr/pold)*100) + '%</div>' : '';
+
+                    html += '<div class="cc-card" onclick="window.location.href=\'produit-detail.html?id=' + pid + '\'">'
+                          + '<div class="cc-img-wrap">'
+                          + '<img src="' + pimg + '" alt="' + pname + '" loading="lazy" onerror="this.src=\'https://via.placeholder.com/300?text=YARID\';">'
+                          + starB + promoB
+                          + '</div>'
+                          + '<div class="cc-info">'
+                          + '<p class="cc-cat">' + pcat + '</p>'
+                          + '<h4 class="cc-name">' + pname + '</h4>'
+                          + '<div class="cc-price">' + priceStr + oldHtml + '</div>'
+                          + '</div></div>';
+                });
+
+                html += '</div></section>';
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ==========================================
+        // FILTRES CATÉGORIES — depuis les vrais produits
         // ==========================================
         function renderCategories() {
             try {
                 var container = document.getElementById('categories');
                 if (!container) return;
 
-                var categories = [
-                    { nom: '\u00C0 Propos', filtre: '_about', isAbout: true },
-                    { nom: 'Tout', filtre: 'all', active: true },
-                    { nom: 'Parfums', filtre: 'parfums', active: true },
-                    { nom: 'Accessoires electronique', filtre: 'Accessoires electronique', active: true },
-                    { nom: 'Mode', filtre: 'mode', active: true },
-                    { nom: 'Chaussures', filtre: 'chaussures', active: true },
-                    { nom: 'Sacs', filtre: 'sacs', active: true },
-                    { nom: 'Montres', filtre: 'montres', active: true },
-                    { nom: 'Maison', filtre: 'maison', active: true }
-                ];
-
-                window.yaridCategories = categories;
-
-                var isMobile = window.innerWidth < 768;
-                var displayLimit = isMobile ? 6 : 9;
-                var visible = categories.slice(0, displayLimit);
+                var prods = window.allProducts || [];
+                var seen = {};
+                var dynamicCats = [];
+                prods.forEach(function(p) {
+                    var cat = (p.categorie || '').trim();
+                    if (cat && !seen[cat]) { seen[cat] = true; dynamicCats.push(cat); }
+                });
+                dynamicCats.sort();
+                window.yaridCategories = dynamicCats;
 
                 var html = '';
-                for (var i = 0; i < visible.length; i++) {
-                    var cat = visible[i];
-                    var isActive = cat.filtre === 'all' ? 'active' : '';
-                    if (cat.isAbout) {
-                        html += '<button class="category-pill px-5 py-2.5 rounded-full text-sm font-semibold text-slate-600 flex items-center gap-2 ' + isActive + '" onclick="openAboutModal()">';
-                        html += '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-                        html += '\u00C0 Propos</button>';
-                    } else {
-                        html += '<button class="category-pill px-5 py-2.5 rounded-full text-sm font-semibold text-slate-600 ' + isActive + '" onclick="filterCategory(\'' + cat.filtre + '\',this)">' + cat.nom + '</button>';
-                    }
-                }
-
-                if (categories.length > displayLimit) {
-                    html += '<button class="category-pill px-5 py-2.5 rounded-full text-sm font-semibold text-sky-600" onclick="window.location.href=\'categories.html\'">';
-                    html += '<svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>';
-                    html += '</button>';
-                }
+                // À Propos
+                html += '<button class="category-pill px-4 py-2.5 rounded-full text-sm font-semibold text-slate-600 flex items-center gap-1.5" onclick="openAboutModal()">'
+                      + '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+                      + 'À Propos</button>';
+                // Tout
+                html += '<button class="category-pill px-5 py-2.5 rounded-full text-sm font-semibold text-slate-600 active" onclick="filterCategory(\'all\',this)">Tout</button>';
+                // Catégories dynamiques
+                dynamicCats.forEach(function(cat) {
+                    var label = cat.length > 20 ? cat.substring(0, 18) + '…' : cat;
+                    html += '<button class="category-pill px-5 py-2.5 rounded-full text-sm font-semibold text-slate-600 whitespace-nowrap" onclick="filterCategory(\'' + cat.replace(/'/g, "\\'") + '\',this)">' + label + '</button>';
+                });
 
                 container.innerHTML = html;
-            } catch (e) {
-                console.error('Erreur renderCategories:', e);
-            }
+            } catch (e) { console.error('Erreur renderCategories:', e); }
         }
 
         function filterCategory(cat, btn) {
-            document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
-            
+            document.querySelectorAll('.category-pill').forEach(function(p) { p.classList.remove('active'); });
+            if (btn) {
+                btn.classList.add('active');
+                // Scroll automatique vers la pill active
+                btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+
+            var prods = window.allProducts || [];
+
             if (cat === 'all') {
-                renderProducts(products);
-                document.querySelector('#products-section h3').textContent = 'Nouveautes';
+                renderProducts(prods);
+                var title = document.querySelector('#products-section h3');
+                if (title) title.textContent = 'Nouveautés';
                 return;
             }
-            var catName = cat;
-            var found = (window.yaridCategories || []).find(function(c) {
-                return (c.filtre || c.nom.toLowerCase()) === cat;
+
+            var catLower = cat.toLowerCase();
+            var filtered = prods.filter(function(p) {
+                return (p.categorie || '').toLowerCase() === catLower;
             });
-            if (found) catName = found.nom;
-            window.location.href = 'category-view.html?cat=' + encodeURIComponent(cat) + '&name=' + encodeURIComponent(catName);
+
+            var title = document.querySelector('#products-section h3');
+            if (title) title.textContent = cat + ' · ' + filtered.length + ' produits';
+
+            renderProducts(filtered);
+
+            // Scroll smooth vers la grille
+            setTimeout(function() {
+                var section = document.getElementById('products-section');
+                if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
         }
 
         function setView(view) {

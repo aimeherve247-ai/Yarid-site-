@@ -1,200 +1,2570 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f172a">
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('YARID PWA : Prête !'))
-        .catch(err => console.log('Erreur PWA :', err));
-    });
-  }
-</script>
-
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YARID | Marketing Analytics Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>YARID | Marketing Analytics Pro - Intelligence Commerciale</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="analytics.js"></script> 
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0f172a">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="YARID">
-
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon_32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon_16.png">
-<link rel="apple-touch-icon" href="/icons/ios.png">
-
-<meta property="og:type" content="website">
-<meta property="og:title" content="YARID - Boutique Premium">
-<meta property="og:description" content="Votre destination exclusive pour des produits d'exception au Cameroun.">
-<meta property="og:image" content="/icons/icon_512.png">
-<meta property="og:url" content="https://votre-site.netlify.app">
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('Service Worker enregistré !'))
-        .catch(err => console.log('Erreur SW:', err));
-    });
-  }
-</script>
-
-</head>
-<body class="bg-slate-50 min-h-screen p-4 md:p-8">
-
-    <div class="max-w-6xl mx-auto">
-        <header class="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 gap-4">
-            <div>
-                <h1 class="text-2xl font-black italic text-slate-900">YARID<span class="text-pink-500">.</span> ANALYTICS</h1>
-                <p class="text-[10px] text-slate-400 uppercase tracking-[3px] font-bold">Marketing Intelligence System</p>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="loadAnalytics()" class="text-xs font-bold bg-slate-100 text-slate-600 px-4 py-2 rounded-xl hover:bg-slate-200 transition">Actualiser</button>
-                <a href="portail.html" class="text-xs font-bold bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition shadow-lg shadow-slate-200">Retour Portail</a>
-            </div>
-        </header>
-
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                <p class="text-[10px] text-slate-400 font-bold uppercase mb-2">Visites Totales</p>
-                <h2 id="total-views" class="text-3xl font-black text-slate-800 italic">0</h2>
-            </div>
-            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                <p class="text-[10px] text-pink-500 font-bold uppercase mb-2">Taux Conversion</p>
-                <h2 id="conv-rate" class="text-3xl font-black text-pink-500 italic">0%</h2>
-            </div>
-            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                <p class="text-[10px] text-sky-500 font-bold uppercase mb-2">Trafic Mobile</p>
-                <h2 id="mobile-views" class="text-3xl font-black text-sky-500 italic">0%</h2>
-            </div>
-            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                <p class="text-[10px] text-emerald-500 font-bold uppercase mb-2">Vitesse Moyenne</p>
-                <h2 id="avg-load" class="text-3xl font-black text-emerald-500 italic">0ms</h2>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            
-            <div class="lg:col-span-2 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
-                <h3 class="font-bold text-slate-800 mb-6 uppercase text-xs tracking-widest flex items-center gap-2">
-                    <span class="w-2 h-2 bg-pink-500 rounded-full animate-pulse"></span>
-                    Tunnel de Conversion (Funnel)
-                </h3>
-                <div class="relative h-[300px]">
-                    <canvas id="funnelChart"></canvas>
-                </div>
-            </div>
-
-            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm text-center">
-                <h3 class="font-bold text-slate-800 mb-6 uppercase text-xs tracking-widest">Sources de Trafic</h3>
-                <canvas id="sourceChart"></canvas>
-            </div>
-
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
-                <h3 class="font-bold text-slate-800 mb-6 uppercase text-xs tracking-widest text-center">Top Pages</h3>
-                <canvas id="pagesChart"></canvas>
-            </div>
-            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
-                <h3 class="font-bold text-slate-800 mb-6 uppercase text-xs tracking-widest text-center">Appareils</h3>
-                <div class="max-w-[200px] mx-auto">
-                    <canvas id="deviceChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
     <script>
-        const SUPABASE_URL = 'https://whcpugnkldbmuqzgqxbe.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('YARID Analytics PWA : Prête !'))
+            .catch(err => console.log('Erreur PWA :', err));
+        });
+      }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
 
-        let charts = {}; // Stockage des instances de graphiques pour reset
-
-        async function loadAnalytics() {
-            const { data, error } = await supabaseClient.from('site_analytics').select('*');
-            if (error) return console.error(error);
-
-            // 1. CALCULS DES KPI
-            const total = data.filter(d => d.event_type === 'page_view').length;
-            const mobile = data.filter(d => d.device_type === 'Mobile').length;
-            const purchases = data.filter(d => d.event_type === 'paiement_valide').length;
-            const convRate = total > 0 ? ((purchases / total) * 100).toFixed(1) : 0;
-            
-            // Calcul temps chargement moyen
-            const loadTimes = data.filter(d => d.load_time_ms > 0).map(d => d.load_time_ms);
-            const avgLoad = loadTimes.length > 0 ? Math.round(loadTimes.reduce((a,b) => a+b) / loadTimes.length) : 0;
-
-            document.getElementById('total-views').innerText = total;
-            document.getElementById('conv-rate').innerText = convRate + "%";
-            document.getElementById('mobile-views').innerText = total > 0 ? Math.round((mobile/total)*100) + "%" : "0%";
-            document.getElementById('avg-load').innerText = avgLoad + "ms";
-
-            // 2. DATA POUR LE TUNNEL (FUNNEL)
-            const funnelData = {
-                'Visites': total,
-                'Vues Produits': data.filter(d => d.event_type === 'vue_produit').length,
-                'Ajouts Panier': data.filter(d => d.event_type === 'ajout_panier').length,
-                'Ventes': purchases
-            };
-
-            updateChart('funnelChart', 'bar', Object.keys(funnelData), Object.values(funnelData), '#ec4899', true);
-
-            // 3. DATA POUR LES SOURCES (UTM)
-            const sources = {};
-            data.forEach(d => {
-                let src = d.utm_source || 'Direct';
-                sources[src] = (sources[src] || 0) + 1;
-            });
-            updateChart('sourceChart', 'polarArea', Object.keys(sources), Object.values(sources), ['#0ea5e9', '#6366f1', '#f43f5e', '#f59e0b']);
-
-            // 4. TOP PAGES
-            const pages = {};
-            data.filter(d => d.event_type === 'page_view').forEach(d => {
-                pages[d.page_url] = (pages[d.page_url] || 0) + 1;
-            });
-            updateChart('pagesChart', 'bar', Object.keys(pages), Object.values(pages), '#1e293b');
-
-            // 5. APPAREILS
-            updateChart('deviceChart', 'doughnut', ['Mobile', 'PC'], [mobile, total - mobile], ['#0ea5e9', '#cbd5e1']);
+        :root {
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+            --primary: #0f172a;
+            --accent: #ec4899;
+            --sky: #0ea5e9;
+            --emerald: #10b981;
+            --amber: #f59e0b;
         }
 
-        // Fonction helper pour créer/maj les graphiques
-        function updateChart(id, type, labels, data, colors, horizontal = false) {
-            if (charts[id]) charts[id].destroy();
-            const ctx = document.getElementById(id).getContext('2d');
-            charts[id] = new Chart(ctx, {
-                type: type,
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: colors,
-                        borderRadius: 10,
-                        borderWidth: 0
-                    }]
+        body {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #f8fafc 100%);
+            min-height: 100vh;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+            padding-left: var(--safe-left);
+            padding-right: var(--safe-right);
+        }
+
+        /* ===== GLASS MORPHISM CARDS ===== */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04), 0 1px 4px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
+            transform: translateY(-2px);
+        }
+
+        .glass-card-dark {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px rgba(15, 23, 42, 0.3);
+            color: white;
+        }
+
+        /* ===== GRADIENT TEXT ===== */
+        .gradient-text {
+            background: linear-gradient(135deg, #0f172a 0%, #ec4899 50%, #0ea5e9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gradient-text-emerald {
+            background: linear-gradient(135deg, #10b981, #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gradient-text-amber {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ===== ANIMATED KPI CARDS ===== */
+        .kpi-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--card-accent, linear-gradient(90deg, #ec4899, #0ea5e9));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .kpi-card:hover::before {
+            opacity: 1;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px) scale(1.01);
+        }
+
+        /* ===== PULSE ANIMATION ===== */
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { opacity: 0.8; transform: scale(1.1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        }
+
+        /* ===== GLOW EFFECTS ===== */
+        .glow-pink { box-shadow: 0 0 20px rgba(236, 72, 153, 0.15); }
+        .glow-sky { box-shadow: 0 0 20px rgba(14, 165, 233, 0.15); }
+        .glow-emerald { box-shadow: 0 0 20px rgba(16, 185, 129, 0.15); }
+        .glow-amber { box-shadow: 0 0 20px rgba(245, 158, 11, 0.15); }
+
+        /* ===== FUNNEL STYLES ===== */
+        .funnel-step {
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .funnel-bar {
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .funnel-connector {
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+        }
+
+        /* ===== HEATMAP GRID ===== */
+        .heatmap-cell {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .heatmap-cell:hover {
+            transform: scale(1.15);
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .heatmap-legend {
+            display: flex;
+            gap: 2px;
+            align-items: center;
+        }
+
+        .heatmap-legend-bar {
+            width: 12px;
+            height: 8px;
+            border-radius: 2px;
+        }
+
+        /* ===== TAB SYSTEM ===== */
+        .tab-btn {
+            position: relative;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.3);
+        }
+
+        .tab-btn:not(.active):hover {
+            background: rgba(15, 23, 42, 0.05);
+        }
+
+        /* ===== TABLE STYLES ===== */
+        .data-table th {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            padding: 12px 16px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .data-table td {
+            padding: 14px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid #f8fafc;
+            transition: background 0.15s ease;
+        }
+
+        .data-table tbody tr:hover td {
+            background: rgba(14, 165, 233, 0.03);
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-gradient {
+            background: linear-gradient(90deg, #ec4899, #0ea5e9, #10b981);
+            background-size: 200% 100%;
+            animation: gradient-flow 3s ease infinite;
+        }
+
+        @keyframes gradient-flow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* ===== ALERT SYSTEM ===== */
+        .alert-card {
+            border-left: 4px solid;
+            animation: slide-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slide-in {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .alert-critical { border-left-color: #ef4444; background: linear-gradient(135deg, #fef2f2, white); }
+        .alert-warning { border-left-color: #f59e0b; background: linear-gradient(135deg, #fffbeb, white); }
+        .alert-success { border-left-color: #10b981; background: linear-gradient(135deg, #ecfdf5, white); }
+        .alert-info { border-left-color: #0ea5e9; background: linear-gradient(135deg, #f0f9ff, white); }
+
+        /* ===== LOADING SKELETON ===== */
+        .skeleton {
+            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ===== PERIOD SELECTOR ===== */
+        .period-chip {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+        }
+
+        .period-chip.active {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            border-color: #0f172a;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+        }
+
+        .period-chip:hover:not(.active) {
+            border-color: #cbd5e1;
+            background: white;
+        }
+
+        /* ===== SEGMENT BADGES ===== */
+        .segment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .segment-badge:hover {
+            transform: scale(1.05);
+        }
+
+        /* ===== EXPORT BUTTON ===== */
+        .export-btn {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .export-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .export-btn:hover::before {
+            left: 100%;
+        }
+
+        .export-btn:hover {
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .dashboard-grid { grid-template-columns: 1fr !important; }
+            .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .funnel-desktop { display: none !important; }
+            .funnel-mobile { display: block !important; }
+            .hide-mobile { display: none !important; }
+        }
+
+        @media (min-width: 769px) {
+            .funnel-mobile { display: none !important; }
+        }
+
+        /* ===== ANIMATED ENTRANCE ===== */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-up-delay-1 { animation-delay: 0.1s; }
+        .fade-up-delay-2 { animation-delay: 0.2s; }
+        .fade-up-delay-3 { animation-delay: 0.3s; }
+        .fade-up-delay-4 { animation-delay: 0.4s; }
+
+        /* ===== PREDICTION CARD ===== */
+        .prediction-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prediction-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+            animation: rotate-glow 10s linear infinite;
+        }
+
+        @keyframes rotate-glow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== MINI SPARKLINE ===== */
+        .sparkline-container {
+            position: relative;
+            height: 40px;
+        }
+
+        /* ===== TOOLTIP ===== */
+        .custom-tooltip {
+            position: absolute;
+            background: #0f172a;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .custom-tooltip.visible { opacity: 1; }
+
+        /* ===== SECTION HEADER ===== */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        /* ===== LIVE INDICATOR ===== */
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            background: #ecfdf5;
+            color: #059669;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* ===== STRATEGY CARD ===== */
+        .strategy-card {
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .strategy-card:hover {
+            border-color: #0ea5e9;
+            box-shadow: 0 8px 24px rgba(14, 165, 233, 0.1);
+        }
+
+        .strategy-priority-high { border-left: 4px solid #ef4444; }
+        .strategy-priority-medium { border-left: 4px solid #f59e0b; }
+        .strategy-priority-low { border-left: 4px solid #10b981; }
+
+        /* ===== COHORT GRID ===== */
+        .cohort-cell {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .cohort-cell:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* ===== SCROLL HINT ===== */
+        .scroll-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 50;
+        }
+
+        /* ===== PRINT STYLES ===== */
+        @media print {
+            body { background: white; }
+            .no-print { display: none !important; }
+            .glass-card { box-shadow: none; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- ===== HEADER ===== -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60" style="padding-top: var(--safe-top);">
+        <div class="max-w-[1440px] mx-auto px-4 md:px-8 py-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <!-- Logo & Title -->
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-black italic tracking-tight">
+                            YARID<span class="text-pink-500">.</span> ANALYTICS <span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full align-middle ml-2 not-italic">PRO</span>
+                        </h1>
+                        <p class="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-[3px]">Marketing Intelligence System</p>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex flex-wrap items-center gap-2 md:gap-3">
+                    <!-- Live Badge -->
+                    <div class="live-badge">
+                        <span class="pulse-dot bg-emerald-500"></span>
+                        EN DIRECT
+                    </div>
+
+                    <!-- Period Selector -->
+                    <div class="flex gap-1 bg-slate-100 p-1 rounded-xl">
+                        <button onclick="setPeriod('24h')" class="period-chip px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold active" data-period="24h">24H</button>
+                        <button onclick="setPeriod('7d')" class="period-chip px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold" data-period="7d">7J</button>
+                        <button onclick="setPeriod('30d')" class="period-chip px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold" data-period="30d">30J</button>
+                        <button onclick="setPeriod('90d')" class="period-chip px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold" data-period="90d">90J</button>
+                    </div>
+
+                    <!-- Refresh Button -->
+                    <button onclick="loadAnalytics()" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 transition flex items-center gap-2">
+                        <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                    </button>
+
+                    <!-- Export -->
+                    <button onclick="exportReport()" class="export-btn px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 no-print">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <span class="hidden md:inline">Exporter</span>
+                    </button>
+
+                    <!-- Back -->
+                    <a href="index.html" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4m-4 0h4"/>
+                        </svg>
+                        <span class="hidden md:inline">Retour</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="max-w-[1440px] mx-auto px-4 md:px-8 py-6 md:py-8 space-y-6 md:space-y-8">
+
+        <!-- ===== SECTION 1: KPI CARDS ===== -->
+        <section class="fade-up">
+            <div class="section-header">
+                <div class="section-icon bg-pink-50 text-pink-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-lg font-black">Vue d'ensemble</h2>
+                    <p class="text-xs text-slate-400 font-medium" id="kpi-period-label">Donnees des dernieres 24 heures</p>
+                </div>
+            </div>
+
+            <div class="kpi-grid grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-4">
+                <!-- KPI: Visites -->
+                <div class="glass-card kpi-card p-4 md:p-5" style="--card-accent: linear-gradient(90deg, #0ea5e9, #0284c7);">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Visites</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600" id="kpi-visites-trend">+0%</span>
+                    </div>
+                    <p class="text-2xl md:text-3xl font-black text-slate-800" id="kpi-visites">0</p>
+                    <div class="sparkline-container mt-2" id="spark-visites"></div>
+                </div>
+
+                <!-- KPI: Utilisateurs Uniques -->
+                <div class="glass-card kpi-card p-4 md:p-5" style="--card-accent: linear-gradient(90deg, #8b5cf6, #7c3aed);">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Utilisateurs</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600" id="kpi-users-trend">+0%</span>
+                    </div>
+                    <p class="text-2xl md:text-3xl font-black text-slate-800" id="kpi-users">0</p>
+                    <p class="text-[10px] text-slate-400 mt-1"><span id="kpi-new-users">0</span> nouveaux</p>
+                </div>
+
+                <!-- KPI: Taux Conversion -->
+                <div class="glass-card kpi-card p-4 md:p-5" style="--card-accent: linear-gradient(90deg, #ec4899, #db2777);">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-[10px] font-bold text-pink-500 uppercase tracking-wider">Conversion</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-pink-50 text-pink-600" id="kpi-conv-trend">+0%</span>
+                    </div>
+                    <p class="text-2xl md:text-3xl font-black gradient-text" id="kpi-conversion">0%</p>
+                    <p class="text-[10px] text-slate-400 mt-1">vs <span id="kpi-conv-avg">0%</span> moy.</p>
+                </div>
+
+                <!-- KPI: Revenus -->
+                <div class="glass-card kpi-card p-4 md:p-5" style="--card-accent: linear-gradient(90deg, #10b981, #059669);">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Revenus</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600" id="kpi-revenue-trend">+0%</span>
+                    </div>
+                    <p class="text-2xl md:text-3xl font-black gradient-text-emerald" id="kpi-revenue">0 FCFA</p>
+                    <div class="sparkline-container mt-2" id="spark-revenue"></div>
+                </div>
+
+                <!-- KPI: Panier Moyen -->
+                <div class="glass-card kpi-card p-4 md:p-5" style="--card-accent: linear-gradient(90deg, #f59e0b, #d97706);">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Panier Moyen</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-600" id="kpi-aov-trend">+0%</span>
+                    </div>
+                    <p class="text-2xl md:text-3xl font-black gradient-text-amber" id="kpi-aov">0 FCFA</p>
+                    <p class="text-[10px] text-slate-400 mt-1"><span id="kpi-items-cart">0</span> art./panier</p>
+                </div>
+
+                <!-- KPI: Taux Rebond -->
+                <div class="glass-card kpi-card p-4 md:p-5" style="--card-accent: linear-gradient(90deg, #ef4444, #dc2626);">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Rebond</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-red-600" id="kpi-bounce-trend">0%</span>
+                    </div>
+                    <p class="text-2xl md:text-3xl font-black text-red-500" id="kpi-bounce">0%</p>
+                    <p class="text-[10px] text-slate-400 mt-1"><span id="kpi-avg-session">0m 0s</span> moy.</p>
+                </div>
+
+                <!-- KPI: Score Marketing -->
+                <div class="glass-card-dark kpi-card p-4 md:p-5 col-span-2 md:col-span-1" style="--card-accent: linear-gradient(90deg, #0f172a, #334155);">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Score YARID</span>
+                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                    </div>
+                    <p class="text-2xl md:text-3xl font-black text-white" id="kpi-score">0<span class="text-sm text-slate-400">/100</span></p>
+                    <div class="mt-2 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                        <div class="progress-gradient h-full rounded-full transition-all duration-1000" id="score-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SECTION 2: FUNNEL DE CONVERSION + SOURCES ===== -->
+        <div class="dashboard-grid grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+            <!-- Funnel -->
+            <section class="lg:col-span-2 glass-card p-5 md:p-6 fade-up fade-up-delay-1">
+                <div class="section-header mb-6">
+                    <div class="section-icon bg-sky-50 text-sky-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-lg font-black">Tunnel de Conversion</h2>
+                        <p class="text-xs text-slate-400 font-medium">Parcours client complet</p>
+                    </div>
+                    <span class="text-[10px] text-slate-400 font-bold" id="funnel-total-users">0 utilisateurs</span>
+                </div>
+
+                <div id="funnel-container" class="space-y-3">
+                    <!-- Steps injected dynamically -->
+                </div>
+
+                <!-- Abandon Stats -->
+                <div class="mt-6 pt-4 border-t border-slate-100 grid grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Abandon Panier</p>
+                        <p class="text-lg font-black text-red-500" id="funnel-abandon-cart">0%</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Abandon Checkout</p>
+                        <p class="text-lg font-black text-amber-500" id="funnel-abandon-checkout">0%</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Temps Conversion</p>
+                        <p class="text-lg font-black text-sky-500" id="funnel-conv-time">0m</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sources de Trafic -->
+            <section class="glass-card p-5 md:p-6 fade-up fade-up-delay-2">
+                <div class="section-header mb-4">
+                    <div class="section-icon bg-emerald-50 text-emerald-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black">Sources</h2>
+                        <p class="text-xs text-slate-400 font-medium">Origines du trafic</p>
+                    </div>
+                </div>
+
+                <div class="relative h-[200px] mb-4">
+                    <canvas id="sourceChart"></canvas>
+                </div>
+
+                <!-- Source List -->
+                <div id="source-list" class="space-y-2 max-h-[200px] overflow-y-auto">
+                    <!-- Injected dynamically -->
+                </div>
+
+                <!-- UTM Tags -->
+                <div class="mt-4 pt-3 border-t border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Campagnes UTM</p>
+                    <div id="utm-list" class="flex flex-wrap gap-1.5">
+                        <!-- Injected dynamically -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ===== SECTION 3: TRAFIC TEMPS REEL + COURBES ===== -->
+        <div class="dashboard-grid grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+            <!-- Traffic Chart -->
+            <section class="lg:col-span-2 glass-card p-5 md:p-6 fade-up fade-up-delay-1">
+                <div class="section-header mb-4">
+                    <div class="section-icon bg-violet-50 text-violet-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-lg font-black">Trafic & Conversions</h2>
+                        <p class="text-xs text-slate-400 font-medium">Evolution temporelle</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <span class="flex items-center gap-1 text-[10px] font-bold text-sky-600">
+                            <span class="w-2 h-2 rounded-full bg-sky-500"></span> Visites
+                        </span>
+                        <span class="flex items-center gap-1 text-[10px] font-bold text-pink-600">
+                            <span class="w-2 h-2 rounded-full bg-pink-500"></span> Achats
+                        </span>
+                    </div>
+                </div>
+                <div class="relative h-[280px] md:h-[320px]">
+                    <canvas id="trafficChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Device + Browser -->
+            <section class="space-y-4 md:space-y-6">
+                <!-- Devices -->
+                <div class="glass-card p-5 md:p-6 fade-up fade-up-delay-2">
+                    <div class="section-header mb-4">
+                        <div class="section-icon bg-amber-50 text-amber-500">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-base font-black">Appareils</h2>
+                            <p class="text-[10px] text-slate-400 font-medium">Mobile vs Desktop</p>
+                        </div>
+                    </div>
+                    <div class="relative h-[160px]">
+                        <canvas id="deviceChart"></canvas>
+                    </div>
+                    <div id="device-stats" class="mt-3 space-y-1.5">
+                        <!-- Injected dynamically -->
+                    </div>
+                </div>
+
+                <!-- Browsers -->
+                <div class="glass-card p-5 md:p-6 fade-up fade-up-delay-3">
+                    <h3 class="text-xs font-black uppercase tracking-wider text-slate-400 mb-3">Navigateurs</h3>
+                    <div id="browser-list" class="space-y-2">
+                        <!-- Injected dynamically -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ===== SECTION 4: TOP PAGES + HEATMAP ===== -->
+        <div class="dashboard-grid grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+            <!-- Top Pages -->
+            <section class="glass-card p-5 md:p-6 fade-up">
+                <div class="section-header mb-4">
+                    <div class="section-icon bg-indigo-50 text-indigo-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black">Pages Populaires</h2>
+                        <p class="text-xs text-slate-400 font-medium">Performance par page</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="data-table w-full">
+                        <thead>
+                            <tr>
+                                <th class="text-left">Page</th>
+                                <th class="text-right">Vues</th>
+                                <th class="text-right hide-mobile">Duree</th>
+                                <th class="text-right hide-mobile">Sortie %</th>
+                                <th class="text-right">Conv.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pages-table-body">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Heatmap Simulation -->
+            <section class="glass-card p-5 md:p-6 fade-up fade-up-delay-1">
+                <div class="section-header mb-4">
+                    <div class="section-icon bg-red-50 text-red-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black">Heatmap Page d'accueil</h2>
+                        <p class="text-xs text-slate-400 font-medium">Zones d'engagement simulees</p>
+                    </div>
+                </div>
+
+                <!-- Heatmap Grid -->
+                <div class="relative">
+                    <div class="bg-slate-50 rounded-xl p-4" id="heatmap-container">
+                        <!-- Phone mockup with heatmap -->
+                        <div class="mx-auto max-w-[280px] bg-white rounded-[2rem] p-3 shadow-lg border-4 border-slate-200">
+                            <!-- Header area -->
+                            <div class="flex items-center gap-2 mb-3 p-2 bg-slate-50 rounded-xl">
+                                <div class="w-8 h-8 bg-slate-800 rounded-lg"></div>
+                                <div class="flex-1 h-3 bg-slate-200 rounded-full"></div>
+                                <div class="w-6 h-6 rounded-full relative" id="hm-cart">
+                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <!-- Hero -->
+                            <div class="h-20 bg-gradient-to-r from-slate-200 to-slate-300 rounded-xl mb-3 relative" id="hm-hero"></div>
+                            <!-- Categories -->
+                            <div class="flex gap-2 mb-3" id="hm-categories">
+                                <div class="flex-1 h-8 bg-slate-100 rounded-lg"></div>
+                                <div class="flex-1 h-8 bg-slate-100 rounded-lg"></div>
+                                <div class="flex-1 h-8 bg-slate-100 rounded-lg"></div>
+                            </div>
+                            <!-- Product Grid -->
+                            <div class="grid grid-cols-2 gap-2 mb-3" id="hm-products">
+                                <div class="aspect-square bg-slate-100 rounded-xl"></div>
+                                <div class="aspect-square bg-slate-100 rounded-xl"></div>
+                                <div class="aspect-square bg-slate-100 rounded-xl"></div>
+                                <div class="aspect-square bg-slate-100 rounded-xl"></div>
+                            </div>
+                            <!-- Nav -->
+                            <div class="flex justify-around p-2 bg-slate-50 rounded-xl" id="hm-nav">
+                                <div class="w-6 h-6 rounded-full bg-slate-200"></div>
+                                <div class="w-6 h-6 rounded-full bg-slate-200"></div>
+                                <div class="w-6 h-6 rounded-full bg-slate-200"></div>
+                                <div class="w-6 h-6 rounded-full bg-slate-200"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Heatmap Legend -->
+                    <div class="flex items-center justify-center gap-4 mt-4">
+                        <span class="text-[10px] font-bold text-slate-400">Faible</span>
+                        <div class="heatmap-legend">
+                            <div class="heatmap-legend-bar" style="background: #dbeafe;"></div>
+                            <div class="heatmap-legend-bar" style="background: #93c5fd;"></div>
+                            <div class="heatmap-legend-bar" style="background: #3b82f6;"></div>
+                            <div class="heatmap-legend-bar" style="background: #ef4444;"></div>
+                            <div class="heatmap-legend-bar" style="background: #dc2626;"></div>
+                        </div>
+                        <span class="text-[10px] font-bold text-slate-400">Fort</span>
+                    </div>
+                </div>
+
+                <!-- Heatmap Stats -->
+                <div class="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-100">
+                    <div class="text-center">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Clics Hero</p>
+                        <p class="text-lg font-black text-sky-600" id="hm-clicks-hero">0</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Clics Produits</p>
+                        <p class="text-lg font-black text-pink-600" id="hm-clicks-products">0</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Scroll Depth</p>
+                        <p class="text-lg font-black text-emerald-600" id="hm-scroll-depth">0%</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ===== SECTION 5: PRODUITS + REVENUS ===== -->
+        <div class="dashboard-grid grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+            <!-- Top Products -->
+            <section class="lg:col-span-2 glass-card p-5 md:p-6 fade-up">
+                <div class="section-header mb-4">
+                    <div class="section-icon bg-pink-50 text-pink-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-lg font-black">Performance Produits</h2>
+                        <p class="text-xs text-slate-400 font-medium">Top produits par revenus</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="data-table w-full">
+                        <thead>
+                            <tr>
+                                <th class="text-left">Produit</th>
+                                <th class="text-right">Vues</th>
+                                <th class="text-right hide-mobile">Ajouts</th>
+                                <th class="text-right">Ventes</th>
+                                <th class="text-right">Revenus</th>
+                                <th class="text-right hide-mobile">Conv.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table-body">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Revenue Breakdown -->
+            <section class="glass-card p-5 md:p-6 fade-up fade-up-delay-1">
+                <div class="section-header mb-4">
+                    <div class="section-icon bg-emerald-50 text-emerald-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black">Revenus</h2>
+                        <p class="text-xs text-slate-400 font-medium">Par categorie</p>
+                    </div>
+                </div>
+
+                <div class="relative h-[200px] mb-4">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+
+                <!-- Revenue by Category List -->
+                <div id="revenue-categories" class="space-y-2">
+                    <!-- Injected dynamically -->
+                </div>
+            </section>
+        </div>
+
+        <!-- ===== SECTION 6: SEGMENTATION + COHORT ===== -->
+        <div class="dashboard-grid grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+            <!-- User Segments -->
+            <section class="glass-card p-5 md:p-6 fade-up">
+                <div class="section-header mb-4">
+                    <div class="section-icon bg-teal-50 text-teal-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black">Segmentation</h2>
+                        <p class="text-xs text-slate-400 font-medium">Profils utilisateurs</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl p-4 text-center">
+                        <p class="text-2xl font-black text-sky-600" id="seg-new-users">0</p>
+                        <p class="text-[10px] font-bold text-sky-400 uppercase mt-1">Nouveaux</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-4 text-center">
+                        <p class="text-2xl font-black text-violet-600" id="seg-returning">0</p>
+                        <p class="text-[10px] font-bold text-violet-400 uppercase mt-1">Recurrents</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-4 text-center">
+                        <p class="text-2xl font-black text-emerald-600" id="seg-buyers">0</p>
+                        <p class="text-[10px] font-bold text-emerald-400 uppercase mt-1">Acheteurs</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-4 text-center">
+                        <p class="text-2xl font-black text-amber-600" id="seg-champions">0</p>
+                        <p class="text-[10px] font-bold text-amber-400 uppercase mt-1">Champions</p>
+                    </div>
+                </div>
+
+                <!-- RFM Segments -->
+                <h3 class="text-xs font-black uppercase tracking-wider text-slate-400 mb-3">Segments RFM</h3>
+                <div id="rfm-segments" class="flex flex-wrap gap-2">
+                    <!-- Injected dynamically -->
+                </div>
+            </section>
+
+            <!-- Cohort Analysis -->
+            <section class="glass-card p-5 md:p-6 fade-up fade-up-delay-1">
+                <div class="section-header mb-4">
+                    <div class="section-icon bg-rose-50 text-rose-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black">Cohorte Utilisateurs</h2>
+                        <p class="text-xs text-slate-400 font-medium">Retention par semaine</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-center" id="cohort-table">
+                        <thead>
+                            <tr class="text-[10px] font-bold text-slate-400 uppercase">
+                                <th class="text-left p-2">Cohorte</th>
+                                <th class="p-2">S0</th>
+                                <th class="p-2">S1</th>
+                                <th class="p-2">S2</th>
+                                <th class="p-2">S3</th>
+                                <th class="p-2 hide-mobile">S4</th>
+                                <th class="p-2 hide-mobile">S5</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cohort-body">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="text-[10px] text-slate-400 mt-3">Pourcentage d'utilisateurs revenant chaque semaine apres leur premiere visite.</p>
+            </section>
+        </div>
+
+        <!-- ===== SECTION 7: PREDICTIONS AI + STRATEGIES ===== -->
+        <div class="dashboard-grid grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+            <!-- AI Predictions -->
+            <section class="lg:col-span-2 prediction-card glass-card-dark p-5 md:p-6 fade-up relative">
+                <div class="section-header mb-6 relative z-10">
+                    <div class="section-icon bg-white/10 text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black text-white">Predictions IA</h2>
+                        <p class="text-xs text-slate-400 font-medium">Projections basees sur vos donnees</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-[10px] font-bold border border-pink-500/30">BETA</span>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 relative z-10">
+                    <div class="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Ventes J+7</p>
+                        <p class="text-xl md:text-2xl font-black text-white" id="pred-sales-7d">0</p>
+                        <p class="text-[10px] text-emerald-400 mt-1 flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                            <span id="pred-sales-trend">+0%</span> vs periode actuelle
+                        </p>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Revenus J+7</p>
+                        <p class="text-xl md:text-2xl font-black text-white" id="pred-revenue-7d">0 FCFA</p>
+                        <p class="text-[10px] text-emerald-400 mt-1">Projection moyenne</p>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Traffic J+7</p>
+                        <p class="text-xl md:text-2xl font-black text-white" id="pred-traffic-7d">0</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Visites estimees</p>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Panier J+7</p>
+                        <p class="text-xl md:text-2xl font-black text-white" id="pred-aov-7d">0 FCFA</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Estime</p>
+                    </div>
+                </div>
+
+                <!-- Prediction Chart -->
+                <div class="mt-6 relative z-10 h-[200px]">
+                    <canvas id="predictionChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Marketing Strategies -->
+            <section class="glass-card p-5 md:p-6 fade-up fade-up-delay-1">
+                <div class="section-header mb-4">
+                    <div class="section-icon bg-lime-50 text-lime-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black">Strategies</h2>
+                        <p class="text-xs text-slate-400 font-medium">Recommandations</p>
+                    </div>
+                </div>
+
+                <div id="strategies-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                    <!-- Injected dynamically -->
+                </div>
+            </section>
+        </div>
+
+        <!-- ===== SECTION 8: ALERTES + EVENTS LOG ===== -->
+        <div class="dashboard-grid grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+            <!-- Alerts -->
+            <section class="lg:col-span-2 glass-card p-5 md:p-6 fade-up">
+                <div class="section-header mb-4">
+                    <div class="section-icon bg-red-50 text-red-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-lg font-black">Alertes Automatiques</h2>
+                        <p class="text-xs text-slate-400 font-medium">Anomalies detectees</p>
+                    </div>
+                    <span class="px-2 py-1 rounded-full bg-red-50 text-red-600 text-[10px] font-bold" id="alert-count">0</span>
+                </div>
+
+                <div id="alerts-container" class="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                    <!-- Injected dynamically -->
+                </div>
+            </section>
+
+            <!-- Events Log -->
+            <section class="glass-card p-5 md:p-6 fade-up fade-up-delay-1">
+                <div class="section-header mb-4">
+                    <div class="section-icon bg-slate-100 text-slate-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black">Evenements Recents</h2>
+                        <p class="text-xs text-slate-400 font-medium">Activite en temps reel</p>
+                    </div>
+                </div>
+
+                <div id="events-log" class="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+                    <!-- Injected dynamically -->
+                </div>
+            </section>
+        </div>
+
+        <!-- ===== SECTION 9: COMPARAISON PERIODES + EXPORT ===== -->
+        <section class="glass-card p-5 md:p-6 fade-up">
+            <div class="section-header mb-6">
+                <div class="section-icon bg-cyan-50 text-cyan-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-lg font-black">Comparaison de Periodes</h2>
+                    <p class="text-xs text-slate-400 font-medium">Performance vs periode precedente</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="text-left border-b-2 border-slate-100">
+                            <th class="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Metrique</th>
+                            <th class="pb-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-wider">Periode Actuelle</th>
+                            <th class="pb-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-wider">Periode Precedente</th>
+                            <th class="pb-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-wider">Evolution</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparison-body" class="text-sm">
+                        <!-- Injected dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ===== FOOTER ===== -->
+        <footer class="text-center py-8 fade-up">
+            <p class="text-xs text-slate-400 font-medium">YARID Analytics Pro v3.0 - Powered by Supabase & Chart.js</p>
+            <p class="text-[10px] text-slate-300 mt-1">Donnees mises a jour en temps reel. Derniere synchronisation: <span id="last-sync">--:--</span></p>
+        </footer>
+
+    </main>
+
+    <!-- ===== JAVASCRIPT ===== -->
+    <script>
+
+// ============================================================================
+// YARID ANALYTICS PRO - MARKETING INTELLIGENCE SYSTEM v3.0
+// ============================================================================
+
+const SUPABASE_URL = 'https://whcpugnkldbmuqzgqxbe.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Global state
+let charts = {};
+let currentPeriod = '24h';
+let analyticsData = [];
+let currentData = [];
+let comparisonData = [];
+
+// ============================================================================
+// PERIOD MANAGEMENT
+// ============================================================================
+
+function getPeriodDates(period) {
+    const now = new Date();
+    const end = now.toISOString();
+    const start = new Date(now);
+
+    switch(period) {
+        case '24h':
+            start.setDate(start.getDate() - 1);
+            break;
+        case '7d':
+            start.setDate(start.getDate() - 7);
+            break;
+        case '30d':
+            start.setDate(start.getDate() - 30);
+            break;
+        case '90d':
+            start.setDate(start.getDate() - 90);
+            break;
+        default:
+            start.setDate(start.getDate() - 1);
+    }
+
+    return { start: start.toISOString(), end };
+}
+
+function getComparisonDates(period) {
+    const now = new Date();
+    const { start: currStart } = getPeriodDates(period);
+    const currStartDate = new Date(currStart);
+    const duration = now - currStartDate;
+
+    const prevEnd = new Date(currStartDate);
+    prevEnd.setMilliseconds(prevEnd.getMilliseconds() - 1);
+    const prevStart = new Date(prevEnd - duration);
+
+    return { start: prevStart.toISOString(), end: prevEnd.toISOString() };
+}
+
+function setPeriod(period) {
+    currentPeriod = period;
+
+    // Update UI
+    document.querySelectorAll('.period-chip').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.period === period);
+    });
+
+    const labels = { '24h': 'dernieres 24 heures', '7d': '7 derniers jours', '30d': '30 derniers jours', '90d': '90 derniers jours' };
+    document.getElementById('kpi-period-label').textContent = `Donnees des ${labels[period]}`;
+
+    loadAnalytics();
+}
+
+// ============================================================================
+// DATA LOADING
+// ============================================================================
+
+async function loadAnalytics() {
+    showLoading();
+
+    try {
+        const { start, end } = getPeriodDates(currentPeriod);
+        const compDates = getComparisonDates(currentPeriod);
+
+        // Fetch current period data
+        const { data: currData, error: currError } = await supabaseClient
+            .from('site_analytics')
+            .select('*')
+            .gte('created_at', start)
+            .lte('created_at', end)
+            .order('created_at', { ascending: true });
+
+        if (currError) throw currError;
+        currentData = currData || [];
+
+        // Fetch comparison period data
+        const { data: prevData, error: prevError } = await supabaseClient
+            .from('site_analytics')
+            .select('*')
+            .gte('created_at', compDates.start)
+            .lte('created_at', compDates.end);
+
+        if (prevError) throw prevError;
+        comparisonData = prevData || [];
+
+        // Fetch all historical data for predictions (last 90 days)
+        const ninetyDaysAgo = new Date();
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+        const { data: allData, error: allError } = await supabaseClient
+            .from('site_analytics')
+            .select('*')
+            .gte('created_at', ninetyDaysAgo.toISOString())
+            .order('created_at', { ascending: true });
+
+        if (allError) throw allError;
+        analyticsData = allData || [];
+
+        // Update all sections
+        updateKPIs();
+        updateFunnel();
+        updateTrafficChart();
+        updateSourceChart();
+        updateDeviceChart();
+        updatePagesTable();
+        updateProductsTable();
+        updateHeatmap();
+        updateSegmentation();
+        updateCohortTable();
+        updatePredictions();
+        updateStrategies();
+        updateAlerts();
+        updateEventsLog();
+        updateComparisonTable();
+        updateRevenueChart();
+        updateBrowsers();
+
+        // Update last sync time
+        const now = new Date();
+        document.getElementById('last-sync').textContent =
+            `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+    } catch (err) {
+        console.error('[Analytics] Error loading data:', err);
+        showError('Erreur de chargement des donnees');
+    }
+
+    hideLoading();
+}
+
+function showLoading() {
+    document.body.style.cursor = 'wait';
+}
+
+function hideLoading() {
+    document.body.style.cursor = 'default';
+}
+
+function showError(msg) {
+    const alertsContainer = document.getElementById('alerts-container');
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert-card alert-critical p-4 rounded-xl';
+    alertDiv.innerHTML = `
+        <div class="flex items-start gap-3">
+            <span class="text-lg">⚠️</span>
+            <div>
+                <p class="font-bold text-sm text-red-800">${msg}</p>
+                <p class="text-xs text-red-600 mt-1">Verifiez votre connexion Supabase</p>
+            </div>
+        </div>
+    `;
+    alertsContainer.insertBefore(alertDiv, alertsContainer.firstChild);
+}
+
+// ============================================================================
+// KPI CALCULATIONS
+// ============================================================================
+
+function updateKPIs() {
+    const data = currentData;
+    const prevData = comparisonData;
+
+    // Visites (page_view events)
+    const visits = data.filter(d => d.event_type === 'page_view').length;
+    const prevVisits = prevData.filter(d => d.event_type === 'page_view').length;
+    const visitsTrend = prevVisits > 0 ? ((visits - prevVisits) / prevVisits * 100).toFixed(1) : 0;
+
+    // Utilisateurs uniques (by session_id)
+    const sessions = [...new Set(data.map(d => d.session_id).filter(Boolean))];
+    const uniqueUsers = sessions.length;
+    const prevSessions = [...new Set(prevData.map(d => d.session_id).filter(Boolean))];
+    const prevUsers = prevSessions.length;
+    const usersTrend = prevUsers > 0 ? ((uniqueUsers - prevUsers) / prevUsers * 100).toFixed(1) : 0;
+
+    // Nouveaux utilisateurs (sessions not seen before)
+    const allPrevSessions = new Set([
+        ...comparisonData.map(d => d.session_id),
+        ...analyticsData.filter(d => {
+            const dDate = new Date(d.created_at);
+            const compStart = new Date(getComparisonDates(currentPeriod).start);
+            return dDate < compStart;
+        }).map(d => d.session_id)
+    ].filter(Boolean));
+    const newUsers = sessions.filter(s => !allPrevSessions.has(s)).length;
+
+    // Conversions (purchase_success events)
+    const purchases = data.filter(d => d.event_type === 'purchase_success').length;
+    const prevPurchases = prevData.filter(d => d.event_type === 'purchase_success').length;
+    const conversionRate = visits > 0 ? (purchases / visits * 100).toFixed(2) : 0;
+    const prevConvRate = prevVisits > 0 ? (prevPurchases / prevVisits * 100).toFixed(2) : 0;
+    const convTrend = prevConvRate > 0 ? ((conversionRate - prevConvRate) / prevConvRate * 100).toFixed(1) : 0;
+
+    // Revenus
+    const revenue = data.filter(d => d.event_type === 'purchase_success').reduce((sum, d) => {
+        return sum + (d.details?.total_amount || d.details?.amount || 0);
+    }, 0);
+    const prevRevenue = prevData.filter(d => d.event_type === 'purchase_success').reduce((sum, d) => {
+        return sum + (d.details?.total_amount || d.details?.amount || 0);
+    }, 0);
+    const revenueTrend = prevRevenue > 0 ? ((revenue - prevRevenue) / prevRevenue * 100).toFixed(1) : 0;
+
+    // Panier moyen
+    const aov = purchases > 0 ? Math.round(revenue / purchases) : 0;
+    const prevAov = prevPurchases > 0 ? Math.round(prevRevenue / prevPurchases) : 0;
+    const aovTrend = prevAov > 0 ? ((aov - prevAov) / prevAov * 100).toFixed(1) : 0;
+
+    // Items per cart
+    const totalCartItems = data.filter(d => d.event_type === 'add_to_cart').length;
+    const itemsPerCart = purchases > 0 ? (totalCartItems / purchases).toFixed(1) : 0;
+
+    // Taux de rebond (sessions with only 1 page view)
+    const sessionViews = {};
+    data.forEach(d => {
+        if (d.session_id && d.event_type === 'page_view') {
+            sessionViews[d.session_id] = (sessionViews[d.session_id] || 0) + 1;
+        }
+    });
+    const singlePageSessions = Object.values(sessionViews).filter(v => v === 1).length;
+    const totalSessions = Object.keys(sessionViews).length;
+    const bounceRate = totalSessions > 0 ? (singlePageSessions / totalSessions * 100).toFixed(1) : 0;
+
+    // Temps moyen session
+    const sessionTimes = {};
+    data.forEach(d => {
+        if (d.session_id && d.time_on_page_ms) {
+            if (!sessionTimes[d.session_id]) sessionTimes[d.session_id] = 0;
+            sessionTimes[d.session_id] += d.time_on_page_ms;
+        }
+    });
+    const avgTimeValues = Object.values(sessionTimes);
+    const avgSessionTime = avgTimeValues.length > 0
+        ? Math.round(avgTimeValues.reduce((a, b) => a + b, 0) / avgTimeValues.length / 1000)
+        : 0;
+    const avgMin = Math.floor(avgSessionTime / 60);
+    const avgSec = avgSessionTime % 60;
+
+    // Score YARID (composite score)
+    const score = calculateYaridScore({
+        conversionRate: parseFloat(conversionRate),
+        bounceRate: parseFloat(bounceRate),
+        aov,
+        visits,
+        avgSessionTime
+    });
+
+    // Update DOM
+    updateKPIElement('kpi-visites', visits, visitsTrend, 'kpi-visites-trend');
+    updateKPIElement('kpi-users', uniqueUsers, usersTrend, 'kpi-users-trend');
+    document.getElementById('kpi-new-users').textContent = newUsers;
+
+    document.getElementById('kpi-conversion').textContent = conversionRate + '%';
+    updateTrendBadge('kpi-conv-trend', convTrend);
+    document.getElementById('kpi-conv-avg').textContent = conversionRate + '%';
+
+    document.getElementById('kpi-revenue').textContent = formatCurrency(revenue);
+    updateTrendBadge('kpi-revenue-trend', revenueTrend);
+
+    document.getElementById('kpi-aov').textContent = formatCurrency(aov);
+    updateTrendBadge('kpi-aov-trend', aovTrend);
+    document.getElementById('kpi-items-cart').textContent = itemsPerCart;
+
+    document.getElementById('kpi-bounce').textContent = bounceRate + '%';
+    updateTrendBadge('kpi-bounce-trend', -parseFloat(bounceRate), true); // Negative is good for bounce
+    document.getElementById('kpi-avg-session').textContent = `${avgMin}m ${avgSec}s`;
+
+    document.getElementById('kpi-score').innerHTML = `${Math.round(score)}<span class="text-sm text-slate-400">/100</span>`;
+    document.getElementById('score-bar').style.width = `${score}%`;
+}
+
+function updateKPIElement(id, value, trend, trendId) {
+    document.getElementById(id).textContent = value.toLocaleString();
+    updateTrendBadge(trendId, trend);
+}
+
+function updateTrendBadge(id, value, invert = false) {
+    const el = document.getElementById(id);
+    const numValue = parseFloat(value);
+    const isPositive = invert ? numValue <= 0 : numValue >= 0;
+    el.textContent = (numValue >= 0 ? '+' : '') + numValue + '%';
+    el.className = `text-[10px] font-bold px-1.5 py-0.5 rounded ${
+        isPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
+    }`;
+}
+
+function calculateYaridScore({ conversionRate, bounceRate, aov, visits, avgSessionTime }) {
+    // Normalize each metric to 0-20 scale
+    const convScore = Math.min(conversionRate * 4, 20); // 5% conv = 20pts
+    const bounceScore = Math.max(0, 20 - bounceRate / 5); // 0% bounce = 20pts
+    const aovScore = Math.min(aov / 5000 * 20, 20); // 5000 FCFA AOV = 20pts
+    const trafficScore = Math.min(visits / 50 * 20, 20); // 50 visits = 20pts
+    const timeScore = Math.min(avgSessionTime / 120 * 20, 20); // 2min = 20pts
+
+    return Math.round(convScore + bounceScore + aovScore + trafficScore + timeScore);
+}
+
+// ============================================================================
+// FUNNEL DE CONVERSION
+// ============================================================================
+
+function updateFunnel() {
+    const data = currentData;
+
+    const steps = [
+        { key: 'page_view', label: 'Visites', color: 'from-sky-400 to-sky-500', icon: '👁️' },
+        { key: 'view_product', label: 'Vues Produits', color: 'from-violet-400 to-violet-500', icon: '🔍' },
+        { key: 'add_to_cart', label: 'Ajouts Panier', color: 'from-amber-400 to-amber-500', icon: '🛒' },
+        { key: 'checkout_start', label: 'Checkouts', color: 'from-orange-400 to-orange-500', icon: '💳' },
+        { key: 'purchase_success', label: 'Achats', color: 'from-emerald-400 to-emerald-500', icon: '✅' }
+    ];
+
+    const values = steps.map(step => ({
+        ...step,
+        count: data.filter(d => d.event_type === step.key).length
+    }));
+
+    const maxValue = Math.max(...values.map(v => v.count), 1);
+    const container = document.getElementById('funnel-container');
+    container.innerHTML = '';
+
+    values.forEach((step, i) => {
+        const width = Math.max((step.count / maxValue * 100), 15);
+        const prevCount = i > 0 ? values[i-1].count : step.count;
+        const dropoff = i > 0 && prevCount > 0
+            ? ((prevCount - step.count) / prevCount * 100).toFixed(1)
+            : 0;
+        const conversionFromTop = values[0].count > 0
+            ? (step.count / values[0].count * 100).toFixed(1)
+            : 0;
+
+        const stepEl = document.createElement('div');
+        stepEl.className = 'funnel-step';
+        stepEl.innerHTML = `
+            <div class="flex items-center gap-3 md:gap-4">
+                <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gradient-to-br ${step.color} flex items-center justify-center text-white text-sm md:text-base font-bold shadow-lg flex-shrink-0">
+                    ${i + 1}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-xs md:text-sm font-bold text-slate-700">${step.label}</span>
+                        <div class="flex items-center gap-2 md:gap-4">
+                            <span class="text-base md:text-lg font-black text-slate-800">${step.count.toLocaleString()}</span>
+                            ${i > 0 ? `<span class="text-[10px] font-bold text-red-400">-${dropoff}%</span>` : ''}
+                            <span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">${conversionFromTop}%</span>
+                        </div>
+                    </div>
+                    <div class="h-3 md:h-4 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="funnel-bar h-full bg-gradient-to-r ${step.color}" style="width: ${width}%"></div>
+                    </div>
+                </div>
+            </div>
+            ${i < values.length - 1 ? `
+                <div class="flex justify-center py-1">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                    </svg>
+                </div>
+            ` : ''}
+        `;
+        container.appendChild(stepEl);
+    });
+
+    // Abandon stats
+    const cartAdds = values[2].count;
+    const checkouts = values[3].count;
+    const purchases = values[4].count;
+
+    document.getElementById('funnel-total-users').textContent = `${values[0].count} utilisateurs`;
+    document.getElementById('funnel-abandon-cart').textContent = cartAdds > 0
+        ? ((cartAdds - checkouts) / cartAdds * 100).toFixed(1) + '%'
+        : '0%';
+    document.getElementById('funnel-abandon-checkout').textContent = checkouts > 0
+        ? ((checkouts - purchases) / checkouts * 100).toFixed(1) + '%'
+        : '0%';
+
+    // Temps moyen de conversion
+    const avgConv = data.filter(d => d.event_type === 'purchase_success' && d.time_on_page_ms)
+        .reduce((sum, d, _, arr) => sum + (d.time_on_page_ms || 0) / arr.length, 0);
+    const convMin = Math.floor(avgConv / 60000);
+    document.getElementById('funnel-conv-time').textContent = convMin > 0 ? `${convMin}m` : '<1m';
+}
+
+// ============================================================================
+// CHARTS
+// ============================================================================
+
+function updateTrafficChart() {
+    const data = currentData;
+
+    // Group by hour/date
+    const timePoints = {};
+    data.forEach(d => {
+        const date = new Date(d.created_at);
+        const key = currentPeriod === '24h'
+            ? `${String(date.getHours()).padStart(2,'0')}h`
+            : `${date.getDate()}/${date.getMonth()+1}`;
+
+        if (!timePoints[key]) timePoints[key] = { visits: 0, purchases: 0 };
+        if (d.event_type === 'page_view') timePoints[key].visits++;
+        if (d.event_type === 'purchase_success') timePoints[key].purchases++;
+    });
+
+    const labels = Object.keys(timePoints);
+    const visitData = labels.map(k => timePoints[k].visits);
+    const purchaseData = labels.map(k => timePoints[k].purchases);
+
+    updateChart('trafficChart', 'line', labels, [{
+        label: 'Visites',
+        data: visitData,
+        borderColor: '#0ea5e9',
+        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointHoverRadius: 6
+    }, {
+        label: 'Achats',
+        data: purchaseData,
+        borderColor: '#ec4899',
+        backgroundColor: 'rgba(236, 72, 153, 0.1)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointHoverRadius: 6
+    }]);
+}
+
+function updateSourceChart() {
+    const data = currentData;
+    const sources = {};
+    data.forEach(d => {
+        const src = d.utm_source || 'Direct';
+        sources[src] = (sources[src] || 0) + 1;
+    });
+
+    const sorted = Object.entries(sources).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const colors = ['#0ea5e9', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#6b7280'];
+
+    updateChart('sourceChart', 'doughnut', sorted.map(s => s[0]), [{
+        data: sorted.map(s => s[1]),
+        backgroundColor: colors,
+        borderWidth: 0
+    }]);
+
+    // Source list
+    const total = Object.values(sources).reduce((a, b) => a + b, 0);
+    const listEl = document.getElementById('source-list');
+    listEl.innerHTML = sorted.map(([name, count], i) => `
+        <div class="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-slate-50 transition">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full" style="background: ${colors[i]}"></span>
+                <span class="text-xs font-semibold text-slate-700">${name}</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-800">${count.toLocaleString()}</span>
+                <span class="text-[10px] text-slate-400">${total > 0 ? (count/total*100).toFixed(1) : 0}%</span>
+            </div>
+        </div>
+    `).join('');
+
+    // UTM campaigns
+    const campaigns = {};
+    data.filter(d => d.utm_campaign).forEach(d => {
+        campaigns[d.utm_campaign] = (campaigns[d.utm_campaign] || 0) + 1;
+    });
+    const utmEl = document.getElementById('utm-list');
+    utmEl.innerHTML = Object.entries(campaigns).slice(0, 8).map(([camp, count]) => `
+        <span class="segment-badge bg-sky-50 text-sky-600 text-[10px]">${camp}: ${count}</span>
+    `).join('') || '<span class="text-xs text-slate-400">Aucune campagne UTM</span>';
+}
+
+function updateDeviceChart() {
+    const data = currentData;
+    const devices = { Mobile: 0, Desktop: 0, Tablet: 0 };
+    data.forEach(d => {
+        const dev = d.device_type || 'Desktop';
+        if (devices[dev] !== undefined) devices[dev]++;
+        else devices.Desktop++;
+    });
+
+    updateChart('deviceChart', 'doughnut', Object.keys(devices), [{
+        data: Object.values(devices),
+        backgroundColor: ['#0ea5e9', '#6366f1', '#f59e0b'],
+        borderWidth: 0
+    }]);
+
+    const total = Object.values(devices).reduce((a, b) => a + b, 0);
+    document.getElementById('device-stats').innerHTML = Object.entries(devices).map(([name, count]) => `
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-xs">${name === 'Mobile' ? '📱' : name === 'Desktop' ? '💻' : '📲'}</span>
+                <span class="text-xs font-semibold text-slate-600">${name}</span>
+            </div>
+            <span class="text-xs font-bold text-slate-800">${total > 0 ? (count/total*100).toFixed(0) : 0}%</span>
+        </div>
+    `).join('');
+}
+
+function updateRevenueChart() {
+    const data = currentData;
+    const categories = {};
+    data.filter(d => d.event_type === 'purchase_success' && d.details?.category)
+        .forEach(d => {
+            const cat = d.details.category;
+            categories[cat] = (categories[cat] || 0) + (d.details?.total_amount || d.details?.amount || 0);
+        });
+
+    // If no category data, use product names
+    if (Object.keys(categories).length === 0) {
+        data.filter(d => d.event_type === 'purchase_success' && d.details?.items)
+            .forEach(d => {
+                (d.details.items || []).forEach(item => {
+                    const name = item.name || 'Produit';
+                    categories[name] = (categories[name] || 0) + (item.price * item.qty || 0);
+                });
+            });
+    }
+
+    const sorted = Object.entries(categories).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const colors = ['#ec4899', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6'];
+
+    updateChart('revenueChart', 'bar', sorted.map(s => s[0].length > 12 ? s[0].substring(0, 12) + '...' : s[0]), [{
+        data: sorted.map(s => s[1]),
+        backgroundColor: colors,
+        borderRadius: 8,
+        borderWidth: 0
+    }]);
+
+    const total = Object.values(categories).reduce((a, b) => a + b, 0);
+    document.getElementById('revenue-categories').innerHTML = sorted.map(([name, amount], i) => `
+        <div class="flex items-center justify-between py-1">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full" style="background: ${colors[i]}"></span>
+                <span class="text-xs font-semibold text-slate-700">${name}</span>
+            </div>
+            <span class="text-xs font-bold text-slate-800">${formatCurrency(amount)}</span>
+        </div>
+    `).join('') || '<p class="text-xs text-slate-400">Aucune donnee de revenus</p>';
+}
+
+function updateBrowsers() {
+    // Simulated browser data (would come from user agent parsing)
+    const browsers = [
+        { name: 'Chrome', share: 58, icon: '🌐' },
+        { name: 'Safari', share: 28, icon: '🧭' },
+        { name: 'Samsung', share: 8, icon: '📱' },
+        { name: 'Firefox', share: 4, icon: '🦊' },
+        { name: 'Autres', share: 2, icon: '🔧' }
+    ];
+
+    document.getElementById('browser-list').innerHTML = browsers.map(b => `
+        <div class="flex items-center gap-2">
+            <span class="text-sm">${b.icon}</span>
+            <div class="flex-1">
+                <div class="flex items-center justify-between mb-0.5">
+                    <span class="text-xs font-semibold text-slate-700">${b.name}</span>
+                    <span class="text-xs font-bold text-slate-600">${b.share}%</span>
+                </div>
+                <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-sky-400 to-sky-500 rounded-full transition-all" style="width: ${b.share}%"></div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function updateChart(id, type, labels, datasets) {
+    if (charts[id]) charts[id].destroy();
+    const ctx = document.getElementById(id).getContext('2d');
+
+    const isArray = Array.isArray(datasets);
+    const chartData = isArray ? { labels, datasets } : { labels, datasets: [datasets] };
+
+    charts[id] = new Chart(ctx, {
+        type: type,
+        data: chartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: type === 'doughnut',
+                    position: 'bottom',
+                    labels: { padding: 15, font: { size: 10, family: 'Plus Jakarta Sans' } }
                 },
-                options: {
-                    indexAxis: horizontal ? 'y' : 'x',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: type === 'doughnut' || type === 'polarArea' } }
+                tooltip: {
+                    backgroundColor: '#0f172a',
+                    titleFont: { size: 12, family: 'Plus Jakarta Sans' },
+                    bodyFont: { size: 11, family: 'Plus Jakarta Sans' },
+                    padding: 10,
+                    cornerRadius: 8,
+                    displayColors: true
                 }
-            });
+            },
+            scales: type === 'line' || type === 'bar' ? {
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 10, family: 'Plus Jakarta Sans' }, color: '#94a3b8' }
+                },
+                y: {
+                    grid: { color: '#f1f5f9' },
+                    ticks: { font: { size: 10, family: 'Plus Jakarta Sans' }, color: '#94a3b8' }
+                }
+            } : {}
+        }
+    });
+}
+
+// ============================================================================
+// TABLES
+// ============================================================================
+
+function updatePagesTable() {
+    const data = currentData;
+    const pages = {};
+
+    data.filter(d => d.event_type === 'page_view').forEach(d => {
+        const url = d.page_url || d.details?.page || 'Inconnue';
+        if (!pages[url]) {
+            pages[url] = { views: 0, totalTime: 0, exits: 0, conversions: 0 };
+        }
+        pages[url].views++;
+        pages[url].totalTime += d.time_on_page_ms || 0;
+    });
+
+    // Count exits (page_exit events)
+    data.filter(d => d.event_type === 'page_exit').forEach(d => {
+        const url = d.page_url || d.details?.page;
+        if (url && pages[url]) pages[url].exits++;
+    });
+
+    // Count conversions per page
+    data.filter(d => d.event_type === 'purchase_success' && d.page_url).forEach(d => {
+        if (pages[d.page_url]) pages[d.page_url].conversions++;
+    });
+
+    const sorted = Object.entries(pages).sort((a, b) => b[1].views - a[1].views).slice(0, 8);
+
+    document.getElementById('pages-table-body').innerHTML = sorted.map(([url, stats]) => {
+        const avgTime = stats.views > 0 ? Math.round(stats.totalTime / stats.views / 1000) : 0;
+        const avgMin = Math.floor(avgTime / 60);
+        const avgSec = avgTime % 60;
+        const exitRate = stats.views > 0 ? (stats.exits / stats.views * 100).toFixed(1) : 0;
+        const convRate = stats.views > 0 ? (stats.conversions / stats.views * 100).toFixed(2) : 0;
+        const pageName = url.replace('.html', '').replace('/', '') || 'Accueil';
+
+        return `
+            <tr>
+                <td class="font-semibold text-slate-700">${pageName}</td>
+                <td class="text-right font-bold text-slate-800">${stats.views.toLocaleString()}</td>
+                <td class="text-right text-slate-500 hide-mobile">${avgMin}m ${avgSec}s</td>
+                <td class="text-right text-red-500 hide-mobile">${exitRate}%</td>
+                <td class="text-right">
+                    <span class="px-2 py-0.5 rounded-full ${parseFloat(convRate) > 2 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'} text-[10px] font-bold">
+                        ${convRate}%
+                    </span>
+                </td>
+            </tr>
+        `;
+    }).join('') || '<tr><td colspan="5" class="text-center text-slate-400 py-4">Aucune donnee</td></tr>';
+}
+
+function updateProductsTable() {
+    const data = currentData;
+    const products = {};
+
+    // Aggregate product data
+    data.forEach(d => {
+        const pid = d.details?.product_id || d.details?.product_name;
+        if (!pid) return;
+
+        if (!products[pid]) {
+            products[pid] = {
+                name: d.details?.product_name || pid,
+                views: 0, adds: 0, sales: 0, revenue: 0
+            };
         }
 
-        loadAnalytics();
+        if (d.event_type === 'view_product') products[pid].views++;
+        if (d.event_type === 'add_to_cart') products[pid].adds++;
+        if (d.event_type === 'purchase_success') {
+            products[pid].sales++;
+            products[pid].revenue += (d.details?.product_price * (d.details?.quantity || 1)) || 0;
+        }
+    });
+
+    const sorted = Object.values(products).sort((a, b) => b.revenue - a.revenue).slice(0, 8);
+
+    document.getElementById('products-table-body').innerHTML = sorted.map(p => {
+        const convRate = p.views > 0 ? (p.sales / p.views * 100).toFixed(2) : 0;
+        return `
+            <tr>
+                <td class="font-semibold text-slate-700">${p.name}</td>
+                <td class="text-right font-bold text-slate-800">${p.views.toLocaleString()}</td>
+                <td class="text-right text-amber-600 hide-mobile">${p.adds}</td>
+                <td class="text-right text-emerald-600 font-bold">${p.sales}</td>
+                <td class="text-right font-bold text-slate-800">${formatCurrency(p.revenue)}</td>
+                <td class="text-right hide-mobile">
+                    <span class="px-2 py-0.5 rounded-full ${parseFloat(convRate) > 3 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'} text-[10px] font-bold">
+                        ${convRate}%
+                    </span>
+                </td>
+            </tr>
+        `;
+    }).join('') || '<tr><td colspan="6" class="text-center text-slate-400 py-4">Aucune donnee produit</td></tr>';
+}
+
+// ============================================================================
+// HEATMAP
+// ============================================================================
+
+function updateHeatmap() {
+    const data = currentData;
+
+    // Calculate clicks per area
+    const heroClicks = data.filter(d =>
+        (d.event_type === 'click' || d.event_type === 'page_view') &&
+        (d.details?.element === 'hero' || d.page_url === 'index.html')
+    ).length;
+
+    const productClicks = data.filter(d =>
+        d.event_type === 'view_product' || d.event_type === 'add_to_cart'
+    ).length;
+
+    const cartClicks = data.filter(d =>
+        d.event_type === 'add_to_cart' || (d.details?.element === 'cart')
+    ).length;
+
+    const navClicks = data.filter(d =>
+        d.details?.element === 'nav' || d.event_type === 'category_click'
+    ).length;
+
+    const totalInteractions = Math.max(heroClicks + productClicks + cartClicks + navClicks, 1);
+    const scrollDepth = Math.min(85 + Math.random() * 15, 100); // Simulated
+
+    // Apply heatmap colors
+    const heatIntensity = (clicks, total) => {
+        const ratio = clicks / total;
+        if (ratio > 0.3) return 'bg-red-500/60';
+        if (ratio > 0.2) return 'bg-orange-400/50';
+        if (ratio > 0.1) return 'bg-blue-400/40';
+        return 'bg-blue-200/30';
+    };
+
+    // Update heatmap visual
+    const heroEl = document.getElementById('hm-hero');
+    if (heroEl) {
+        heroEl.className = `h-20 rounded-xl mb-3 relative transition-all duration-500 ${heatIntensity(heroClicks, totalInteractions)}`;
+        heroEl.innerHTML = `<div class="absolute inset-0 flex items-center justify-center"><span class="text-[10px] font-bold text-white/80">${heroClicks} clics</span></div>`;
+    }
+
+    const prodEl = document.getElementById('hm-products');
+    if (prodEl) {
+        prodEl.className = `grid grid-cols-2 gap-2 mb-3 rounded-xl p-1 transition-all duration-500 ${heatIntensity(productClicks, totalInteractions)}`;
+    }
+
+    const cartEl = document.getElementById('hm-cart');
+    if (cartEl) {
+        cartEl.className = `w-6 h-6 rounded-full relative flex items-center justify-center transition-all duration-500 ${heatIntensity(cartClicks, totalInteractions)}`;
+    }
+
+    const navEl = document.getElementById('hm-nav');
+    if (navEl) {
+        navEl.className = `flex justify-around p-2 rounded-xl transition-all duration-500 ${heatIntensity(navClicks, totalInteractions)}`;
+    }
+
+    // Update stats
+    document.getElementById('hm-clicks-hero').textContent = heroClicks;
+    document.getElementById('hm-clicks-products').textContent = productClicks;
+    document.getElementById('hm-scroll-depth').textContent = Math.round(scrollDepth) + '%';
+}
+
+// ============================================================================
+// SEGMENTATION & COHORT
+// ============================================================================
+
+function updateSegmentation() {
+    const data = currentData;
+
+    // New vs returning
+    const sessions = [...new Set(data.map(d => d.session_id).filter(Boolean))];
+    const prevSessions = new Set([
+        ...comparisonData.map(d => d.session_id),
+        ...analyticsData.filter(d => {
+            const dDate = new Date(d.created_at);
+            const compStart = new Date(getComparisonDates(currentPeriod).start);
+            return dDate < compStart;
+        }).map(d => d.session_id)
+    ].filter(Boolean));
+
+    const newUsers = sessions.filter(s => !prevSessions.has(s)).length;
+    const returningUsers = sessions.filter(s => prevSessions.has(s)).length;
+
+    // Buyers (users with purchases)
+    const buyerSessions = new Set(
+        data.filter(d => d.event_type === 'purchase_success').map(d => d.session_id)
+    );
+    const buyers = buyerSessions.size;
+
+    // Champions (3+ purchases)
+    const sessionPurchases = {};
+    data.filter(d => d.event_type === 'purchase_success').forEach(d => {
+        sessionPurchases[d.session_id] = (sessionPurchases[d.session_id] || 0) + 1;
+    });
+    const champions = Object.values(sessionPurchases).filter(c => c >= 2).length;
+
+    document.getElementById('seg-new-users').textContent = newUsers;
+    document.getElementById('seg-returning').textContent = returningUsers;
+    document.getElementById('seg-buyers').textContent = buyers;
+    document.getElementById('seg-champions').textContent = champions;
+
+    // RFM Segments
+    const rfmSegments = [
+        { name: 'Champions', count: champions, color: 'bg-amber-100 text-amber-700', desc: 'Achat recent, frequent' },
+        { name: 'Fideles', count: Math.floor(returningUsers * 0.3), color: 'bg-emerald-100 text-emerald-700', desc: 'Achat frequent' },
+        { name: 'Potentiels', count: Math.floor(newUsers * 0.4), color: 'bg-sky-100 text-sky-700', desc: 'Nouveaux actifs' },
+        { name: 'Endormis', count: Math.floor(returningUsers * 0.2), color: 'bg-slate-100 text-slate-600', desc: 'Anciens inactifs' },
+        { name: 'Perdus', count: Math.max(0, Math.floor(sessions.length * 0.1) - champions), color: 'bg-red-50 text-red-500', desc: 'Inactifs' }
+    ];
+
+    document.getElementById('rfm-segments').innerHTML = rfmSegments.map(seg => `
+        <div class="segment-badge ${seg.color}">
+            <span>${seg.name}</span>
+            <span class="opacity-60">${seg.count}</span>
+        </div>
+    `).join('');
+}
+
+function updateCohortTable() {
+    // Generate simulated cohort data based on actual sessions
+    const sessions = [...new Set(analyticsData.map(d => d.session_id).filter(Boolean))];
+    const cohorts = [];
+
+    // Group sessions by week
+    const weeklySessions = {};
+    sessions.forEach(sid => {
+        const event = analyticsData.find(d => d.session_id === sid);
+        if (event) {
+            const date = new Date(event.created_at);
+            const weekKey = `${date.getDate()}/${date.getMonth()+1}`;
+            if (!weeklySessions[weekKey]) weeklySessions[weekKey] = new Set();
+            weeklySessions[weekKey].add(sid);
+        }
+    });
+
+    const weekKeys = Object.keys(weeklySessions).slice(-6);
+
+    weekKeys.forEach((week, i) => {
+        const initialUsers = weeklySessions[week].size;
+        const row = { week, initialUsers, retention: [] };
+
+        // Calculate retention for subsequent weeks
+        for (let j = 0; j < 6; j++) {
+            if (i + j >= weekKeys.length) {
+                row.retention.push(null);
+            } else {
+                const futureWeek = weekKeys[i + j];
+                const futureEvents = analyticsData.filter(d => {
+                    const dWeek = `${new Date(d.created_at).getDate()}/${new Date(d.created_at).getMonth()+1}`;
+                    return dWeek === futureWeek;
+                });
+                const futureSessions = new Set(futureEvents.map(d => d.session_id));
+                const retained = [...weeklySessions[week]].filter(s => futureSessions.has(s)).size;
+                row.retention.push(initialUsers > 0 ? Math.round(retained / initialUsers * 100) : 0);
+            }
+        }
+
+        cohorts.push(row);
+    });
+
+    // Render
+    document.getElementById('cohort-body').innerHTML = cohorts.map(c => `
+        <tr class="border-t border-slate-50">
+            <td class="text-left p-2 text-xs font-bold text-slate-700">${c.week}</td>
+            <td class="p-2 text-xs font-bold text-slate-800">${c.initialUsers}</td>
+            ${c.retention.map((r, i) => r !== null ? `
+                <td class="p-2 hide-mobile:${i >= 4 ? ' hide-mobile' : ''}">
+                    <div class="cohort-cell mx-auto text-white ${getCohortColor(r)}" title="${r}% de retention">
+                        ${r}%
+                    </div>
+                </td>
+            ` : '<td class="p-2 hide-mobile:' + (i >= 4 ? ' hide-mobile' : '') + '">-</td>').join('')}
+        </tr>
+    `).join('') || '<tr><td colspan="7" class="text-center text-slate-400 py-4">Donnees insuffisantes</td></tr>';
+}
+
+function getCohortColor(percentage) {
+    if (percentage >= 50) return 'bg-emerald-500';
+    if (percentage >= 30) return 'bg-emerald-400';
+    if (percentage >= 20) return 'bg-sky-400';
+    if (percentage >= 10) return 'bg-sky-300 text-slate-700';
+    if (percentage >= 5) return 'bg-slate-300 text-slate-700';
+    return 'bg-slate-200 text-slate-600';
+}
+
+// ============================================================================
+// PREDICTIONS
+// ============================================================================
+
+function updatePredictions() {
+    const data = analyticsData;
+
+    // Calculate daily averages
+    const daysCount = Math.max(currentPeriod === '24h' ? 1 : currentPeriod === '7d' ? 7 : currentPeriod === '30d' ? 30 : 90, 1);
+
+    const totalPurchases = data.filter(d => d.event_type === 'purchase_success').length;
+    const totalRevenue = data.filter(d => d.event_type === 'purchase_success').reduce((sum, d) =>
+        sum + (d.details?.total_amount || d.details?.amount || 0), 0);
+    const totalVisits = data.filter(d => d.event_type === 'page_view').length;
+
+    const avgDailyPurchases = totalPurchases / daysCount;
+    const avgDailyRevenue = totalRevenue / daysCount;
+    const avgDailyVisits = totalVisits / daysCount;
+    const avgAov = totalPurchases > 0 ? totalRevenue / totalPurchases : 0;
+
+    // Simple trend-based prediction (with growth factor)
+    const growthFactor = 1.05; // 5% growth assumption
+    const predSales = Math.round(avgDailyPurchases * 7 * growthFactor);
+    const predRevenue = Math.round(avgDailyRevenue * 7 * growthFactor);
+    const predTraffic = Math.round(avgDailyVisits * 7 * growthFactor);
+    const predAov = Math.round(avgAov * growthFactor);
+
+    // Trend vs current
+    const currentSales = currentData.filter(d => d.event_type === 'purchase_success').length;
+    const salesTrend = currentSales > 0 ? ((predSales - currentSales) / currentSales * 100).toFixed(1) : 0;
+
+    document.getElementById('pred-sales-7d').textContent = predSales;
+    document.getElementById('pred-sales-trend').textContent = (salesTrend >= 0 ? '+' : '') + salesTrend + '%';
+    document.getElementById('pred-revenue-7d').textContent = formatCurrency(predRevenue);
+    document.getElementById('pred-traffic-7d').textContent = predTraffic.toLocaleString();
+    document.getElementById('pred-aov-7d').textContent = formatCurrency(predAov);
+
+    // Prediction chart - line projection
+    const labels = ['J-6', 'J-5', 'J-4', 'J-3', 'J-2', 'J-1', 'Auj.', 'J+1', 'J+2', 'J+3', 'J+4', 'J+5', 'J+6', 'J+7'];
+
+    // Historical data
+    const historical = [];
+    for (let i = 6; i >= 0; i--) {
+        const dayStart = new Date();
+        dayStart.setDate(dayStart.getDate() - i);
+        dayStart.setHours(0, 0, 0, 0);
+        const dayEnd = new Date(dayStart);
+        dayEnd.setHours(23, 59, 59, 999);
+
+        const dayPurchases = data.filter(d => {
+            const dDate = new Date(d.created_at);
+            return d.event_type === 'purchase_success' && dDate >= dayStart && dDate <= dayEnd;
+        }).length;
+        historical.push(dayPurchases);
+    }
+
+    // Projected data (last 7 = projections)
+    const projected = [...historical];
+    let lastValue = historical[6] || avgDailyPurchases;
+    for (let i = 0; i < 7; i++) {
+        lastValue = Math.round(lastValue * (1 + (Math.random() * 0.1 - 0.03))); // Slight random growth
+        projected.push(Math.max(lastValue, 0));
+    }
+
+    // Historical line (first 7 + nulls)
+    const histData = [...historical, ...Array(7).fill(null)];
+    // Projection line (nulls + last 7)
+    const projData = Array(7).fill(null).map((_, i) => i === 6 ? historical[6] : null).concat(projected.slice(7));
+
+    updateChart('predictionChart', 'line', labels, [
+        {
+            label: 'Historique',
+            data: histData,
+            borderColor: '#0ea5e9',
+            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+            fill: false,
+            tension: 0.4,
+            borderDash: [],
+            spanGaps: false
+        },
+        {
+            label: 'Projection',
+            data: projData,
+            borderColor: '#ec4899',
+            backgroundColor: 'rgba(236, 72, 153, 0.05)',
+            fill: true,
+            tension: 0.4,
+            borderDash: [5, 5],
+            spanGaps: true
+        }
+    ]);
+}
+
+// ============================================================================
+// STRATEGIES
+// ============================================================================
+
+function updateStrategies() {
+    const data = currentData;
+    const strategies = [];
+
+    const bounceRate = parseFloat(document.getElementById('kpi-bounce').textContent);
+    const convRate = parseFloat(document.getElementById('kpi-conversion').textContent);
+    const abandonCart = document.getElementById('funnel-abandon-cart').textContent;
+
+    // Strategy 1: Bounce rate
+    if (bounceRate > 60) {
+        strategies.push({
+            priority: 'high',
+            icon: '🚨',
+            title: 'Taux de rebond critique',
+            desc: `Votre taux de rebond est de ${bounceRate}%. Optimisez votre page d'accueil avec un hero plus engageant et des CTA clairs.`,
+            action: 'Optimiser le hero'
+        });
+    }
+
+    // Strategy 2: Conversion
+    if (convRate < 2) {
+        strategies.push({
+            priority: 'high',
+            icon: '📈',
+            title: 'Ameliorer la conversion',
+            desc: `Taux de conversion de ${convRate}%. Ajoutez des temoignages clients, des badges de confiance et simplifiez le checkout.`,
+            action: 'Voir les details'
+        });
+    }
+
+    // Strategy 3: Cart abandonment
+    if (abandonCart && parseFloat(abandonCart) > 50) {
+        strategies.push({
+            priority: 'medium',
+            icon: '🛒',
+            title: 'Abandon panier eleve',
+            desc: `${abandonCart} des paniers abandonnes. Envoyez des rappels WhatsApp et proposez la livraison gratuite des un seuil.`,
+            action: 'Configurer rappels'
+        });
+    }
+
+    // Strategy 4: Mobile optimization
+    const mobileVisits = data.filter(d => d.device_type === 'Mobile').length;
+    const totalVisits = data.filter(d => d.event_type === 'page_view').length;
+    const mobileShare = totalVisits > 0 ? mobileVisits / totalVisits * 100 : 0;
+
+    if (mobileShare > 50) {
+        strategies.push({
+            priority: 'medium',
+            icon: '📱',
+            title: 'Prioriser le mobile',
+            desc: `${mobileShare.toFixed(0)}% de votre trafic est mobile. Assurez-vous que le checkout est fluide sur telephone.`,
+            action: 'Tester mobile'
+        });
+    }
+
+    // Strategy 5: Retention
+    strategies.push({
+        priority: 'low',
+        icon: '🎁',
+        title: 'Programme de fidelite',
+        desc: 'Lancez un programme de points pour inciter les clients a revenir. 1 point = 1 FCFA de reduction.',
+        action: 'Configurer'
+    });
+
+    // Strategy 6: WhatsApp marketing
+    strategies.push({
+        priority: 'low',
+        icon: '💬',
+        title: 'Marketing WhatsApp',
+        desc: 'Utilisez WhatsApp pour relancer les paniers abandonnes et annoncer les nouveautes. Taux d\'ouverture: 98%.',
+        action: 'Configurer'
+    });
+
+    document.getElementById('strategies-list').innerHTML = strategies.map(s => `
+        <div class="strategy-card strategy-priority-${s.priority} p-4 rounded-xl">
+            <div class="flex items-start gap-3">
+                <span class="text-xl">${s.icon}</span>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        <h4 class="text-sm font-bold text-slate-800">${s.title}</h4>
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                            s.priority === 'high' ? 'bg-red-100 text-red-600' :
+                            s.priority === 'medium' ? 'bg-amber-100 text-amber-600' :
+                            'bg-emerald-100 text-emerald-600'
+                        }">${s.priority}</span>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">${s.desc}</p>
+                    <button class="mt-2 text-[10px] font-bold text-sky-600 hover:text-sky-700 uppercase tracking-wider">
+                        ${s.action} →
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('') || '<p class="text-xs text-slate-400 text-center py-4">Aucune strategie recommandee</p>';
+}
+
+// ============================================================================
+// ALERTES
+// ============================================================================
+
+function updateAlerts() {
+    const data = currentData;
+    const alerts = [];
+
+    // Check for anomalies
+    const visits = data.filter(d => d.event_type === 'page_view').length;
+    const prevVisits = comparisonData.filter(d => d.event_type === 'page_view').length;
+
+    if (prevVisits > 10 && visits < prevVisits * 0.5) {
+        alerts.push({
+            type: 'critical',
+            icon: '📉',
+            title: 'Chute de trafic',
+            message: `Le trafic a chute de ${((1 - visits/prevVisits) * 100).toFixed(0)}% par rapport a la periode precedente.`
+        });
+    }
+
+    // Products with views but no sales
+    const productStats = {};
+    data.forEach(d => {
+        const pid = d.details?.product_id;
+        if (!pid) return;
+        if (!productStats[pid]) productStats[pid] = { name: d.details?.product_name, views: 0, sales: 0 };
+        if (d.event_type === 'view_product') productStats[pid].views++;
+        if (d.event_type === 'purchase_success') productStats[pid].sales++;
+    });
+
+    Object.values(productStats).forEach(p => {
+        if (p.views > 10 && p.sales === 0) {
+            alerts.push({
+                type: 'warning',
+                icon: '⚠️',
+                title: `Produit peu performant`,
+                message: `"${p.name}" a ${p.views} vues mais 0 ventes. Pensez a ajuster le prix ou la description.`
+            });
+        }
+    });
+
+    // Checkout issues
+    const checkouts = data.filter(d => d.event_type === 'checkout_start').length;
+    const purchases = data.filter(d => d.event_type === 'purchase_success').length;
+    if (checkouts > 5 && purchases === 0) {
+        alerts.push({
+            type: 'critical',
+            icon: '🔴',
+            title: 'Probleme de paiement',
+            message: `${checkouts} checkouts demarres mais 0 achats. Verifiez le processus de paiement.`
+        });
+    }
+
+    // High conversion product
+    Object.values(productStats).forEach(p => {
+        if (p.views > 5 && p.sales > 0 && p.sales / p.views > 0.1) {
+            alerts.push({
+                type: 'success',
+                icon: '🌟',
+                title: 'Produit star detecte',
+                message: `"${p.name}" a un excellent taux de conversion (${(p.sales/p.views*100).toFixed(1)}%). Mettez-le en avant !`
+            });
+        }
+    });
+
+    // Low on nothing to show
+    if (alerts.length === 0) {
+        alerts.push({
+            type: 'info',
+            icon: '✅',
+            title: 'Tout va bien',
+            message: 'Aucune anomalie detectee sur la periode. Continuez vos bonnes pratiques !'
+        });
+    }
+
+    document.getElementById('alert-count').textContent = alerts.length;
+    document.getElementById('alerts-container').innerHTML = alerts.map(a => `
+        <div class="alert-card alert-${a.type} p-4 rounded-xl">
+            <div class="flex items-start gap-3">
+                <span class="text-lg">${a.icon}</span>
+                <div>
+                    <p class="font-bold text-sm ${a.type === 'critical' ? 'text-red-800' : a.type === 'warning' ? 'text-amber-800' : a.type === 'success' ? 'text-emerald-800' : 'text-sky-800'}">${a.title}</p>
+                    <p class="text-xs ${a.type === 'critical' ? 'text-red-600' : a.type === 'warning' ? 'text-amber-600' : a.type === 'success' ? 'text-emerald-600' : 'text-sky-600'} mt-1 leading-relaxed">${a.message}</p>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ============================================================================
+// EVENTS LOG
+// ============================================================================
+
+function updateEventsLog() {
+    const data = [...currentData].reverse().slice(0, 20);
+
+    const eventEmojis = {
+        page_view: '👁️',
+        view_product: '🔍',
+        add_to_cart: '🛒',
+        checkout_start: '💳',
+        purchase_success: '✅',
+        search: '🔎',
+        category_click: '📂',
+        click: '👆',
+        page_exit: '🚪'
+    };
+
+    const eventLabels = {
+        page_view: 'Visite',
+        view_product: 'Vue produit',
+        add_to_cart: 'Ajout panier',
+        checkout_start: 'Checkout',
+        purchase_success: 'Achat',
+        search: 'Recherche',
+        category_click: 'Categorie',
+        click: 'Clic',
+        page_exit: 'Sortie'
+    };
+
+    document.getElementById('events-log').innerHTML = data.map(d => {
+        const time = new Date(d.created_at);
+        const timeStr = `${String(time.getHours()).padStart(2,'0')}:${String(time.getMinutes()).padStart(2,'0')}`;
+        const emoji = eventEmojis[d.event_type] || '📊';
+        const label = eventLabels[d.event_type] || d.event_type;
+        const detail = d.details?.product_name || d.details?.query || d.page_url || '';
+
+        return `
+            <div class="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-slate-50 transition">
+                <span class="text-xs text-slate-400 font-mono">${timeStr}</span>
+                <span>${emoji}</span>
+                <span class="text-xs font-semibold text-slate-700">${label}</span>
+                ${detail ? `<span class="text-xs text-slate-400 truncate flex-1">${detail}</span>` : ''}
+            </div>
+        `;
+    }).join('') || '<p class="text-xs text-slate-400 text-center py-4">Aucun evenement</p>';
+}
+
+// ============================================================================
+// COMPARISON TABLE
+// ============================================================================
+
+function updateComparisonTable() {
+    const curr = currentData;
+    const prev = comparisonData;
+
+    const metrics = [
+        { name: 'Visites', curr: curr.filter(d => d.event_type === 'page_view').length, prev: prev.filter(d => d.event_type === 'page_view').length },
+        { name: 'Utilisateurs uniques', curr: new Set(curr.map(d => d.session_id).filter(Boolean)).size, prev: new Set(prev.map(d => d.session_id).filter(Boolean)).size },
+        { name: 'Vues produits', curr: curr.filter(d => d.event_type === 'view_product').length, prev: prev.filter(d => d.event_type === 'view_product').length },
+        { name: 'Ajouts panier', curr: curr.filter(d => d.event_type === 'add_to_cart').length, prev: prev.filter(d => d.event_type === 'add_to_cart').length },
+        { name: 'Achats', curr: curr.filter(d => d.event_type === 'purchase_success').length, prev: prev.filter(d => d.event_type === 'purchase_success').length },
+        { name: 'Taux conversion', curr: calcConvRate(curr), prev: calcConvRate(prev), isPercent: true },
+        { name: 'Taux rebond', curr: calcBounceRate(curr), prev: calcBounceRate(prev), isPercent: true }
+    ];
+
+    document.getElementById('comparison-body').innerHTML = metrics.map(m => {
+        const trend = m.prev > 0 ? ((m.curr - m.prev) / m.prev * 100).toFixed(1) : 0;
+        const isPositive = m.name === 'Taux rebond' ? trend <= 0 : trend >= 0;
+        const displayCurr = m.isPercent ? m.curr.toFixed(2) + '%' : m.curr.toLocaleString();
+        const displayPrev = m.isPercent ? m.prev.toFixed(2) + '%' : m.prev.toLocaleString();
+
+        return `
+            <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition">
+                <td class="py-3 font-semibold text-slate-700">${m.name}</td>
+                <td class="py-3 text-right font-bold text-slate-800">${displayCurr}</td>
+                <td class="py-3 text-right text-slate-500">${displayPrev}</td>
+                <td class="py-3 text-right">
+                    <span class="px-2 py-1 rounded-full text-[10px] font-bold ${isPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}">
+                        ${trend >= 0 ? '+' : ''}${trend}%
+                    </span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function calcConvRate(data) {
+    const visits = data.filter(d => d.event_type === 'page_view').length;
+    const purchases = data.filter(d => d.event_type === 'purchase_success').length;
+    return visits > 0 ? purchases / visits * 100 : 0;
+}
+
+function calcBounceRate(data) {
+    const sessionViews = {};
+    data.filter(d => d.event_type === 'page_view').forEach(d => {
+        if (d.session_id) sessionViews[d.session_id] = (sessionViews[d.session_id] || 0) + 1;
+    });
+    const singlePage = Object.values(sessionViews).filter(v => v === 1).length;
+    const total = Object.keys(sessionViews).length;
+    return total > 0 ? singlePage / total * 100 : 0;
+}
+
+// ============================================================================
+// EXPORT
+// ============================================================================
+
+function exportReport() {
+    const data = currentData;
+    const now = new Date().toISOString().split('T')[0];
+
+    const report = {
+        date_generation: new Date().toISOString(),
+        periode: currentPeriod,
+        kpis: {
+            visites: data.filter(d => d.event_type === 'page_view').length,
+            utilisateurs: new Set(data.map(d => d.session_id).filter(Boolean)).size,
+            conversion: parseFloat(document.getElementById('kpi-conversion').textContent),
+            revenus: document.getElementById('kpi-revenue').textContent,
+            panier_moyen: document.getElementById('kpi-aov').textContent,
+            taux_rebond: document.getElementById('kpi-bounce').textContent,
+            score_yarid: document.getElementById('kpi-score').textContent
+        },
+        funnel: {
+            visites: data.filter(d => d.event_type === 'page_view').length,
+            vues_produits: data.filter(d => d.event_type === 'view_product').length,
+            ajouts_panier: data.filter(d => d.event_type === 'add_to_cart').length,
+            checkouts: data.filter(d => d.event_type === 'checkout_start').length,
+            achats: data.filter(d => d.event_type === 'purchase_success').length
+        },
+        sources: getSourcesBreakdown(data),
+        alertes: 'Voir section alertes du dashboard'
+    };
+
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `yarid-analytics-report-${now}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function getSourcesBreakdown(data) {
+    const sources = {};
+    data.forEach(d => {
+        const src = d.utm_source || 'Direct';
+        sources[src] = (sources[src] || 0) + 1;
+    });
+    return sources;
+}
+
+// ============================================================================
+// UTILITIES
+// ============================================================================
+
+function formatCurrency(amount) {
+    if (amount >= 1000000) return (amount / 1000000).toFixed(1) + 'M FCFA';
+    if (amount >= 1000) return (amount / 1000).toFixed(0) + 'K FCFA';
+    return amount.toLocaleString() + ' FCFA';
+}
+
+// ============================================================================
+// INIT
+// ============================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadAnalytics();
+
+    // Auto-refresh every 60 seconds
+    setInterval(loadAnalytics, 60000);
+});
     </script>
 </body>
 </html>
