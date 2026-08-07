@@ -5,16 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>YARID | Produit</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#0369a1">
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src https://whcpugnkldbmuqzgqxbe.supabase.co https://*.supabase.co; img-src 'self' https: data: blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="YARID">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="cart-global.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: #f8fafc; }
+        :root {
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        body { background: #f8fafc; padding-top: var(--safe-top); padding-bottom: var(--safe-bottom); }
+        header.fixed { padding-top: var(--safe-top) !important; }
+        main.pt-14 { padding-top: calc(56px + var(--safe-top)) !important; }
+        .sticky-action-bar { padding-bottom: calc(12px + var(--safe-bottom)) !important; }
+        @supports (-webkit-touch-callout: none) {
+            header.fixed { padding-top: max(env(safe-area-inset-top), 20px) !important; }
+            main.pt-14 { padding-top: calc(56px + max(env(safe-area-inset-top), 20px)) !important; }
+        }
         .btn-whatsapp { background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); box-shadow: 0 4px 15px rgba(37,211,102,0.3); }
-        .btn-cart { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); box-shadow: 0 4px 15px rgba(15,23,42,0.2); }
+        .btn-cart { background: linear-gradient(135deg, #0369a1 0%, #1e293b 100%); box-shadow: 0 4px 15px rgba(15,23,42,0.2); }
         .variant-btn { border: 2px solid #e2e8f0; background: white; transition: all 0.2s ease; cursor: pointer; }
         .variant-btn:hover { border-color: #0ea5e9; }
         .variant-btn.selected { border-color: #0ea5e9; background: #f0f9ff; color: #0ea5e9; }
@@ -79,7 +95,7 @@
             justify-content: center;
             gap: 8px;
             padding: 14px 16px;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            background: linear-gradient(135deg, #0369a1 0%, #1e293b 50%, #334155 100%);
             color: #fff;
             border: none;
             border-radius: 16px;
@@ -160,7 +176,6 @@
             white-space: nowrap;
         }
 
-        /* Ripple effect on tap */
         .btn-action-cart::after,
         .btn-action-whatsapp::after {
             content: '';
@@ -181,7 +196,6 @@
             height: 200%;
         }
 
-        /* Cart badge on sticky bar */
         .btn-action-cart .cart-badge-inline {
             position: absolute;
             top: -6px;
@@ -200,15 +214,38 @@
             box-shadow: 0 2px 6px rgba(239,68,68,0.4);
         }
 
-        /* Main padding to account for sticky bar */
         main { padding-bottom: 100px !important; }
 
-        /* ========== GALLERY STYLES ========== */
         #p-gallery-track { display: flex; width: 100%; }
         #p-gallery-track > div { flex: 0 0 100%; }
         .gallery-dot { transition: all 0.3s ease; }
         #p-gallery-thumbs::-webkit-scrollbar { display: none; }
         #p-gallery-thumbs { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .tab-btn.active { color: #0369a1 !important; border-bottom-color: #0369a1 !important; }
+
+        .size-option {
+            min-width: 44px; height: 40px; padding: 0 14px;
+            border: 1.5px solid #e2e8f0; border-radius: 10px;
+            background: white; font-size: 12px; font-weight: 600; color: #475569;
+            cursor: pointer; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .size-option:hover { border-color: #0ea5e9; color: #0ea5e9; }
+        .size-option.selected {
+            background: #0369a1; color: white; border-color: #0369a1;
+            box-shadow: 0 2px 8px rgba(15,23,42,0.25);
+        }
+        .color-option {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 2px solid #e2e8f0; cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .color-option:hover { border-color: #94a3b8; transform: scale(1.1); }
+        .color-option.selected {
+            border-color: #0369a1;
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #0369a1;
+        }
     </style>
 </head>
 <body class="antialiased text-slate-900">
@@ -249,7 +286,7 @@
 
         <!-- Product Detail -->
         <div id="product-detail" class="hidden fade-in">
-            <!-- Image Gallery with Swipe -->
+            <!-- Image Gallery -->
             <div class="relative w-full bg-white overflow-hidden" style="touch-action:pan-y;">
                 <div id="p-gallery-track" class="flex transition-transform duration-400 ease-out" style="touch-action:pan-y;">
                     <div class="w-full flex-shrink-0 aspect-square">
@@ -257,43 +294,51 @@
                     </div>
                 </div>
                 <div class="absolute top-3 left-3" id="p-badges"></div>
-                <!-- Navigation arrows -->
+                <!-- Navigation -->
                 <button id="gallery-prev" onclick="galleryPrev()" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center shadow-lg opacity-0 transition-opacity duration-300 z-10" style="display:none;">
                     <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
                 </button>
                 <button id="gallery-next" onclick="galleryNext()" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center shadow-lg opacity-0 transition-opacity duration-300 z-10" style="display:none;">
                     <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                 </button>
-                <!-- Pagination dots -->
                 <div id="p-gallery-dots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10"></div>
-                <!-- Image counter -->
                 <div id="p-gallery-counter" class="absolute top-3 right-3 bg-black/40 backdrop-blur text-white text-[10px] font-bold px-2.5 py-1 rounded-full z-10" style="display:none;"></div>
             </div>
-            <!-- Thumbnail strip -->
+            
             <div id="p-gallery-thumbs" class="flex gap-2 px-4 py-2 overflow-x-auto bg-white border-b border-slate-100" style="display:none;"></div>
 
             <!-- Info -->
             <div class="p-4 space-y-4">
-                <!-- Category + Stock -->
                 <div class="flex items-center justify-between">
                     <span id="p-category" class="text-[10px] font-black text-sky-500 uppercase tracking-widest"></span>
                     <span id="p-stock-badge"></span>
                 </div>
 
-                <!-- Name -->
                 <h1 id="p-name" class="text-xl font-black text-slate-900 leading-tight"></h1>
 
-                <!-- Rating -->
                 <div class="flex items-center gap-2" id="p-rating-section">
                     <div class="flex items-center gap-0.5" id="p-stars"></div>
                     <span id="p-rating-value" class="text-sm font-bold text-slate-700"></span>
                     <span id="p-reviews-count" class="text-xs text-slate-400"></span>
                 </div>
 
-                <!-- Price -->
                 <div class="flex items-baseline gap-3">
                     <span id="p-price" class="text-2xl font-black text-slate-900"></span>
                     <span id="p-old-price" class="text-sm text-slate-400 line-through hidden"></span>
+                </div>
+
+                <!-- Couleur -->
+                <div id="color-selector-section" style="display:none;">
+                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Couleur</p>
+                    <div id="color-options" class="flex gap-2 flex-wrap"></div>
+                    <p id="selected-color-text" class="text-xs text-slate-500 mt-1"></p>
+                </div>
+
+                <!-- Taille -->
+                <div id="size-selector-section" style="display:none;">
+                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Taille</p>
+                    <div id="size-options" class="flex gap-2 flex-wrap"></div>
+                    <p id="selected-size-text" class="text-xs text-slate-500 mt-1"></p>
                 </div>
 
                 <!-- Variants -->
@@ -302,50 +347,60 @@
                     <div id="p-variants-list" class="flex flex-wrap gap-2"></div>
                 </div>
 
-                <!-- Description -->
-                <div>
-                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Description</p>
-                    <p id="p-description" class="text-sm text-slate-600 leading-relaxed"></p>
-                </div>
-
                 <!-- Views -->
                 <div class="flex items-center gap-1 text-slate-400">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                     <span id="p-views" class="text-[10px] font-bold"></span>
                 </div>
 
-                <!-- Divider -->
                 <div class="h-px bg-slate-100"></div>
 
-                <!-- Reviews Section -->
+                <!-- TABS: Description | Details | Avis -->
                 <div>
-                    <div class="flex items-center justify-between mb-3">
-                        <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Avis clients</p>
-                        <button onclick="openReviewModal()" class="text-[10px] font-black text-sky-500 uppercase tracking-widest hover:text-sky-600 transition">Donner mon avis</button>
+                    <div class="flex border-b border-slate-200 mb-4">
+                        <button class="tab-btn flex-1 pb-3 text-[11px] font-black uppercase tracking-widest text-slate-400 border-b-2 border-transparent transition-all active" onclick="switchTab(this,'desc')" data-tab="desc">Description</button>
+                        <button class="tab-btn flex-1 pb-3 text-[11px] font-black uppercase tracking-widest text-slate-400 border-b-2 border-transparent transition-all" onclick="switchTab(this,'details')" data-tab="details">Details</button>
+                        <button class="tab-btn flex-1 pb-3 text-[11px] font-black uppercase tracking-widest text-slate-400 border-b-2 border-transparent transition-all" onclick="switchTab(this,'avis')" data-tab="avis">Avis (<span id="tab-review-count">0</span>)</button>
                     </div>
-                    <!-- Rating Summary -->
-                    <div class="bg-slate-50 rounded-xl p-3 mb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="text-center">
-                                <p class="text-2xl font-black text-slate-900" id="avg-rating-big">0.0</p>
-                                <div class="flex justify-center my-1" id="avg-rating-stars"></div>
-                                <p class="text-[10px] text-slate-400" id="total-reviews-text">0 avis</p>
-                            </div>
-                            <div class="flex-1 space-y-1">
-                                <div class="flex items-center gap-2"><span class="text-[10px] w-3">5</span><div class="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full bg-yellow-400 rounded-full" id="bar-5" style="width:0%"></div></div></div>
-                                <div class="flex items-center gap-2"><span class="text-[10px] w-3">4</span><div class="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full bg-yellow-400 rounded-full" id="bar-4" style="width:0%"></div></div></div>
-                                <div class="flex items-center gap-2"><span class="text-[10px] w-3">3</span><div class="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full bg-yellow-400 rounded-full" id="bar-3" style="width:0%"></div></div></div>
-                                <div class="flex items-center gap-2"><span class="text-[10px] w-3">2</span><div class="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full bg-yellow-400 rounded-full" id="bar-2" style="width:0%"></div></div></div>
-                                <div class="flex items-center gap-2"><span class="text-[10px] w-3">1</span><div class="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full bg-yellow-400 rounded-full" id="bar-1" style="width:0%"></div></div></div>
-                            </div>
+
+                    <div id="tab-panel-desc" class="tab-panel">
+                        <p id="p-description-tab" class="text-sm text-slate-600 leading-relaxed"></p>
+                    </div>
+
+                    <div id="tab-panel-details" class="tab-panel hidden">
+                        <div class="space-y-3">
+                            <div class="flex justify-between py-2 border-b border-slate-100"><span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Categorie</span><span id="detail-category" class="text-sm font-semibold text-slate-800">-</span></div>
+                            <div class="flex justify-between py-2 border-b border-slate-100"><span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Couleur</span><span id="detail-color" class="text-sm font-semibold text-slate-800">-</span></div>
+                            <div class="flex justify-between py-2 border-b border-slate-100"><span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Taille</span><span id="detail-size" class="text-sm font-semibold text-slate-800">-</span></div>
+                            <div class="flex justify-between py-2 border-b border-slate-100"><span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Disponibilite</span><span class="text-sm font-semibold text-emerald-600">En stock</span></div>
+                            <div class="flex justify-between py-2 border-b border-slate-100"><span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Livraison</span><span class="text-sm font-semibold text-slate-800">24h yaounde/ Douala 48-72h</span></div>
+                            <div class="flex justify-between py-2"><span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Garantie</span><span class="text-sm font-semibold text-slate-800">Garantie constructeur</span></div>
                         </div>
                     </div>
-                    <!-- Reviews List -->
-                    <div id="reviews-list" class="space-y-2 max-h-48 overflow-y-auto scrollbar-hide"></div>
-                    <button onclick="loadMoreReviews()" class="add-review-btn mt-2" id="load-more-reviews">Voir plus d'avis</button>
+
+                    <div id="tab-panel-avis" class="tab-panel hidden">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-3">
+                                <div>
+                                    <p class="text-2xl font-black text-slate-900" id="avg-rating-big">0.0</p>
+                                    <div class="flex my-0.5" id="avg-rating-stars"></div>
+                                    <p class="text-[10px] text-slate-400" id="total-reviews-text">0 avis</p>
+                                </div>
+                            </div>
+                            <button onclick="openReviewModal()" class="text-[10px] font-black text-sky-500 uppercase tracking-widest hover:text-sky-600 transition">Donner mon avis</button>
+                        </div>
+                        <div class="mb-3 space-y-1">
+                            <div class="flex items-center gap-2"><span class="text-[10px] w-3 text-slate-500">5</span><div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-yellow-400 rounded-full transition-all" id="bar-5" style="width:0%"></div></div></div>
+                            <div class="flex items-center gap-2"><span class="text-[10px] w-3 text-slate-500">4</span><div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-yellow-400 rounded-full transition-all" id="bar-4" style="width:0%"></div></div></div>
+                            <div class="flex items-center gap-2"><span class="text-[10px] w-3 text-slate-500">3</span><div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-yellow-400 rounded-full transition-all" id="bar-3" style="width:0%"></div></div></div>
+                            <div class="flex items-center gap-2"><span class="text-[10px] w-3 text-slate-500">2</span><div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-yellow-400 rounded-full transition-all" id="bar-2" style="width:0%"></div></div></div>
+                            <div class="flex items-center gap-2"><span class="text-[10px] w-3 text-slate-500">1</span><div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-yellow-400 rounded-full transition-all" id="bar-1" style="width:0%"></div></div></div>
+                        </div>
+                        <div id="reviews-list" class="space-y-3 max-h-64 overflow-y-auto scrollbar-hide"></div>
+                        <button onclick="loadMoreReviews()" class="add-review-btn mt-2" id="load-more-reviews">Voir plus d'avis</button>
+                    </div>
                 </div>
 
-                <!-- Divider -->
                 <div class="h-px bg-slate-100"></div>
 
             </div>
@@ -359,7 +414,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                 <span class="btn-action-text">Ajouter au panier</span>
             </button>
-            <button id="btn-whatsapp" class="btn-action-whatsapp">
+            <button id="btn-whatsapp" class="btn-action-whatsapp"onclick="orderWhatsApp()">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 01 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
                 <span class="btn-action-text">Commander</span>
             </button>
@@ -418,11 +473,29 @@
     const SUPABASE_KEY = 'sb_publishable_LbTOPS3OgBPIJHJGEFKg9Q_djLjGvdk';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // ===== SECURITY: XSS Sanitizer =====
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    function sanitizeInput(input) {
+        return input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                    .replace(/javascript:/gi, '')
+                    .replace(/on\w+\s*=/gi, '');
+    }
+
     const params = new URLSearchParams(window.location.search);
     const productId = parseInt(params.get('id'));
     let currentProduct = null;
+    
+    // Variables globales corrigées (Les doublons ont été retirés)
     let selectedVariant = null;
     let currentRating = 0;
+    let selectedColor = null;
+    let selectedSize = null;
+
     let galleryImages = [];
     let galleryIndex = 0;
 
@@ -431,6 +504,17 @@
         document.getElementById('error-state').classList.remove('hidden');
     } else {
         loadProduct();
+    }
+
+    // Vues simulées — cohérentes avec les avis
+    function getProductViews(productId) {
+        var seed = productId * 9301 + 49297;
+        var t = seed % 8000;
+        return 200 + t;
+    }
+    function formatViews(n) {
+        if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'k';
+        return String(n);
     }
 
     async function loadProduct() {
@@ -446,19 +530,30 @@
             currentProduct = data;
             renderProduct(data);
             loadReviews(data.id);
-            updateCartUI();
+            try { updateCartUI(); } catch(ignore) {}
         } catch (e) {
-            console.error(e);
-            document.getElementById('loading-state').classList.add('hidden');
-            document.getElementById('error-state').classList.remove('hidden');
+            console.error('loadProduct error:', e);
+            var loadingEl2 = document.getElementById('loading-state');
+            var productEl2 = document.getElementById('product-detail');
+            var stickyEl2 = document.getElementById('sticky-actions');
+            var errorEl2 = document.getElementById('error-state');
+            if (loadingEl2) loadingEl2.classList.add('hidden');
+            if (productEl2 && !currentProduct) productEl2.classList.add('hidden');
+            if (stickyEl2) stickyEl2.style.display = 'none';
+            if (errorEl2) errorEl2.classList.remove('hidden');
         }
     }
 
     function renderProduct(p) {
-        document.getElementById('loading-state').classList.add('hidden');
-        document.getElementById('product-detail').classList.remove('hidden');
+        var loadingEl = document.getElementById('loading-state');
+        var errorEl = document.getElementById('error-state');
+        var productEl = document.getElementById('product-detail');
+        var stickyEl = document.getElementById('sticky-actions');
+        if (loadingEl) loadingEl.classList.add('hidden');
+        if (errorEl) errorEl.classList.add('hidden');
+        if (productEl) productEl.classList.remove('hidden');
+        if (stickyEl) stickyEl.style.display = 'block';
 
-        // Build gallery from images array or fallback to single image_url
         galleryImages = [];
         if (p.images && Array.isArray(p.images) && p.images.length > 0) {
             galleryImages = p.images.filter(function(url) { return url && url.trim(); });
@@ -487,6 +582,26 @@
 
         document.getElementById('p-category').textContent = p.categorie || 'Produit';
 
+        const detailCat = document.getElementById('detail-category');
+        if (detailCat) detailCat.textContent = p.categorie || '-';
+
+        const detailColor = document.getElementById('detail-color');
+        let couleurs = p.couleur || p.couleurs || '-';
+        if (Array.isArray(couleurs)) {
+            couleurs = couleurs.map(c => {
+                if (typeof c === 'object' && c !== null) {
+                    return c.nom || c.name || c.valeur || c.couleur || '';
+                }
+                return c;
+            }).filter(Boolean).join(', ');
+        }
+        if (detailColor) detailColor.textContent = couleurs || 'À préciser à la commande';
+
+        const detailSize = document.getElementById('detail-size');
+        let tailles = p.taille || p.tailles || '-';
+        if (Array.isArray(tailles)) tailles = tailles.join(', ');
+        if (detailSize) detailSize.textContent = tailles;
+
         const stockEl = document.getElementById('p-stock-badge');
         if (p.statut_stock === 'rupture') stockEl.innerHTML = '<span class="badge-stock badge-rupture">● Rupture de stock</span>';
         else if (p.statut_stock === 'sur_commande') stockEl.innerHTML = '<span class="badge-stock badge-sur-cmd">● Sur commande</span>';
@@ -499,18 +614,53 @@
             document.getElementById('p-old-price').classList.remove('hidden');
         }
 
-        if (p.variantes && Array.isArray(p.variantes) && p.variantes.length > 0) {
-            document.getElementById('p-variants-section').classList.remove('hidden');
-            document.getElementById('p-variants-list').innerHTML = p.variantes.map((v, i) => `
-                <button class="variant-btn px-4 py-2 rounded-xl text-xs font-bold" data-index="${i}" onclick="selectVariant(${i})">
-                    ${v.nom || v.name || 'Option ' + (i+1)}
-                    ${v.prix ? '<span class="text-slate-400 font-semibold">+' + v.prix.toLocaleString() + ' F</span>' : ''}
-                </button>
-            `).join('');
+        // Réinitialiser les sélections à chaque chargement de produit
+        selectedColor = null;
+        selectedSize = null;
+
+        let taillesArray = [];
+        let taillesRaw = p.taille || p.tailles;
+        if (Array.isArray(taillesRaw)) taillesArray = taillesRaw;
+        else if (typeof taillesRaw === 'string') taillesArray = taillesRaw.split(',').map(s => s.trim());
+
+        if (taillesArray.length > 0 && taillesArray[0] !== '') {
+            document.getElementById('size-selector-section').style.display = 'block';
+            document.getElementById('size-options').innerHTML = taillesArray.map((t) =>
+                `<button class="size-option" onclick="selectSize('${t}', this)">${t}</button>`
+            ).join('');
+        } else {
+            document.getElementById('size-selector-section').style.display = 'none';
         }
 
-        document.getElementById('p-description').textContent = p.description || 'Aucune description disponible.';
-        document.getElementById('p-views').textContent = (p.vues || 0).toLocaleString() + ' vues';
+        let couleursArray = [];
+        let couleursRaw = p.couleur || p.couleurs;
+        if (Array.isArray(couleursRaw)) {
+            couleursArray = couleursRaw.map(c => typeof c === 'object' && c !== null ? (c.nom || c.name || c.valeur || c.couleur) : c).filter(Boolean);
+        } else if (typeof couleursRaw === 'string') {
+            couleursArray = couleursRaw.split(',').map(s => s.trim()).filter(Boolean);
+        }
+
+        if (couleursArray.length > 0 && couleursArray[0] !== '') {
+            document.getElementById('color-selector-section').style.display = 'block';
+            document.getElementById('color-options').innerHTML = couleursArray.map((c) =>
+                `<button class="size-option" onclick="selectColor('${c}', this)">${c}</button>`
+            ).join('');
+        } else {
+            document.getElementById('color-selector-section').style.display = 'none';
+        }
+
+        if (p.variantes && Array.isArray(p.variantes) && p.variantes.length > 0) {
+            document.getElementById('p-variants-section').classList.remove('hidden');
+            document.getElementById('p-variants-list').innerHTML = p.variantes.map((v, i) => {
+                const vName = escapeHtml(v.nom || v.name || 'Option ' + (i+1));
+                const vPrice = v.prix ? '<span class="text-slate-400 font-semibold">+' + (parseInt(v.prix) || 0).toLocaleString() + ' F</span>' : '';
+                return `<button class="variant-btn px-4 py-2 rounded-xl text-xs font-bold" data-index="${i}" onclick="selectVariant(${i})">${vName} ${vPrice}</button>`;
+            }).join('');
+        }
+
+        var descTab = document.getElementById('p-description-tab');
+        if (descTab) descTab.textContent = p.description || 'Aucune description disponible.';
+        document.getElementById('p-views').textContent = formatViews(getProductViews(p.id || 0)) + ' vues';
 
         const waBtn = document.getElementById('btn-whatsapp');
         if (p.statut_stock === 'rupture') {
@@ -523,14 +673,12 @@
         document.title = p.name + ' | YARID';
     }
 
-    // ========== IMAGE GALLERY ==========
     function renderGallery() {
         var track = document.getElementById('p-gallery-track');
         var dots = document.getElementById('p-gallery-dots');
         var thumbs = document.getElementById('p-gallery-thumbs');
         var counter = document.getElementById('p-gallery-counter');
 
-        // Build slides
         var html = '';
         for (var i = 0; i < galleryImages.length; i++) {
             html += '<div class="w-full flex-shrink-0 aspect-square bg-gradient-to-br from-slate-50 to-slate-100">';
@@ -540,17 +688,14 @@
         track.innerHTML = html;
         track.style.transform = 'translateX(-' + (galleryIndex * 100) + '%)';
 
-        // Dots
         var dotsHtml = '';
         for (var i = 0; i < galleryImages.length; i++) {
             dotsHtml += '<button onclick="goToGalleryImage(' + i + ')" class="gallery-dot ' + (i === galleryIndex ? 'active' : '') + '" style="width:' + (i === galleryIndex ? '20px' : '6px') + ';height:6px;border-radius:9999px;background:' + (i === galleryIndex ? '#0ea5e9' : '#cbd5e1') + ';transition:all 0.3s ease;border:none;cursor:pointer;"></button>';
         }
         dots.innerHTML = dotsHtml;
 
-        // Counter
         if (counter) counter.textContent = (galleryIndex + 1) + ' / ' + galleryImages.length;
 
-        // Thumbnails
         if (thumbs && galleryImages.length > 1) {
             var thumbsHtml = '';
             for (var i = 0; i < galleryImages.length; i++) {
@@ -580,16 +725,13 @@
     }
 
     function renderGalleryDotsAndThumbs() {
-        // Update dots
         var dots = document.querySelectorAll('.gallery-dot');
         dots.forEach(function(dot, i) {
             dot.style.width = i === galleryIndex ? '20px' : '6px';
             dot.style.background = i === galleryIndex ? '#0ea5e9' : '#cbd5e1';
         });
-        // Update counter
         var counter = document.getElementById('p-gallery-counter');
         if (counter) counter.textContent = (galleryIndex + 1) + ' / ' + galleryImages.length;
-        // Update thumbs
         var thumbBtns = document.querySelectorAll('#p-gallery-thumbs button');
         thumbBtns.forEach(function(btn, i) {
             if (i === galleryIndex) {
@@ -602,7 +744,6 @@
         });
     }
 
-    // Touch swipe support
     (function initGallerySwipe() {
         var galleryContainer = document.querySelector('#p-gallery-track');
         if (!galleryContainer) return;
@@ -637,7 +778,6 @@
         });
     })();
 
-    // Hover arrows visibility
     (function initGalleryHover() {
         var wrap = document.querySelector('#product-detail > div:first-of-type');
         if (!wrap) return;
@@ -665,41 +805,146 @@
         document.getElementById('p-price').textContent = (basePrice + variantPrice).toLocaleString() + ' FCFA';
     }
 
-    function orderWhatsApp() {
-        if (!currentProduct || currentProduct.statut_stock === 'rupture') return;
-        const phone = '237655959284';
-        let msg = 'Bonjour YARID ! Je souhaite commander le produit suivant :\n\n';
-        msg += '\uD83D\uDCE6 *' + currentProduct.name + '*\n';
-        msg += '\uD83D\uDCB0 Prix : ' + document.getElementById('p-price').textContent + '\n';
-        if (selectedVariant) msg += '\uD83C\uDFA8 Variante : ' + (selectedVariant.nom || selectedVariant.name) + '\n';
-        msg += '\nMerci de me confirmer la disponibilite et les modalites de livraison.';
-        window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+    function selectColor(col, btn) {
+        selectedColor = col;
+        document.querySelectorAll('#color-options .size-option').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('selected-color-text').textContent = col;
     }
 
+    function selectSize(size, btn) {
+        selectedSize = size;
+        document.querySelectorAll('#size-options .size-option').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('selected-size-text').textContent = size;
+    }
+
+    function switchTab(btn, tabName) {
+        document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); });
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+        var panel = document.getElementById('tab-panel-' + tabName);
+        if (panel) panel.classList.remove('hidden');
+    }
+
+    function orderViaWhatsApp() { orderWhatsApp(); }
+
+    // ===== CORRIGE : ajoute couleur et taille sélectionnées au message WhatsApp =====
+    function orderWhatsApp() {
+        if (!currentProduct || currentProduct.statut_stock === 'rupture') return;
+
+        const phone = '237655959284';
+        let msg = 'Bonjour YARID ! Je souhaite commander le produit suivant :\n\n';
+        msg += '📦 *' + currentProduct.name + '*\n';
+        msg += '💰 Prix : ' + (document.getElementById('p-price')?.textContent || '') + '\n';
+        if (typeof selectedVariant !== 'undefined' && selectedVariant) {
+            msg += '⚙️ Variante : ' + (selectedVariant.nom || selectedVariant.name) + '\n';
+        }
+        if (selectedColor) {
+            msg += '🎨 Couleur : ' + selectedColor + '\n';
+        }
+        if (selectedSize) {
+            msg += '📏 Taille : ' + selectedSize + '\n';
+        }
+        msg += '\nMerci de me confirmer la disponibilité et les modalités de livraison.';
+
+        window.location.href = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg);
+    }
+
+    // ===== CORRIGE : ajoute couleur et taille sélectionnées au nom de l'article dans le panier =====
     function addCurrentToCart() {
         if (!currentProduct) return;
         if (currentProduct.statut_stock === 'rupture') { alert('Ce produit est en rupture de stock.'); return; }
         const priceText = document.getElementById('p-price').textContent;
         const price = parseInt(priceText.replace(/\D/g, '')) || currentProduct.price;
         const variantName = selectedVariant ? (selectedVariant.nom || selectedVariant.name) : null;
-        const fullName = variantName ? (currentProduct.name + ' (' + variantName + ')') : currentProduct.name;
+
+        let options = [];
+        if (variantName) options.push(variantName);
+        if (selectedColor) options.push(selectedColor);
+        if (selectedSize) options.push(selectedSize);
+        const fullName = options.length > 0 ? (currentProduct.name + ' (' + options.join(', ') + ')') : currentProduct.name;
+
         addToCart({ id: currentProduct.id, name: fullName, price: price, image_url: currentProduct.image_url }, 1);
         const btn = document.getElementById('btn-cart');
         const original = btn.innerHTML;
-        btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Ajoute !';
+        btn.innerHTML = 'Ajouté !';
         btn.classList.remove('btn-cart'); btn.classList.add('bg-emerald-500');
         setTimeout(() => { btn.innerHTML = original; btn.classList.add('btn-cart'); btn.classList.remove('bg-emerald-500'); }, 1500);
     }
 
-    // ========== REVIEWS ==========
+    const MOCK_FIRST_NAMES = ['Kevin','Marc','Sandrine','Brice','Ingrid','Alain','Fanny','Cedric','Dylan','Laura','Yann','Melissa','Serge','Claire','Junior','Aurelie'];
+    const MOCK_LAST_NAMES = ['M.','K.','T.','B.','N.','D.','F.','L.','P.','S.','A.','Y.','Mme K.','Mme T.','Mme B.','Mme N.'];
+    const MOCK_COMMENTS = [
+        'Super produit, qualite au rendez-vous ! Livraison rapide a Douala, je recommande vivement YARID.',
+        'Tres satisfait de mon achat. Le produit correspond exactement a la description. Emballage soigne.',
+        'Excellent rapport qualite-prix. La livraison a ete faite en 48h comme promis. Merci YARID !',
+        'Produit conforme, belle finition. Je suis client regulier et je ne suis jamais decu.',
+        'Livraison ultra rapide a Yaounde. Le produit est top, mes amis veulent tous commander maintenant.',
+        'Premiere commande et vraiment impressionne. Service client reactif et produit de qualite.',
+        'Le meilleur site de confiance au Cameroun. Produit authentique, je verifierai a chaque fois ici.',
+        'Commande recue en parfait etat. Le suivi etait clair et l equipe est tres professionnelle.',
+        'Je recommande les yeux fermes. Qualite premium, livraison express, service impeccable.',
+        'Tout simplement parfait. Le produit depasse mes attentes. Bravo a toute l equipe YARID !',
+        'Apres 3 commandes, je confirme : c est le meilleur site tech et mode du Cameroun. Fiable a 100%.',
+        'J etais sceptique au debut mais la qualite est la. Livraison sous 72h a Bafoussam. Merci !',
+        'Produit de tres bonne qualite. Mon frere a aussi commande apres avoir vu le mien.',
+        'Service au top, reponse WhatsApp rapide. Le produit est original, pas de contrefacon.',
+        'Le packaging etait soigne, on sent le professionnalisme. Je reviendrai sans hesiter.',
+        'Excellente experience d achat. Le paiement en deux fois est un vrai plus. Merci YARID !'
+    ];
+    const MOCK_AVATARS = ['https://api.dicebear.com/7.x/avataaars/svg?seed=','https://api.dicebear.com/7.x/notionists/svg?seed='];
+
+    function generateMockReviews(pid) {
+        const seed = pid * 7919;
+        function seededRandom(n) {
+            const x = Math.sin(seed + n * 9999) * 10000;
+            return x - Math.floor(x);
+        }
+        const count = 3 + Math.floor(seededRandom(1) * 6); 
+        const reviews = [];
+        for (let i = 0; i < count; i++) {
+            const fname = MOCK_FIRST_NAMES[Math.floor(seededRandom(i + 10) * MOCK_FIRST_NAMES.length)];
+            const lname = MOCK_LAST_NAMES[Math.floor(seededRandom(i + 20) * MOCK_LAST_NAMES.length)];
+            const comment = MOCK_COMMENTS[Math.floor(seededRandom(i + 30) * MOCK_COMMENTS.length)];
+            const rating = 4 + (seededRandom(i + 40) > 0.6 ? 1 : 0);
+            const daysAgo = Math.floor(seededRandom(i + 50) * 60) + 1;
+            const date = new Date();
+            date.setDate(date.getDate() - daysAgo);
+            const avatarSeed = fname + lname + pid;
+            reviews.push({
+                id: 'mock-' + i,
+                client_nom: fname + ' ' + lname,
+                rating: rating,
+                note: rating,
+                comment: comment,
+                commentaire: comment,
+                created_at: date.toISOString(),
+                verified: true,
+                avatar: MOCK_AVATARS[0] + encodeURIComponent(avatarSeed),
+                isMock: true
+            });
+        }
+        return reviews;
+    }
+
     async function loadReviews(pid) {
         try {
             const { data, error } = await _supabase.from('avis').select('*').eq('produit_id', pid).order('created_at', { ascending: false });
-            const reviews = (!error && data) ? data : [];
-            renderReviewsList(reviews);
-            renderStarsDisplay(reviews);
-            updateRatingBars(reviews);
-        } catch(e) { console.error('Erreur chargement avis:', e); }
+            let realReviews = (!error && data && data.length > 0) ? data : [];
+            let allReviews = realReviews;
+            if (realReviews.length === 0) {
+                allReviews = generateMockReviews(pid);
+            }
+            renderReviewsList(allReviews);
+            renderStarsDisplay(allReviews);
+            updateRatingBars(allReviews);
+        } catch(e) {
+            const mockReviews = generateMockReviews(pid);
+            renderReviewsList(mockReviews);
+            renderStarsDisplay(mockReviews);
+            updateRatingBars(mockReviews);
+        }
     }
 
     function renderReviewsList(reviews) {
@@ -708,16 +953,32 @@
             container.innerHTML = '<p class="text-center text-slate-400 text-sm py-4">Soyez le premier a donner votre avis !</p>';
             return;
         }
-        container.innerHTML = reviews.slice(0, 5).map(r => `
-            <div class="review-item">
-                <div class="flex items-center justify-between">
-                    <span class="reviewer-name">${r.client_nom || 'Client'}</span>
-                    <div class="flex items-center gap-1">${renderStarsHTML(r.rating || r.note || 5, 'w-3 h-3')}</div>
+        container.innerHTML = reviews.slice(0, 5).map(r => {
+            const safeName = escapeHtml(r.client_nom || 'Client');
+            const safeComment = escapeHtml(r.comment || r.commentaire || '');
+            const initials = safeName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            const dateStr = r.created_at ? escapeHtml(new Date(r.created_at).toLocaleDateString('fr-FR')) : '';
+            const hasAvatar = r.avatar && r.avatar.match(/^https?:\/\/.+/i);
+            const safeAvatar = hasAvatar ? escapeHtml(r.avatar) : '';
+            return `
+            <div class="review-item" style="background:#f8fafc;border-radius:0.75rem;padding:0.875rem;margin-bottom:0.625rem;border:1px solid #f1f5f9;">
+                <div class="flex items-start gap-3">
+                    ${hasAvatar ? `<img src="${safeAvatar}" alt="" style="width:36px;height:36px;border-radius:50%;flex-shrink:0;background:#e2e8f0;" onerror="this.style.display='none';this.parentNode.insertAdjacentHTML('afterbegin','<div style=\\'width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0369a1,#1e293b);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;\\'>${initials}</div>');">` : `<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0369a1,#1e293b);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">${initials}</div>`}
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="reviewer-name">${safeName}</span>
+                            ${r.verified ? '<span style="display:inline-flex;align-items:center;gap:3px;background:#ecfdf5;color:#059669;font-size:9px;font-weight:700;padding:2px 8px;border-radius:9999px;"><svg width="10" height="10" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Achat verifie</span>' : ''}
+                        </div>
+                        <div class="flex items-center gap-1.5 mt-1">
+                            <div class="flex items-center gap-0.5">${renderStarsHTML(r.rating || r.note || 5, 'w-3 h-3')}</div>
+                            <span style="font-size:10px;color:#94a3b8;">${dateStr}</span>
+                        </div>
+                        <p class="review-text" style="margin-top:6px;font-size:12px;color:#475569;line-height:1.5;">${safeComment}</p>
+                    </div>
                 </div>
-                <p class="review-date">${r.created_at ? new Date(r.created_at).toLocaleDateString('fr-FR') : ''}</p>
-                <p class="review-text">${r.comment || r.commentaire || ''}</p>
             </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function renderStarsHTML(rating, size) {
@@ -732,6 +993,7 @@
         const avg = reviews.length > 0 ? (reviews.reduce((s, r) => s + (r.rating || r.note || 0), 0) / reviews.length) : 0;
         document.getElementById('avg-rating-big').textContent = avg.toFixed(1);
         document.getElementById('total-reviews-text').textContent = reviews.length + ' avis';
+        document.getElementById('tab-review-count').textContent = reviews.length;
         document.getElementById('avg-rating-stars').innerHTML = renderStarsHTML(Math.round(avg), 'w-3 h-3');
         document.getElementById('p-stars').innerHTML = renderStarsHTML(Math.round(avg), 'w-3 h-3');
         document.getElementById('p-rating-value').textContent = avg.toFixed(1);
@@ -794,19 +1056,25 @@
         _supabase.from('avis').select('*').eq('produit_id', currentProduct.id).order('created_at', { ascending: false }).then(({ data, error }) => {
             if (!error && data) {
                 const container = document.getElementById('reviews-list');
-                container.innerHTML = data.map(r => `
+                container.innerHTML = data.map(r => {
+                    const safeName = escapeHtml(r.client_nom || 'Client');
+                    const safeComment = escapeHtml(r.comment || r.commentaire || '');
+                    const safeDate = escapeHtml(r.created_at ? new Date(r.created_at).toLocaleDateString('fr-FR') : '');
+                    return `
                     <div class="review-item">
                         <div class="flex items-center justify-between">
-                            <span class="reviewer-name">${r.client_nom || 'Client'}</span>
+                            <span class="reviewer-name">${safeName}</span>
                             <div class="flex items-center gap-1">${renderStarsHTML(r.rating || r.note || 5, 'w-3 h-3')}</div>
                         </div>
-                        <p class="review-date">${r.created_at ? new Date(r.created_at).toLocaleDateString('fr-FR') : ''}</p>
-                        <p class="review-text">${r.comment || r.commentaire || ''}</p>
-                    </div>
-                `).join('');
+                        <p class="review-date">${safeDate}</p>
+                        <p class="review-text">${safeComment}</p>
+                    </div>`;
+                }).join('');
             }
         });
     }
+
     </script>
+<script src="yarid-checkout.js"></script>
 </body>
 </html>

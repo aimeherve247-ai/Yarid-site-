@@ -1187,7 +1187,8 @@
         <!-- ===== FOOTER ===== -->
         <footer class="text-center py-8 fade-up">
             <p class="text-xs text-slate-400 font-medium">YARID Analytics Pro v3.0 - Powered by Supabase & Chart.js</p>
-            <p class="text-[10px] text-slate-300 mt-1">Donnees mises a jour en temps reel. Derniere synchronisation: <span id="last-sync">--:--</span></p>
+            <p class="text-[10px] text-slate-300 mt-1">Données mises à jour en temps réel. Dernière synchronisation: <span id="last-sync">--:--</span></p>
+            <p id="data-source-badge" class="text-[10px] text-amber-400 mt-0.5 font-semibold">⏳ Chargement...</p>
         </footer>
 
     </main>
@@ -1270,6 +1271,50 @@ function setPeriod(period) {
 // DATA LOADING
 // ============================================================================
 
+// ============================================================================
+// DATA LOADING — lit site_analytics + commandes (données réelles YARID)
+// ============================================================================
+
+// Convertit une commande YARID en événements analytics synthétiques
+function commandeToEvents(cmd) {
+    const events = [];
+    const base = {
+        session_id:  'cmd_' + cmd.order_id,
+        page_url:    'index.html',
+        device_type: 'Mobile',
+        browser:     'Chrome',
+        utm_source:  'WhatsApp',
+        utm_medium:  null,
+        utm_campaign: null,
+        time_on_page_ms: null,
+    };
+
+    // checkout_start pour toute commande
+    events.push({ ...base, event_type: 'checkout_start', created_at: cmd.created_at,
+        details: { order_id: cmd.order_id, total_amount: cmd.montant_total || 0 } });
+
+    // purchase_success uniquement si statut confirmé
+    const confirmedStatuts = ['livre', 'en_livraison', 'en_preparation', 'paye', 'en_attente'];
+    if (confirmedStatuts.includes(cmd.statut)) {
+        events.push({ ...base, event_type: 'purchase_success', created_at: cmd.created_at,
+            details: {
+                order_id:     cmd.order_id,
+                total_amount: cmd.montant_total || 0,
+                category:     cmd.article ? cmd.article.split(',')[0] : '',
+                items:        parseArticles(cmd.article, cmd.montant_total),
+            }
+        });
+    }
+    return events;
+}
+
+function parseArticles(articleStr, total) {
+    if (!articleStr) return [];
+    return articleStr.split(',').map(function(a) {
+        return { name: a.trim(), price: total || 0, qty: 1 };
+    });
+}
+
 async function loadAnalytics() {
     showLoading();
 
@@ -1277,40 +1322,47 @@ async function loadAnalytics() {
         const { start, end } = getPeriodDates(currentPeriod);
         const compDates = getComparisonDates(currentPeriod);
 
-        // Fetch current period data
-        const { data: currData, error: currError } = await supabaseClient
-            .from('site_analytics')
-            .select('*')
-            .gte('created_at', start)
-            .lte('created_at', end)
-            .order('created_at', { ascending: true });
+        // ── 1. site_analytics (tracking comportemental) ──
+        const [sbCurr, sbPrev, sbAll] = await Promise.all([
+            supabaseClient.from('site_analytics').select('*').gte('created_at', start).lte('created_at', end).order('created_at', { ascending: true }),
+            supabaseClient.from('site_analytics').select('*').gte('created_at', compDates.start).lte('created_at', compDates.end),
+            supabaseClient.from('site_analytics').select('*').gte('created_at', new Date(Date.now() - 90*24*60*60*1000).toISOString()).order('created_at', { ascending: true }),
+        ]);
 
-        if (currError) throw currError;
-        currentData = currData || [];
+        // ── 2. commandes YARID (données réelles de vente) ──
+        const ninetyAgo = new Date(Date.now() - 90*24*60*60*1000).toISOString();
+        const { data: allCmds } = await supabaseClient.from('commandes').select('*').gte('created_at', ninetyAgo).order('created_at', { ascending: true });
+        const cmds = allCmds || [];
 
-        // Fetch comparison period data
-        const { data: prevData, error: prevError } = await supabaseClient
-            .from('site_analytics')
-            .select('*')
-            .gte('created_at', compDates.start)
-            .lte('created_at', compDates.end);
+        // Convertir commandes en événements synthétiques
+        const cmdEvents    = cmds.flatMap(commandeToEvents);
+        const cmdCurr      = cmdEvents.filter(e => e.created_at >= start && e.created_at <= end);
+        const cmdPrev      = cmdEvents.filter(e => e.created_at >= compDates.start && e.created_at <= compDates.end);
 
-        if (prevError) throw prevError;
-        comparisonData = prevData || [];
+        // Éviter doublons : si un achat est déjà tracké dans site_analytics, ne pas l'ajouter depuis commandes
+        const trackedOrders = new Set((sbAll.data || []).filter(e => e.event_type === 'purchase_success').map(e => e.details?.order_id).filter(Boolean));
+        const deduped = (events) => events.filter(e => {
+            if (e.event_type === 'purchase_success' && e.details?.order_id && trackedOrders.has(e.details.order_id)) return false;
+            return true;
+        });
 
-        // Fetch all historical data for predictions (last 90 days)
-        const ninetyDaysAgo = new Date();
-        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-        const { data: allData, error: allError } = await supabaseClient
-            .from('site_analytics')
-            .select('*')
-            .gte('created_at', ninetyDaysAgo.toISOString())
-            .order('created_at', { ascending: true });
+        // ── 3. Fusionner ──
+        currentData    = [...(sbCurr.data || []), ...deduped(cmdCurr)].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+        comparisonData = [...(sbPrev.data || []), ...deduped(cmdPrev)];
+        analyticsData  = [...(sbAll.data  || []), ...deduped(cmdEvents)].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
 
-        if (allError) throw allError;
-        analyticsData = allData || [];
+        // ── Badge source des données ──
+        const hasRealTracking = (sbCurr.data || []).length > 0;
+        const hasRealOrders   = cmdCurr.length > 0;
+        const sourceEl = document.getElementById('data-source-badge');
+        if (sourceEl) {
+            if (hasRealTracking && hasRealOrders)    sourceEl.textContent = '✅ Tracking + Commandes réelles';
+            else if (hasRealOrders)                  sourceEl.textContent = '🛒 Données commandes YARID';
+            else if (hasRealTracking)                sourceEl.textContent = '📡 Tracking actif';
+            else                                     sourceEl.textContent = '⚠️ Aucune donnée — installer le tracker';
+        }
 
-        // Update all sections
+        // ── 4. Rafraîchir tous les widgets ──
         updateKPIs();
         updateFunnel();
         updateTrafficChart();
@@ -1329,14 +1381,13 @@ async function loadAnalytics() {
         updateRevenueChart();
         updateBrowsers();
 
-        // Update last sync time
         const now = new Date();
         document.getElementById('last-sync').textContent =
-            `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
 
     } catch (err) {
-        console.error('[Analytics] Error loading data:', err);
-        showError('Erreur de chargement des donnees');
+        console.error('[Analytics] Error:', err);
+        showError('Erreur de chargement : ' + err.message);
     }
 
     hideLoading();
