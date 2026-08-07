@@ -1,0 +1,1 @@
+function trackYaridEvent(name) { /* tracker stub */ }
