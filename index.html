@@ -7,7 +7,10 @@
     <title>YARID | Boutique Premium</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#0369a1">
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://yarid-tracker.evousan.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src https://whcpugnkldbmuqzgqxbe.supabase.co https://yarid-tracker.evousan.com https://api.qrserver.com https://api.dicebear.com https://*.supabase.co; img-src 'self' https: data: blob:; frame-src https://www.google.com https://maps.google.com;
+; object-src 'none'; base-uri 'self'; form-action 'self';">
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -17,6 +20,7 @@
         });
       }
     </script>
+<script src="yarid-tracker.js"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -32,10 +36,40 @@
     <script src="referral-system.js"></script>
     <script src="analytics.js"></script>
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+        /* ============================================
+           YARID PREMIUM — Palette & Typography
+           ============================================ */
+        :root {
+            --y-navy: #0B4F8C;
+            --y-navy-light: #0EA5E9;
+            --y-navy-card: #0369A1;
+            --y-blue: #0EA5E9;
+            --y-blue-light: #38BDF8;
+            --y-gold: #D4AF37;
+            --y-gold-light: #F0D878;
+            --y-champagne: #E8DCC4;
+            --y-white: #FFFFFF;
+            --y-gray-50: #F8FAFC;
+            --y-gray-100: #F1F5F9;
+            --y-gray-200: #E2E8F0;
+            --y-gray-300: #CBD5E1;
+            --y-gray-400: #94A3B8;
+            --y-gray-500: #64748B;
+            --y-gray-600: #475569;
+            --y-gray-700: #334155;
+            --y-gray-800: #1E293B;
+        }
         
-        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        * { 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
         
         :root {
             --safe-top: env(safe-area-inset-top, 0px);
@@ -45,9 +79,79 @@
         }
         
         body { 
-            background: #f8fafc; 
+            background: var(--y-gray-50); 
+            color: var(--y-navy);
             padding-top: var(--safe-top);
             padding-bottom: var(--safe-bottom);
+            letter-spacing: -0.01em;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== SAFE AREA / NOTCH SUPPORT ===== */
+        /* Header fixed avec padding pour l'encoche */
+        #main-header {
+            padding-top: max(var(--safe-top), 0px) !important;
+        }
+        #main-header .h-16 {
+            height: 64px;
+            display: flex;
+            align-items: center;
+        }
+        /* Bottom nav avec padding pour la home indicator */
+        .bottom-nav {
+            padding-bottom: max(var(--safe-bottom), env(safe-area-inset-bottom, 0px)) !important;
+            padding-left: max(var(--safe-bottom), env(safe-area-inset-left, 0px)) !important;
+            padding-right: max(var(--safe-bottom), env(safe-area-inset-right, 0px)) !important;
+        }
+        /* S'assurer que le contenu principal n'est pas caché sous le header */
+        main.pt-16 {
+            padding-top: calc(64px + var(--safe-top)) !important;
+        }
+        /* WhatsApp float button au-dessus de la bottom nav + safe area */
+        .wa-float-v2 {
+            bottom: calc(100px + var(--safe-bottom)) !important;
+        }
+        /* Modals et drawers doivent respecter les safe areas */
+        .cart-drawer, .modal-overlay {
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+        }
+        /* Sticky action bar sur produit-detail */
+        .sticky-action-bar {
+            padding-bottom: calc(12px + var(--safe-bottom)) !important;
+        }
+        /* iPhone-specific : encoche dynamique */
+        @supports (-webkit-touch-callout: none) {
+            /* iOS devices */
+            #main-header {
+                padding-top: max(env(safe-area-inset-top), 20px) !important;
+            }
+            main.pt-16 {
+                padding-top: calc(64px + max(env(safe-area-inset-top), 20px)) !important;
+            }
+            .bottom-nav {
+                padding-bottom: max(env(safe-area-inset-bottom), 17px) !important;
+            }
+        }
+        /* Landscape mode : reset safe-top for side-notch phones */
+        @media (orientation: landscape) {
+            #main-header {
+                padding-top: env(safe-area-inset-top, 0px) !important;
+            }
+            main.pt-16 {
+                padding-top: calc(64px + env(safe-area-inset-top, 0px)) !important;
+            }
+        }
+
+        /* ===== TYPOGRAPHIE PREMIUM ===== */
+        .font-display {
+            font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+            letter-spacing: -0.02em;
+            font-weight: 700;
+        }
+        .font-body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            letter-spacing: -0.01em;
         }
         
         .btn-primary { 
@@ -67,9 +171,9 @@
         }
         
         .category-pill.active { 
-            background: #0f172a; 
+            background: #0369a1; 
             color: white; 
-            border-color: #0f172a;
+            border-color: #0369a1;
         }
         
         .category-scroll { 
@@ -84,18 +188,32 @@
         
         .product-card {
             background: white;
-            border-radius: 24px;
+            border-radius: 20px;
             overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             display: flex;
             flex-direction: column;
             height: 100%;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(11,17,32,0.04);
+            border: 1px solid var(--y-gray-200);
+            position: relative;
         }
-
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--y-gold), var(--y-gold-light), var(--y-gold));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            border-radius: 20px 20px 0 0;
+        }
         .product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transform: translateY(-6px);
+            box-shadow: 0 20px 48px rgba(11,17,32,0.12), 0 8px 16px rgba(11,17,32,0.06);
+            border-color: var(--y-champagne);
+        }
+        .product-card:hover::before {
+            opacity: 1;
         }
         
         .product-card .product-image-container {
@@ -147,7 +265,7 @@
         .product-card .product-price {
             font-size: 1rem;
             font-weight: 800;
-            color: #0f172a;
+            color: #0369a1;
         }
         
         .product-card .product-old-price {
@@ -164,7 +282,7 @@
         
         .product-card .btn-add-cart {
             flex: 1;
-            background: #0f172a;
+            background: #0369a1;
             color: white;
             padding: 0.5rem;
             border-radius: 0.5rem;
@@ -219,7 +337,7 @@
         .product-title-v2 {
             font-size: 13px;
             font-weight: 700;
-            color: #0f172a;
+            color: #0369a1;
             line-height: 1.35;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -239,7 +357,7 @@
         .product-price-v2 {
             font-size: 14px;
             font-weight: 900;
-            color: #0f172a;
+            color: #0369a1;
         }
 
         .product-arrow-hint {
@@ -394,7 +512,7 @@
             left: 0;
             right: 0;
             height: 50%;
-            background: linear-gradient(to top, rgba(15,23,42,0.08), transparent);
+            background: linear-gradient(to top, rgba(11,79,140,0.08), transparent);
             opacity: 0;
             transition: opacity 0.4s ease;
         }
@@ -409,7 +527,7 @@
             display: flex; align-items: center; justify-content: space-between;
             padding: 0 16px; margin-bottom: 12px;
         }
-        .cat-carousel-title { font-size: 16px; font-weight: 900; color: #0f172a; letter-spacing: -0.02em; }
+        .cat-carousel-title { font-size: 16px; font-weight: 900; color: #0369a1; letter-spacing: -0.02em; }
         .cat-carousel-sub   { font-size: 10px; font-weight: 600; color: #94a3b8; margin-top: 1px; }
         .cat-carousel-link  {
             font-size: 11px; font-weight: 800; color: #0ea5e9; text-decoration: none;
@@ -453,11 +571,11 @@
         }
         .bm-info { padding: 10px 11px 12px; flex: 1; display: flex; flex-direction: column; }
         .bm-name {
-            font-size: 12px; font-weight: 800; color: #0f172a; line-height: 1.35;
+            font-size: 12px; font-weight: 800; color: #0369a1; line-height: 1.35;
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
             overflow: hidden; min-height: 2.7em; margin-bottom: 6px;
         }
-        .bm-price     { font-size: 14px; font-weight: 900; color: #0f172a; }
+        .bm-price     { font-size: 14px; font-weight: 900; color: #0369a1; }
         .bm-old-price { font-size: 10px; color: #94a3b8; text-decoration: line-through; margin-left: 4px; font-weight: 600; }
         .bm-action {
             margin-top: 8px; display: flex; align-items: center; gap: 4px;
@@ -477,7 +595,7 @@
             display: flex; align-items: center; justify-content: space-between;
             padding: 0 16px; margin-bottom: 12px;
         }
-        .cat-carousel-title { font-size: 16px; font-weight: 900; color: #0f172a; letter-spacing: -0.02em; }
+        .cat-carousel-title { font-size: 16px; font-weight: 900; color: #0369a1; letter-spacing: -0.02em; }
         .cat-carousel-title span { color: #0ea5e9; }
         .cat-carousel-link {
             font-size: 11px; font-weight: 800; color: #0ea5e9;
@@ -490,8 +608,8 @@
         .cat-carousel-track::-webkit-scrollbar { display: none; }
         .cc-card {
             flex-shrink: 0; width: 152px; background: white; border-radius: 20px;
-            overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.07); cursor: pointer;
-            transition: transform 0.22s, box-shadow 0.22s; border: 1px solid rgba(0,0,0,0.04);
+            overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04); cursor: pointer;
+            transition: transform 0.22s, box-shadow 0.22s; border: 1px solid #f1f5f9;
         }
         .cc-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(14,165,233,0.14); }
         .cc-card:active { transform: scale(0.97); }
@@ -512,11 +630,11 @@
         .cc-info { padding: 9px 11px 12px; }
         .cc-cat { font-size: 8px; font-weight: 800; color: #0ea5e9; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 3px; }
         .cc-name {
-            font-size: 11.5px; font-weight: 800; color: #0f172a; line-height: 1.35;
+            font-size: 11.5px; font-weight: 800; color: #0369a1; line-height: 1.35;
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
             overflow: hidden; min-height: 31px; margin-bottom: 6px;
         }
-        .cc-price { font-size: 13px; font-weight: 900; color: #0f172a; display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+        .cc-price { font-size: 13px; font-weight: 900; color: #0369a1; display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
         .cc-old { font-size: 10px; font-weight: 600; color: #94a3b8; text-decoration: line-through; }
         .cc-divider { height: 8px; background: #f1f5f9; margin: 4px 0 24px; }
 
@@ -573,68 +691,90 @@
             height: 200%;
         }
 
-        /* Carrousel Produits Stars - Défilement infini */
-        .stars-carousel-wrap {
-            position: relative;
-            overflow: hidden;
-            border-radius: 20px;
+        /* Grille Produits Stars - scroll horizontal */
+        #stars-grid::-webkit-scrollbar { display: none; }
+
+        /* Carrousels scroll horizontal - scrollbar masquee */
+
+
+        /* Cartes Why YARID - scrollbar masquee */
+        #why-yarid-cards::-webkit-scrollbar { display: none; }
+
+        /* ===== ANIMATIONS PREMIUM ===== */
+        .section-alt { background: #f8fafc; }
+        .section-white { background: #ffffff; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fade-in {
+            animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .animate-fade-in-scale {
+            animation: fadeInScale 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .stagger-1 { animation-delay: 0.05s; opacity: 0; }
+        .stagger-2 { animation-delay: 0.1s; opacity: 0; }
+        .stagger-3 { animation-delay: 0.15s; opacity: 0; }
+        .stagger-4 { animation-delay: 0.2s; opacity: 0; }
+        .stagger-5 { animation-delay: 0.25s; opacity: 0; }
+        .stagger-6 { animation-delay: 0.3s; opacity: 0; }
+        .stagger-7 { animation-delay: 0.35s; opacity: 0; }
+        .stagger-8 { animation-delay: 0.4s; opacity: 0; }
+
+        /* Shimmer loading effect */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton-premium {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e8e0d0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s ease-in-out infinite;
         }
 
-        .stars-carousel-track {
-            display: flex;
-            gap: 12px;
-            animation: starsScroll 25s linear infinite;
-            width: max-content;
-        }
-
-        .stars-carousel-wrap:hover .stars-carousel-track {
-            animation-play-state: paused;
-        }
-
-        @keyframes starsScroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        /* Mini carte animée pour le carrousel */
-        .mini-card-animated {
-            flex-shrink: 0;
-            width: 140px;
+        /* Cartes produits - ombre plus douce et bordure fine */
+        .product-card {
             background: white;
-            border-radius: 18px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            border: 1px solid rgba(226, 232, 240, 0.6);
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .product-card:hover {
+            box-shadow: 0 8px 24px rgba(14,165,233,0.10), 0 2px 8px rgba(14,165,233,0.06);
         }
 
-        .mini-card-animated:hover {
-            transform: translateY(-8px) scale(1.06);
-            box-shadow: 0 16px 40px rgba(14, 165, 233, 0.2);
-            border-color: rgba(14, 165, 233, 0.3);
-        }
+        /* Hero Carrousel Principal */
+        .hero-main-swiper { width: 100%; height: 240px; position: relative; }
+.hero-main-swiper .swiper-wrapper { display: flex; width: 100%; height: 100%; }
+.hero-main-swiper .swiper-slide {
+    width: 100% !important;
+    min-width: 100% !important;
+    height: 100% !important;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.hero-main-swiper .swiper-slide img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+}
 
-        .mini-card-animated .mini-img-wrap {
-            position: relative;
-            aspect-ratio: 1;
-            overflow: hidden;
-            background: linear-gradient(135deg, #f8fafc 0%, #e8edf3 100%);
+        .hero-main-swiper .swiper-pagination { bottom: 10px !important; z-index: 10; }
+        .hero-main-swiper .swiper-pagination-bullet {
+            width: 6px; height: 6px;
+            background: rgba(255,255,255,0.4);
+            opacity: 1;
         }
-
-        .mini-card-animated .mini-img-wrap img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .mini-card-animated:hover .mini-img-wrap img {
-            transform: scale(1.1);
-        }
-
-        .mini-card-animated .mini-info {
-            padding: 10px;
+        .hero-main-swiper .swiper-pagination-bullet-active {
+            background: white;
+            width: 18px;
+            border-radius: 3px;
         }
 
         .mini-card-animated .mini-title {
@@ -650,7 +790,7 @@
         .mini-card-animated .mini-price {
             font-size: 12px;
             font-weight: 800;
-            color: #0f172a;
+            color: #0369a1;
             margin-top: 4px;
         }
 
@@ -689,9 +829,9 @@
         /* Overlay gradient animé */
         .gradient-overlay-animated {
             background: linear-gradient(135deg, 
-                rgba(15, 23, 42, 0.7) 0%, 
+                rgba(11, 79, 140, 0.7) 0%, 
                 rgba(14, 165, 233, 0.3) 50%, 
-                rgba(15, 23, 42, 0.7) 100%);
+                rgba(11, 79, 140, 0.7) 100%);
             background-size: 200% 200%;
             animation: gradientShift 6s ease-in-out infinite;
         }
@@ -751,156 +891,12 @@
         }
 
         .category-pill.active {
-            background: #0f172a;
+            background: #0369a1;
             color: white;
-            border-color: #0f172a;
-            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.3);
+            border-color: #0369a1;
+            box-shadow: 0 4px 15px rgba(11, 79, 140, 0.3);
         }
 
-        /* ============================================================
-           Hero Carousel Alibaba Style
-           ============================================================ */
-        .hero-alibaba-section {
-            display: flex;
-            gap: 0.75rem;
-            padding: 0 1rem;
-            margin-bottom: 1.5rem;
-            align-items: stretch;
-        }
-
-        .hero-carousel-container {
-            width: 60%;
-            flex-shrink: 0;
-            display: flex;
-        }
-
-        .hero-product-grid {
-            display: flex;
-            overflow-x: auto;
-            overflow-y: hidden;
-            gap: 12px;
-            padding: 4px 0;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            scroll-snap-type: x mandatory;
-            width: 100%;
-        }
-        .hero-product-grid::-webkit-scrollbar { display: none; }
-
-        .hero-swiper-alibaba {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            border-radius: 1rem;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-
-        .hero-swiper-alibaba .swiper-wrapper,
-        .hero-swiper-alibaba .swiper-slide {
-            height: 100% !important;
-        }
-
-        .hero-swiper-alibaba .swiper-slide {
-            border-radius: 1rem;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .hero-swiper-alibaba .swiper-slide img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .hero-swiper-alibaba .swiper-pagination {
-            bottom: 8px !important;
-        }
-
-        .hero-swiper-alibaba .swiper-pagination-bullet {
-            width: 6px;
-            height: 6px;
-            background: rgba(255,255,255,0.6);
-        }
-
-        .hero-swiper-alibaba .swiper-pagination-bullet-active {
-            background: white;
-            width: 16px;
-            border-radius: 3px;
-        }
-
-        .mini-product-card {
-            flex: 0 0 160px;
-            scroll-snap-align: start;
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
-            box-shadow: 0 6px 16px -4px rgba(0,0,0,0.06);
-        }
-
-        .mini-product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 28px rgba(0,0,0,0.12);
-        }
-
-        .mini-product-card .mini-img-wrap {
-            position: relative;
-            aspect-ratio: 1;
-            overflow: hidden;
-            background: #f8fafc;
-        }
-
-        .mini-product-card .mini-img-wrap img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .mini-product-info {
-            padding: 10px;
-            flex-shrink: 0;
-        }
-        
-        .mini-product-name {
-            font-size: 11px;
-            font-weight: 700;
-            color: #1e293b;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin: 0 0 4px 0;
-        }
-        
-        .mini-product-price {
-            font-size: 12px;
-            font-weight: 800;
-            color: #0ea5e9;
-        }
-        
-        .mini-badge {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            font-size: 7px;
-            font-weight: 800;
-            padding: 1px 4px;
-            border-radius: 4px;
-            text-transform: uppercase;
-        }
-        
-        .badge-top {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white;
-        }
-        
-        .badge-certified {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
-        
         /* Search Bar Styles */
         .search-container {
             flex: 1;
@@ -1245,7 +1241,7 @@
         
         /* Referral System Styles */
         .referral-card {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: linear-gradient(135deg, #0369a1 0%, #1e293b 100%);
             border-radius: 1.5rem;
             padding: 1.5rem;
             color: white;
@@ -1334,7 +1330,7 @@
             font-family: monospace;
             font-size: 1.25rem;
             font-weight: 800;
-            color: #0f172a;
+            color: #0369a1;
             letter-spacing: 0.1em;
         }
         
@@ -1399,7 +1395,7 @@
         }
     </style>
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#0369a1">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1430,30 +1426,30 @@
     <script>console.log('[YARID] BODY loaded'); window.yarid_body_loaded = true;</script>
 
     <!-- Header Modifié avec Barre de Recherche -->
-    <header id="main-header" class="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md z-50 border-b border-slate-100">
+    <header id="main-header" class="fixed top-0 left-0 right-0 z-50" style="background:#FFFFFF;border-bottom:1px solid #E2E8F0;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding-top:var(--safe-top);">
         <div class="flex items-center justify-between px-3 h-16">
             <!-- Logo -->
-            <a href="index.html" class="text-xl font-black italic tracking-tighter uppercase flex-shrink-0">YARID<span class="text-sky-500">.</span></a>
+            <a href="index.html" class="flex-shrink-0" style="height:34px;display:flex;align-items:center;"><img src="logo-yarid.jpg" alt="YARID" style="height:100%;width:auto;object-fit:contain;border-radius:5px;"></a>
             
             <!-- Barre de Recherche + Panier intégré -->
-            <div class="search-container">
+            <div class="search-container" style="background:#F1F5F9;border:1.5px solid #CBD5E1;border-radius:999px;padding:4px 6px;">
                 <div class="search-input-wrapper">
-                    <svg class="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 flex-shrink-0" style="color:var(--y-gray-400);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                     <input type="text"
                            id="search-input"
-                           class="search-input"
+                           class="search-input" style="color:#1E293B;background:transparent;"
                            placeholder="Rechercher un produit..."
                            autocomplete="off"
                            onkeydown="if(event.key==='Enter'){event.preventDefault();handleSearch();}">
                     <button class="p-1.5 rounded-full hover:bg-sky-100 transition flex-shrink-0" onclick="handleSearch()" title="Rechercher">
-                        <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4" style="color:var(--y-gold)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                         </svg>
                     </button>
                     <button class="p-1 rounded-full hover:bg-slate-200 transition flex-shrink-0" onclick="startVoiceSearch()">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4" style="color:var(--y-gray-400)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
                         </svg>
                     </button>
@@ -1464,7 +1460,7 @@
                         <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                         </svg>
-                        <span id="cart-count" class="absolute -top-0.5 -right-0.5 bg-sky-500 text-white text-[8px] font-black rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5 hidden leading-none">0</span>
+                        <span id="cart-count" class="absolute -top-0.5 -right-0.5 bg-gradient-to-r from-yellow-500 to-amber-600 text-white text-[8px] font-black rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5 hidden leading-none">0</span>
                     </button>
                 </div>
                 
@@ -1517,83 +1513,92 @@
     <!-- Main Content -->
     <main class="pt-16">
         
-        <!-- NOUVEAU: Hero Carousel + Product Grid (Style Alibaba) -->
-        <section class="pt-4">
-            <div class="hero-alibaba-section">
-                <!-- Bloc Gauche: Hero Carousel -->
-                <div class="hero-carousel-container">
-                    <div class="swiper hero-swiper-alibaba" id="hero-swiper-alibaba">
-                        <div class="swiper-wrapper">
-                            <!-- Slide 1: Coups de cœur -->
-                            <div class="swiper-slide">
-                                <img src="https://i.ibb.co/FbFV9sc8/IMG-3670.jpg" class="w-full h-full object-cover" alt="Coups de cœur">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-4">
-                                    <span class="text-white/80 text-[10px] font-bold uppercase tracking-wider mb-1">Sélection Premium</span>
-                                    <h2 class="text-white text-lg font-black italic uppercase leading-tight mb-2">Coups de cœur</h2>
-                                    <button onclick="scrollToProducts()" class="bg-white text-slate-900 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider w-fit hover:bg-sky-500 hover:text-white transition">
-                                        Voir les offres
-                                    </button>
-                                </div>
-                            </div>
-                            <!-- Slide 2: Nouveautés -->
-                            <div class="swiper-slide">
-                                <img src="https://i.ibb.co/WWFjbGxr/IMG-6273.jpg" class="w-full h-full object-cover" alt="Nouveautés">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-4">
-                                    <span class="text-white/80 text-[10px] font-bold uppercase tracking-wider mb-1">Nouveau</span>
-                                    <h2 class="text-white text-lg font-black italic uppercase leading-tight mb-2">Tendances</h2>
-                                    <button onclick="scrollToProducts()" class="bg-white text-slate-900 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider w-fit hover:bg-sky-500 hover:text-white transition">
-                                        Découvrir
-
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="swiper-pagination"></div>
-                    </div>
-                </div>
-                
-                <!-- Bloc Droite: Carrousel Produits Stars Animé -->
-                <div style="width:40%;flex-shrink:0;display:flex;flex-direction:column;">
-                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 px-1" style="white-space:nowrap;">Produits Stars</p>
-                    <div class="stars-carousel-wrap" id="hero-mini-products-wrap" style="flex:1;">
-                        <div class="stars-carousel-track" id="hero-mini-products">
-                            <!-- Produits injectés dynamiquement -->
-                            <div class="mini-card-animated skeleton" style="width:140px;height:180px;"></div>
-                            <div class="mini-card-animated skeleton" style="width:140px;height:180px;"></div>
-                            <div class="mini-card-animated skeleton" style="width:140px;height:180px;"></div>
-                            <div class="mini-card-animated skeleton" style="width:140px;height:180px;"></div>
+        <!-- ===== HERO CARROUSEL PRINCIPAL: Grand & Impactant ===== -->
+        <section class="px-3 mb-3" style="margin-top:6px;">
+            <div class="swiper hero-main-swiper" id="hero-main-swiper" style="height:240px;border-radius:18px;overflow:hidden;background:linear-gradient(135deg,#0B4F8C 0%,#0EA5E9 50%,#0369A1 100%);">
+                <div class="swiper-wrapper">
+                    <!-- Slide 1: Identite YARID -->
+                    <div class="swiper-slide" style="position:relative;overflow:hidden;cursor:pointer;background:linear-gradient(135deg,#0B4F8C 0%,#0EA5E9 50%,#0369A1 100%);" onclick="scrollToProducts()">
+                        <img src="https://i.ibb.co/bf7Jsp1/BOUTIQUE-PREMIUM-AU-CAMEROUN-1200-x-800-px-1.png" alt="YARID Boutique Premium" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(3,105,161,0.6) 0%,rgba(11,79,140,0.2) 40%,transparent 70%);"></div>
+                        <div style="position:absolute;bottom:0;left:0;right:0;padding:22px;display:flex;flex-direction:column;align-items:flex-start;gap:5px;">
+                            <span style="font-size:10px;font-weight:800;color:#7dd3fc;text-transform:uppercase;letter-spacing:1.5px;">Boutique Premium au Cameroun</span>
+                            <h1 style="font-size:22px;font-weight:900;color:white;font-style:italic;text-transform:uppercase;line-height:1.05;margin:0;">Tech, Mode<br>& Lifestyle</h1>
+                            <span style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.7);">Decouvrez nos produits originaux &rarr;</span>
                         </div>
                     </div>
-                </div>
-        </div>
-        </section>
-
-        <!-- Category pills -->
-        <section class="mb-4 pt-2">
-          <div class="category-scroll" id="categories">
-            <!-- Injecté par renderCategories() -->
-          </div>
-        </section>
-
-        <!-- Hero Carousel Parrainage - DÉPLACÉ APRÈS les catégories -->
-        <section class="mb-6 px-4">
-            <div class="swiper hero-swiper" id="hero-swiper" style="height: 180px; border-radius: 1rem; overflow: hidden;">
-                <div class="swiper-wrapper" id="hero-wrapper">
-                    <div class="swiper-slide relative bg-slate-900">
-                        <img src="https://i.ibb.co/8gnggR3s/IMG-6357.jpg" class="w-full h-full object-cover opacity-60">
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent p-5 flex flex-col justify-end">
-                            <span class="text-sky-400 text-xs font-bold uppercase tracking-wider mb-1">Programme Elite</span>
-                            <h2 class="text-white text-2xl font-black italic uppercase leading-none mb-2">Parrainez<br>& Gagnez</h2>
-                            <p class="text-slate-300 text-xs mb-3">1 clic=1FCFA par ami parrainé</p>
-                            <button onclick="openParrainage()" class="btn-primary text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider w-fit">
-                                Participer
-                            </button>
+                    <!-- Slide 2: Parrainage -->
+                    <div class="swiper-slide" style="position:relative;overflow:hidden;background:linear-gradient(135deg,#0369a1 0%,#0B4F8C 100%);">
+                        <img src="https://i.ibb.co/HDvZv0X9/Design-sans-titre.png" alt="Programme Parrainage" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                        <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(11,79,140,0.75) 0%,rgba(3,105,161,0.3) 60%,transparent 100%);"></div>
+                        <div style="position:absolute;bottom:0;left:0;right:0;padding:22px;display:flex;flex-direction:column;align-items:flex-start;gap:5px;">
+                            <span style="font-size:10px;font-weight:800;color:#38bdf8;text-transform:uppercase;letter-spacing:1.5px;">Programme Elite</span>
+                            <h2 style="font-size:22px;font-weight:900;color:white;font-style:italic;text-transform:uppercase;line-height:1.05;margin:0;">Parrainez<br>& Gagnez</h2>
+                            <p style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.75);margin:0;">Gagnez 1 FCFA par ami parraine, cumulez et gagnez</p>
+                            <button onclick="event.stopPropagation();openParrainage();" style="margin-top:6px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:white;border:none;padding:9px 22px;border-radius:999px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;cursor:pointer;box-shadow:0 4px 14px rgba(14,165,233,0.4);transition:all 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">Participer</button>
                         </div>
                     </div>
+                    
                 </div>
-                <div class="swiper-pagination !bottom-3"></div>
+                <div class="swiper-pagination" style="bottom:10px !important;"></div>
             </div>
         </section>
+
+
+
+        <!-- ===== CATEGORIES VISUELLES EN TUILES ===== -->
+        <section class="px-3 mb-4 section-white" style="padding:16px 12px 20px;margin:0 -12px;">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+                <a onclick="filterByCategory('Parfums')" style="position:relative;border-radius:12px;overflow:hidden;height:90px;display:block;text-decoration:none;cursor:pointer;">
+                    <img src="https://i.ibb.co/SD0mrTvH/Copie-de-Copie-de-Smartphones.png" alt="Parfums" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5),transparent 60%);"></div>
+                    <span style="position:absolute;bottom:6px;left:8px;color:white;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;text-shadow:0 1px 3px rgba(0,0,0,0.5);">Parfums</span>
+                </a>
+                <a onclick="filterByCategory('Tech')" style="position:relative;border-radius:12px;overflow:hidden;height:90px;display:block;text-decoration:none;cursor:pointer;">
+                    <img src="https://i.ibb.co/tMGNZddZ/Smartphones.png" alt="Tech" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5),transparent 60%);"></div>
+                    <span style="position:absolute;bottom:6px;left:8px;color:white;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;text-shadow:0 1px 3px rgba(0,0,0,0.5);">Tech</span>
+                </a>
+                <a onclick="filterByCategory('Telephone')" style="position:relative;border-radius:12px;overflow:hidden;height:90px;display:block;text-decoration:none;cursor:pointer;">
+                    <img src="https://i.ibb.co/BHkJMWST/Smartphones.png" alt="Telephone" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5),transparent 60%);"></div>
+                    <span style="position:absolute;bottom:6px;left:8px;color:white;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;text-shadow:0 1px 3px rgba(0,0,0,0.5);">Telephone</span>
+                </a>
+                <a onclick="filterByCategory('Mode')" style="position:relative;border-radius:12px;overflow:hidden;height:90px;display:block;text-decoration:none;cursor:pointer;">
+                    <img src="https://i.ibb.co/FbR2Wf2m/Copie-de-Smartphones.png" alt="Mode" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5),transparent 60%);"></div>
+                    <span style="position:absolute;bottom:6px;left:8px;color:white;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;text-shadow:0 1px 3px rgba(0,0,0,0.5);">Mode</span>
+                </a>
+                <a onclick="filterByCategory('Gaming')" style="position:relative;border-radius:12px;overflow:hidden;height:90px;display:block;text-decoration:none;cursor:pointer;">
+                    <img src="https://i.ibb.co/PvwnMFF8/IMG-20260707-WA0012.jpg" alt="Gaming" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5),transparent 60%);"></div>
+                    <span style="position:absolute;bottom:6px;left:8px;color:white;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;text-shadow:0 1px 3px rgba(0,0,0,0.5);">Gaming</span>
+                </a>
+                <a onclick="filterByCategory('Maison')" style="position:relative;border-radius:12px;overflow:hidden;height:90px;display:block;text-decoration:none;cursor:pointer;">
+                    <img src="https://i.ibb.co/zT1wXtMF/IMG-20260707-WA0013.jpg" alt="Maison" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5),transparent 60%);"></div>
+                    <span style="position:absolute;bottom:6px;left:8px;color:white;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;text-shadow:0 1px 3px rgba(0,0,0,0.5);">Maison</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- ===== PRODUITS STARS: Grille horizontale scrollable ===== -->
+        <section class="mb-4" style="padding:24px 16px;background:var(--y-gray-50);border-top:1px solid var(--y-gray-200);border-bottom:1px solid var(--y-gray-200);">
+            <div class="flex items-center justify-between px-3 mb-2">
+                <h2 class="font-display text-sm uppercase tracking-widest" style="color:var(--y-navy);">Produits Stars</h2>
+                <span class="text-[10px] font-bold text-sky-500 uppercase tracking-wider" onclick="scrollToProducts()" style="cursor:pointer;">Voir tout &rarr;</span>
+            </div>
+            <div class="flex gap-2 px-3 overflow-x-auto pb-1" id="stars-grid" style="scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
+                <!-- Injecté dynamiquement -->
+                <div class="flex-shrink-0 skeleton rounded-xl" style="width:140px;height:180px;scroll-snap-align:start;"></div>
+                <div class="flex-shrink-0 skeleton rounded-xl" style="width:140px;height:180px;scroll-snap-align:start;"></div>
+                <div class="flex-shrink-0 skeleton rounded-xl" style="width:140px;height:180px;scroll-snap-align:start;"></div>
+                <div class="flex-shrink-0 skeleton rounded-xl" style="width:140px;height:180px;scroll-snap-align:start;"></div>
+            </div>
+        </section>
+
+        <!-- (Parrainage integre dans le hero carousel principal) -->
+
 
         <!-- ===== 4 CARROUSELS CATÉGORIES ===== -->
         <div id="category-carousels">
@@ -1601,7 +1606,7 @@
         </div>
 
         <!-- Products Grid -->
-        <section class="px-4 mb-8" id="products-section">
+        <section class="px-4 mb-8 section-white" id="products-section" style="padding:24px 16px;">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold">Nouveautés</h3>
                 <div class="flex gap-2">
@@ -1622,8 +1627,340 @@
             </div>
         </section>
 
+                <!-- ===== POURQUOI CHOISIR YARID ? - Style temoignages Back Market ===== -->
+        <section class="mb-8" style="margin-top:2rem;background:linear-gradient(180deg,#e0f2fe 0%,#f0f9ff 40%,#f8fafc 100%);padding-top:2rem;padding-bottom:2rem;">
+            <!-- Titre impactant -->
+            <div class="px-4" style="margin-bottom:16px;">
+                <h2 class="font-display" style="font-size:26px;color:var(--y-navy);line-height:1.15;letter-spacing:-0.02em;">+1 200 clients satisfaits<br>au <span style="color:#0ea5e9;">Cameroun</span></h2>
+                <p style="font-size:12px;color:#64748b;margin-top:4px;">Decouvrez pourquoi nos clients nous font confiance</p>
+            </div>
 
-        <!-- WhatsApp Support Floating Button v2.0 - Circulaire au-dessus de la nav -->
+            <!-- Cartes temoignages scrollables horizontalement -->
+            <div style="display:flex;gap:12px;overflow-x:auto;padding:0 16px 8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;" id="why-yarid-cards">
+
+                <!-- Carte 1: Equipe YARID -->
+                <div style="flex-shrink:0;width:260px;scroll-snap-align:start;">
+                    <div style="position:relative;height:340px;border-radius:18px;overflow:hidden;background:#0369a1;">
+                        <img src="https://i.ibb.co/JWmqYNFL/IMG-8508.jpg" alt="Equipe YARID" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                        <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent 30%, rgba(11,79,140,0.88) 100%);"></div>
+                        <span style="position:absolute;top:12px;left:12px;background:#0ea5e9;color:white;padding:5px 12px;border-radius:999px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(14,165,233,0.3);">Equipe YARID</span>
+                        <div style="position:absolute;bottom:14px;left:14px;right:14px;">
+                            <p style="font-size:14px;color:white;font-weight:900;margin:0 0 6px;line-height:1.2;">Une equipe passionnee a votre service</p>
+                            <p style="font-size:12px;color:rgba(255,255,255,0.85);margin:0;line-height:1.5;">Jeunes entrepreneurs camerounais dedies a vous offrir les meilleurs produits Tech, Mode & Lifestyle avec proximite et professionnalisme.</p>
+                            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+                                <span style="font-size:8px;font-weight:700;color:#7dd3fc;background:rgba(125,211,252,0.15);padding:3px 8px;border-radius:999px;">Entreprise camerounaise</span>
+                                <span style="font-size:8px;font-weight:700;color:#16a34a;background:rgba(34,197,94,0.1);padding:4px 10px;border-radius:999px;border:1px solid rgba(34,197,94,0.15);">+2 ans</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:12px 14px;background:white;border-radius:14px;border:1px solid var(--y-gray-200);box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#0ea5e9,#0284c7);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                        </div>
+                        <div>
+                            <p style="font-size:10px;color:#94a3b8;margin:0;font-weight:600;text-transform:uppercase;">Equipe YARID</p>
+                            <p style="font-size:11px;color:#334155;margin:0;font-weight:700;">+1 200 clients servis</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carte 2: Suivi personnalise -->
+                <div style="flex-shrink:0;width:260px;scroll-snap-align:start;">
+                    <div style="position:relative;height:340px;border-radius:18px;overflow:hidden;background:#0369a1;">
+                        <img src="https://i.ibb.co/rGQrvQLF/IMG-0010.png" alt="Suivi commande" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                        <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent 30%, rgba(11,79,140,0.88) 100%);"></div>
+                        <span style="position:absolute;top:12px;left:12px;background:#a855f7;color:white;padding:5px 12px;border-radius:999px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(168,85,247,0.3);">Suivi Personnalise</span>
+                        <div style="position:absolute;bottom:14px;left:14px;right:14px;">
+                            <p style="font-size:14px;color:white;font-weight:900;margin:0 0 6px;line-height:1.2;">Suivez votre commande en temps reel</p>
+                            <p style="font-size:12px;color:rgba(255,255,255,0.85);margin:0;line-height:1.5;">Notifications WhatsApp a chaque etape : confirmation, preparation, expedition et livraison. Transparence totale sur votre commande.</p>
+                            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+                                <span style="font-size:8px;font-weight:700;color:#a78bfa;background:rgba(167,139,250,0.15);padding:3px 8px;border-radius:999px;">WhatsApp</span>
+                                <span style="font-size:8px;font-weight:700;color:#4ade80;background:rgba(74,222,128,0.15);padding:3px 8px;border-radius:999px;">Temps reel</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:12px 14px;background:white;border-radius:14px;border:1px solid var(--y-gray-200);box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#a855f7,#9333ea);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"/></svg>
+                        </div>
+                        <div>
+                            <p style="font-size:10px;color:#94a3b8;margin:0;font-weight:600;text-transform:uppercase;">Suivi Personnalise</p>
+                            <p style="font-size:11px;color:#334155;margin:0;font-weight:700;">Notifications auto</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carte 3: Paiement flexible -->
+                <div style="flex-shrink:0;width:260px;scroll-snap-align:start;">
+                    <div style="position:relative;height:340px;border-radius:18px;overflow:hidden;background:#0369a1;">
+                        <img src="https://i.ibb.co/8gZpBrbZ/IMG-3680.jpg" alt="Paiement" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                        <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent 30%, rgba(11,79,140,0.88) 100%);"></div>
+                        <span style="position:absolute;top:12px;left:12px;background:#22c55e;color:white;padding:5px 12px;border-radius:999px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(34,197,94,0.3);">Paiement Flexible</span>
+                        <div style="position:absolute;bottom:14px;left:14px;right:14px;">
+                            <p style="font-size:14px;color:white;font-weight:900;margin:0 0 6px;line-height:1.2;">Payez comme vous voulez</p>
+                            <p style="font-size:12px;color:rgba(255,255,255,0.85);margin:0;line-height:1.5;">MTN Mobile Money, Orange Money, paiement en especes a la livraison ou code marchand securise. Transactions cryptees et protegees.</p>
+                            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+                                <span style="font-size:8px;font-weight:700;color:#4ade80;background:rgba(74,222,128,0.15);padding:3px 8px;border-radius:999px;">Mobile Money</span>
+                                <span style="font-size:8px;font-weight:700;color:#fb923c;background:rgba(251,146,60,0.15);padding:3px 8px;border-radius:999px;">Orange Money</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:12px 14px;background:white;border-radius:14px;border:1px solid var(--y-gray-200);box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                        </div>
+                        <div>
+                            <p style="font-size:10px;color:#94a3b8;margin:0;font-weight:600;text-transform:uppercase;">Paiement Flexible</p>
+                            <p style="font-size:11px;color:#334155;margin:0;font-weight:700;">4 modes de paiement</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carte 4: Livraison -->
+                <div style="flex-shrink:0;width:260px;scroll-snap-align:start;">
+                    <div style="position:relative;height:340px;border-radius:18px;overflow:hidden;background:#0369a1;">
+                        <img src="https://i.ibb.co/pvXBHNKD/Untitled-design.png" alt="Livraison" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                        <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent 30%, rgba(11,79,140,0.88) 100%);"></div>
+                        <span style="position:absolute;top:12px;left:12px;background:#22d3ee;color:#0369a1;padding:5px 12px;border-radius:999px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(34,211,238,0.3);">Livraison Rapide</span>
+                        <div style="position:absolute;bottom:14px;left:14px;right:14px;">
+                            <p style="font-size:14px;color:white;font-weight:900;margin:0 0 6px;line-height:1.2;">Livraison rapide partout au Cameroun</p>
+                            <p style="font-size:12px;color:rgba(255,255,255,0.85);margin:0;line-height:1.5;">Douala & Yaounde en 24h, toutes les villes sous 48-72h. Livraison a domicile ou point de retrait avec partenaires logistiques de confiance.</p>
+                            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+                                <span style="font-size:8px;font-weight:700;color:#22d3ee;background:rgba(34,211,238,0.15);padding:3px 8px;border-radius:999px;">24h Douala</span>
+                                <span style="font-size:8px;font-weight:700;color:#4ade80;background:rgba(74,222,128,0.15);padding:3px 8px;border-radius:999px;">National</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:12px 14px;background:white;border-radius:14px;border:1px solid var(--y-gray-200);box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#22d3ee,#0891b2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        </div>
+                        <div>
+                            <p style="font-size:10px;color:#94a3b8;margin:0;font-weight:600;text-transform:uppercase;">Livraison Rapide</p>
+                            <p style="font-size:11px;color:#334155;margin:0;font-weight:700;">A domicile ou point retrait</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carte 5: Assistance -->
+                <div style="flex-shrink:0;width:260px;scroll-snap-align:start;">
+                    <div style="position:relative;height:340px;border-radius:18px;overflow:hidden;background:#0369a1;">
+                        <img src="https://i.ibb.co/XrJgjxrq/IMG-9824.jpg" alt="Assistance" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                        <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent 30%, rgba(11,79,140,0.88) 100%);"></div>
+                        <span style="position:absolute;top:12px;left:12px;background:#f59e0b;color:white;padding:5px 12px;border-radius:999px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(245,158,11,0.3);">Assistance 24/7</span>
+                        <div style="position:absolute;bottom:14px;left:14px;right:14px;">
+                            <p style="font-size:14px;color:white;font-weight:900;margin:0 0 6px;line-height:1.2;">Toujours la pour vous</p>
+                            <p style="font-size:12px;color:rgba(255,255,255,0.85);margin:0;line-height:1.5;">Notre equipe est disponible 7j/7 via WhatsApp et appel direct. Conseil avant achat, aide apres-vente, questions sur vos commandes.</p>
+                            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+                                <span style="font-size:8px;font-weight:700;color:#fbbf24;background:rgba(251,191,36,0.15);padding:3px 8px;border-radius:999px;">WhatsApp</span>
+                                <span style="font-size:8px;font-weight:700;color:#4ade80;background:rgba(74,222,128,0.15);padding:3px 8px;border-radius:999px;">7j/7</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:12px 14px;background:white;border-radius:14px;border:1px solid var(--y-gray-200);box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                        </div>
+                        <div>
+                            <p style="font-size:10px;color:#94a3b8;margin:0;font-weight:600;text-transform:uppercase;">Assistance 24/7</p>
+                            <p style="font-size:11px;color:#334155;margin:0;font-weight:700;">+237 655 959 284</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carte 6: Garantie -->
+                <div style="flex-shrink:0;width:260px;scroll-snap-align:start;">
+                    <div style="position:relative;height:340px;border-radius:18px;overflow:hidden;background:#0369a1;">
+                        <img src="https://i.ibb.co/RGytMJKT/IMG-8512.jpg" alt="Garantie" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                        <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent 30%, rgba(11,79,140,0.88) 100%);"></div>
+                        <span style="position:absolute;top:12px;left:12px;background:#ec4899;color:white;padding:5px 12px;border-radius:999px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(236,72,153,0.3);">Garantie Authentique</span>
+                        <div style="position:absolute;bottom:14px;left:14px;right:14px;">
+                            <p style="font-size:14px;color:white;font-weight:900;margin:0 0 6px;line-height:1.2;">Achetez en toute confiance</p>
+                            <p style="font-size:12px;color:rgba(255,255,255,0.85);margin:0;line-height:1.5;">Tous nos produits sont 100% originaux avec garantie constructeur. Verification qualite avant expedition pour votre protection.</p>
+                            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+                                <span style="font-size:8px;font-weight:700;color:#f472b6;background:rgba(244,114,182,0.15);padding:3px 8px;border-radius:999px;">100% Original</span>
+                                <span style="font-size:8px;font-weight:700;color:#4ade80;background:rgba(74,222,128,0.15);padding:3px 8px;border-radius:999px;">Garantie</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:12px 14px;background:white;border-radius:14px;border:1px solid var(--y-gray-200);box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#ec4899,#db2777);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        </div>
+                        <div>
+                            <p style="font-size:10px;color:#94a3b8;margin:0;font-weight:600;text-transform:uppercase;">Garantie Authentique</p>
+                            <p style="font-size:11px;color:#334155;margin:0;font-weight:700;">Controle qualite</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carte 7: Retour facile -->
+                <div style="flex-shrink:0;width:260px;scroll-snap-align:start;">
+                    <div style="position:relative;height:340px;border-radius:18px;overflow:hidden;background:#0369a1;">
+                        <img src="https://i.ibb.co/YT1TNJgX/IMG-8509.jpg" alt="Retour" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                        <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent 30%, rgba(11,79,140,0.88) 100%);"></div>
+                        <span style="position:absolute;top:12px;left:12px;background:#14b8a6;color:white;padding:5px 12px;border-radius:999px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(20,184,166,0.3);">Retour Facile</span>
+                        <div style="position:absolute;bottom:14px;left:14px;right:14px;">
+                            <p style="font-size:14px;color:white;font-weight:900;margin:0 0 6px;line-height:1.2;">Achat sans risque</p>
+                            <p style="font-size:12px;color:rgba(255,255,255,0.85);margin:0;line-height:1.5;">Produit non conforme ? Retour sous 7 jours. Nous remplacons ou remboursons. Votre satisfaction est notre priorite absolue chez YARID.</p>
+                            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+                                <span style="font-size:8px;font-weight:700;color:#14b8a6;background:rgba(20,184,166,0.15);padding:3px 8px;border-radius:999px;">7 jours</span>
+                                <span style="font-size:8px;font-weight:700;color:#4ade80;background:rgba(74,222,128,0.15);padding:3px 8px;border-radius:999px;">Remboursement</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:12px 14px;background:white;border-radius:14px;border:1px solid var(--y-gray-200);box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#14b8a6,#0d9488);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        </div>
+                        <div>
+                            <p style="font-size:10px;color:#94a3b8;margin:0;font-weight:600;text-transform:uppercase;">Retour Facile</p>
+                            <p style="font-size:11px;color:#334155;margin:0;font-weight:700;">Remplacement ou remboursement</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banniere CTA -->
+            <div class="px-4" style="margin-top:16px;">
+                <div style="padding:22px;background:linear-gradient(135deg,#0369a1,#1e293b);border-radius:18px;text-align:center;">
+                    <p style="font-size:16px;font-weight:900;color:white;margin:0;font-style:italic;text-transform:uppercase;line-height:1.3;">Rejoignez <span style="color:#38bdf8;">+1 200 clients</span> satisfaits</p>
+                    <p style="font-size:11px;color:#94a3b8;margin:8px 0 16px;">Note moyenne 4.7/5 sur 2 800+ avis verifies au Cameroun</p>
+                    <button onclick="scrollToProducts()" style="background:linear-gradient(135deg,var(--y-navy) 0%,var(--y-navy-light) 50%,var(--y-navy) 100%);color:var(--y-gold-light);border:1px solid rgba(212,175,55,0.3);padding:14px 40px;border-radius:999px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;cursor:pointer;box-shadow:0 4px 20px rgba(11,79,140,0.3);transition:all 0.3s ease;" onmouseover="this.style.background='linear-gradient(135deg,#0EA5E9,#0B4F8C,#0EA5E9)';this.style.borderColor='#D4AF37';this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(212,175,55,0.2)'" onmouseout="this.style.background='linear-gradient(135deg,#0B4F8C,#0EA5E9,#0B4F8C)';this.style.borderColor='rgba(212,175,55,0.3)';this.style.transform='translateY(0)';this.style.boxShadow='0 4px 20px rgba(11,79,140,0.3)'">Decouvrir les produits &rarr;</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== A PROPOS - Section complete ===== -->
+        <section class="mb-8" style="padding:28px 16px;background:linear-gradient(180deg,#0369a1 0%,#1e293b 50%,#0369a1 100%);position:relative;overflow:hidden;">
+            <div style="position:absolute;inset:0;opacity:0.03;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><circle cx=%2230%22 cy=%2230%22 r=%221%22 fill=%22%23D4AF37%22/></svg>');"></div>
+
+            <!-- Header -->
+            <div class="px-2" style="margin-bottom:20px;position:relative;z-index:1;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                    <div style="width:32px;height:1px;background:linear-gradient(90deg,#D4AF37,transparent);"></div>
+                    <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#D4AF37;">Qui sommes-nous</span>
+                </div>
+                <h2 class="font-display" style="font-size:22px;color:#fff;line-height:1.2;letter-spacing:-0.01em;">A propos de<br><span style="color:#D4AF37;">YARID</span></h2>
+            </div>
+
+            <!-- Logo & tagline -->
+            <div style="text-align:center;margin-bottom:20px;position:relative;z-index:1;">
+                <h3 style="font-size:32px;font-weight:900;font-style:italic;letter-spacing:-0.03em;text-transform:uppercase;color:#fff;margin:0;">YARID<span style="color:#0ea5e9;">.</span></h3>
+                <p style="font-size:11px;color:#94a3b8;margin:6px 0 0;">L'excellence au service de vos projets</p>
+            </div>
+
+            <!-- Notre Histoire -->
+            <div style="padding:0 2px;margin-bottom:14px;position:relative;z-index:1;">
+                <div style="background:rgba(30,41,59,0.6);border:1px solid rgba(212,175,55,0.08);border-radius:16px;padding:16px;">
+                    <h3 style="font-size:13px;font-weight:800;color:#fff;margin:0 0 10px;display:flex;align-items:center;gap:8px;">
+                        <svg width="18" height="18" fill="none" stroke="#0ea5e9" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Notre Histoire
+                    </h3>
+                    <p style="font-size:12px;color:#cbd5e1;margin:0;line-height:1.7;">Fondée au Cameroun, <strong style="color:#D4AF37;">YARID Group</strong> est née d'une vision simple : faire du marché classique un ecosysteme digital avec un acces a des produits de qualite et des services professionnels de qualite internationale. De la boutique en ligne aux solutions ERP et services, nous accompagnons nos clients avec excellence.</p>
+                </div>
+            </div>
+
+            <!-- Notre Vision -->
+            <div style="padding:0 2px;margin-bottom:14px;position:relative;z-index:1;">
+                <div style="background:rgba(30,41,59,0.6);border:1px solid rgba(212,175,55,0.08);border-radius:16px;padding:16px;">
+                    <h3 style="font-size:13px;font-weight:800;color:#fff;margin:0 0 10px;display:flex;align-items:center;gap:8px;">
+                        <svg width="18" height="18" fill="none" stroke="#0ea5e9" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        Notre Vision
+                    </h3>
+                    <p style="font-size:12px;color:#cbd5e1;margin:0;line-height:1.7;">Devenir la <strong style="color:#D4AF37;">reference camerounaise</strong> pour l'acces a des produits et services de qualite, en combinant expertise locale et standards internationaux.</p>
+                </div>
+            </div>
+
+            <!-- Notre Expertise -->
+            <div style="padding:0 2px;margin-bottom:14px;position:relative;z-index:1;">
+                <div style="background:rgba(30,41,59,0.6);border:1px solid rgba(212,175,55,0.08);border-radius:16px;padding:16px;">
+                    <h3 style="font-size:13px;font-weight:800;color:#fff;margin:0 0 12px;display:flex;align-items:center;gap:8px;">
+                        <svg width="18" height="18" fill="none" stroke="#0ea5e9" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                        Notre Expertise
+                    </h3>
+                    <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;">
+                        <li style="display:flex;align-items:center;gap:10px;font-size:12px;color:#e2e8f0;">
+                            <svg width="16" height="16" fill="none" stroke="#22c55e" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Distribution de produits premium
+                        </li>
+                        <li style="display:flex;align-items:center;gap:10px;font-size:12px;color:#e2e8f0;">
+                            <svg width="16" height="16" fill="none" stroke="#22c55e" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Solutions digital et ERP
+                        </li>
+                        <li style="display:flex;align-items:center;gap:10px;font-size:12px;color:#e2e8f0;">
+                            <svg width="16" height="16" fill="none" stroke="#22c55e" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Service et accompagnement en import
+                        </li>
+                        <li style="display:flex;align-items:center;gap:10px;font-size:12px;color:#e2e8f0;">
+                            <svg width="16" height="16" fill="none" stroke="#22c55e" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Sourcing international
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Reseaux Sociaux -->
+            <div style="padding:0 2px;margin-bottom:14px;position:relative;z-index:1;">
+                <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#94a3b8;margin-bottom:12px;text-align:center;">Suivez-nous</p>
+                <div style="display:flex;justify-content:center;gap:16px;">
+                    <a href="https://www.facebook.com/share/18Pc3Umzfb/?mibextid=wwXIfr" target="_blank" style="width:56px;height:56px;background:#1877F2;border-radius:16px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 15px rgba(24,119,242,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <svg width="28" height="28" fill="white" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    </a>
+                    <a href="https://www.instagram.com/yarid_cm237?igsh=MTE2enF4Nmt5NnI0Nw%3D%3D&utm_source=qr" target="_blank" style="width:56px;height:56px;background:linear-gradient(135deg,#833AB4,#FD1D1D,#F77737);border-radius:16px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 15px rgba(253,29,29,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <svg width="28" height="28" fill="white" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    </a>
+                    <a href="https://linkedin.com/company/yaridgroup" target="_blank" style="width:56px;height:56px;background:#0A66C2;border-radius:16px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 15px rgba(10,102,194,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <svg width="28" height="28" fill="white" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.004 2.004 0 01-2.063-2.065A2.003 2.003 0 015.337 3.303a2.004 2.004 0 012.064 2.065 2.003 2.003 0 01-2.064 2.065zM3.555 20.452h3.564V9H3.555v11.452zM22.225 0H1.771C.791 0 0 .774 0 1.729v20.542C0 23.227.791 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Localisation Google Maps -->
+            <div style="padding:0 2px;margin-bottom:14px;position:relative;z-index:1;">
+                <div style="background:rgba(30,41,59,0.6);border:1px solid rgba(212,175,55,0.08);border-radius:16px;padding:16px;">
+                    <h3 style="font-size:13px;font-weight:800;color:#fff;margin:0 0 12px;display:flex;align-items:center;gap:8px;">
+                        <svg width="18" height="18" fill="none" stroke="#0ea5e9" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Ou nous trouver
+                    </h3>
+                    <div style="border-radius:12px;overflow:hidden;margin-bottom:12px;border:1px solid #334155;">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15922.852026762705!2d11.50546945!3d3.85262395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x108bc5f2ce63e7c1%3A0xa0cc8d5e5c5c5c5c!2sTexaco%20Omnisports%2C%20Yaound%C3%A9!5e0!3m2!1sfr!2s!4v1700000000000!5m2!1sfr!2s" width="100%" height="180" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Texaco+Omnisports+Pharmacie+Colombe+Yaounde" target="_blank" style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(11,79,140,0.5);border-radius:10px;text-decoration:none;margin-bottom:8px;">
+                        <div style="width:36px;height:36px;border-radius:8px;background:rgba(16,185,129,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg width="16" height="16" fill="none" stroke="#34d399" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        </div>
+                        <div>
+                            <p style="font-size:12px;font-weight:700;color:#fff;margin:0;">Texaco Omnisports</p>
+                            <p style="font-size:10px;color:#94a3b8;margin:2px 0 0;">Au niveau de la Pharmacie Colombe</p>
+                        </div>
+                    </a>
+                    <div style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(11,79,140,0.5);border-radius:10px;">
+                        <div style="width:36px;height:36px;border-radius:8px;background:rgba(14,165,233,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg width="16" height="16" fill="none" stroke="#38bdf8" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <p style="font-size:12px;font-weight:700;color:#fff;margin:0;">Lun - Sam : 8h00 - 18h00</p>
+                            <p style="font-size:10px;color:#94a3b8;margin:2px 0 0;">Dimanche sur rendez-vous</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact -->
+            <div style="padding:0 2px;margin-bottom:14px;position:relative;z-index:1;">
+                <div style="background:linear-gradient(135deg,#0369a1,#1e293b);border:1px solid rgba(212,175,55,0.15);border-radius:16px;padding:18px;text-align:center;">
+                    <p style="font-size:11px;color:#94a3b8;margin:0 0 6px;">Besoin d'aide ?</p>
+                    <a href="https://wa.me/237655959284" style="font-size:18px;font-weight:900;color:#38bdf8;text-decoration:none;">+237 655 959 284</a>
+                    <p style="font-size:10px;color:#475569;margin:6px 0 0;">Texaco Omnisports, Pharmacie Colombe</p>
+                </div>
+            </div>
+
+            <!-- Version -->
+            <p style="text-align:center;font-size:10px;color:#475569;position:relative;z-index:1;margin:0;">Version 2.0.0 - &copy; 2025 YARID Group</p>
+        </section>
+
+        <!-- WhatsApp Support Floating Button v2.0 - Circulaire au-dessus de la nav --><!-- WhatsApp Support Floating Button v2.0 - Circulaire au-dessus de la nav -->
         <a href="https://api.whatsapp.com/send?phone=237655959284&text=Bonjour%20YARID%2C%20j'ai%20besoin%20d'aide"
            class="wa-float-v2" style="position:fixed;bottom:100px;right:20px;z-index:9999;">
             <svg fill="currentColor" viewBox="0 0 24 24">
@@ -1700,7 +2037,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </button>
                 
-                <button onclick="orderViaWhatsApp()" class="btn-whatsapp w-full py-3 rounded-2xl text-white font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2">
+                <button <button onclick="window.openCheckout()" class="btn-whatsapp w-full py-3 rounded-2xl text-white font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
                     WhatsApp Direct
                 </button>
@@ -2076,7 +2413,7 @@
                             <button onclick="openReferralDashboard()" class="flex-1 bg-slate-900 text-white py-3 rounded-xl text-xs font-bold uppercase tracking-wider">
                                 Mon Tableau de Bord
                             </button>
-                            <button onclick="shareReferralCode()" class="w-12 bg-sky-500 text-white rounded-xl flex items-center justify-center">
+                            <button onclick="shareReferralCode()" class="w-12 bg-gradient-to-r from-yellow-500 to-amber-600 text-white rounded-xl flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
                                 </svg>
@@ -2135,7 +2472,7 @@
                 <div class="bg-slate-900 rounded-3xl p-6 mb-6 text-white relative overflow-hidden">
                     <div class="relative z-10">
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="bg-sky-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase">Elite</span>
+                            <span class="bg-gradient-to-r from-yellow-500 to-amber-600 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase">Elite</span>
                             <span class="text-slate-300 text-xs">Programme Parrainage</span>
                         </div>
                         <h3 class="text-2xl font-black italic uppercase mb-2">Gagnez ensemble</h3>
@@ -2172,7 +2509,7 @@
                     <p class="text-xs font-bold text-sky-600 uppercase mb-2">Votre code</p>
                     <div class="flex gap-2">
                         <input type="text" id="parrainage-code" value="YARID-ELITE-2025" readonly class="flex-1 bg-white border-2 border-sky-200 rounded-xl py-3 px-4 font-black text-center text-lg tracking-widest text-slate-800 outline-none">
-                        <button onclick="copyParrainageCode()" class="bg-sky-500 text-white px-4 rounded-xl font-bold text-sm active:scale-95 transition">Copier</button>
+                        <button onclick="copyParrainageCode()" class="bg-gradient-to-r from-yellow-500 to-amber-600 text-white px-4 rounded-xl font-bold text-sm active:scale-95 transition">Copier</button>
                     </div>
                 </div>
                 
@@ -2291,7 +2628,7 @@
                     <p class="text-xs font-bold text-slate-500 uppercase mb-2">Votre code</p>
                     <div class="referral-code-box">
                         <span class="referral-code-text" id="dashboard-code">---</span>
-                        <button onclick="copyDashboardCode()" class="p-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition">
+                        <button onclick="copyDashboardCode()" class="p-2 bg-gradient-to-r from-yellow-500 to-amber-600 text-white rounded-lg hover:bg-sky-600 transition">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                             </svg>
@@ -2351,6 +2688,39 @@
         let productReviews = {};
 
         // ==========================================
+        // AVIS CLIENTS SIMULES (lancement)
+        // ==========================================
+        const _MOCK_NAMES = ['Amadou K.','Grace M.','Jean-Paul T.','Fatou B.','Koffi N.','Aicha D.','Emmanuel S.','Marie-Claire F.','Yves K.','Sandrine E.','Patrick O.','Linda A.','Francois Z.','Beatrice L.','Romeo M.','Celine Y.','Serge K.','Daniele T.','Blaise N.','Esther G.'];
+        const _MOCK_COMMENTS = {
+            'Parfums': ['Une fragrance qui dure toute la journee, j adore !','Mon mari me complimente a chaque fois.','Qualite exceptionnelle, comparable aux grandes marques.','Livraison rapide et produit bien emballe. Merci !','Je recommande vivement, l odeur est juste parfaite.','Excellent rapport qualite-prix.','Le flacon est magnifique, ca fait un super cadeau.','Tenue impeccable, je recois beaucoup de compliments.'],
+            'Chaussures': ['Tres confortables, je peux marcher toute la journee.','La qualite du cuir est impressionnante a ce prix.','Taille parfaite, conforme au guide des pointures.','Design moderne, mes amis me demandent ou je les ai achetees.','Livraison soignee avec la boite d origine. Impeccable !','Deuxieme paire que j achete, toujours satisfait.','Finition soignee, aucun defaut a signaler.','Excellent rapport qualite-prix au Cameroun.'],
+            'Montres': ['Un look premium qui ne passe pas inapercu.','Mecanisme de qualite, tres precise.','Bracelet confortable et ajustable.','Le cadran est magnifique, photos fideles a la realite.','Boitier robuste, resiste bien aux chocs.','Cadeau parfait, ma femme est ravie.','Livraison express a Douala.','Montre authentique avec certificat de garantie.'],
+            'Telephones': ['Produit neuf sous blister, exactement comme decrit.','Performance fluide, aucun lag.','Batterie qui tient facilement la journee complete.','Camera excellente, mes photos sont magnifiques.','Vendeur serieux, garantie bien expliquee.','Livraison a domicile gratuite.','Meilleur prix trouve au Cameroun.','Accessoires originaux inclus, chargeur rapide top !'],
+            'Sacs': ['Cuir de qualite superieure, tres doux au toucher.','Compartiments bien penses.','Design elegant qui passe au bureau et en soiree.','Fermetures eclairs solides.','Taille ideale pour mes documents et mon laptop.','Sac original avec etiquette d authenticite.','Emballage soigne, recu en parfait etat.'],
+            'Vetements': ['Tissu de qualite, ne se deforme pas au lavage.','Coupe parfaite, taille conforme au tableau.','Couleurs fideles aux photos du site.','Matiere respirante, ideale pour notre climat.','Finitions soignees, coutures renforcees.','Style tendance qui me fait beaucoup de compliments.','Prix imbattable pour cette qualite de tissu.'],
+            'default': ['Produit conforme a la description, je suis satisfait.','Excellent rapport qualite-prix, je recommande YARID.','Livraison rapide et soignee a Douala, merci !','Service client professionnel et reactif sur WhatsApp.','Produit original et authentique, garantie comprise.','Emballage protecteur, recu en parfait etat.','Premier achat chez YARID et certainement pas le dernier.','Prix competitif comparé aux autres boutiques en ligne.','La qualite depasse mes attentes, bravo l equipe !','Transaction securisee et livraison a domicile fiable.']
+        };
+        let _mockCache = {};
+        function _getMockReviews(pid, cat, pname) {
+            var key = 'm' + pid;
+            if (_mockCache[key]) return _mockCache[key];
+            var seed = pid * 7 + (pname || '').length * 3;
+            var n = 3 + (seed % 10); // 3-12 avis
+            var pool = _MOCK_COMMENTS[cat] || _MOCK_COMMENTS['default'];
+            var reviewers = _MOCK_NAMES.slice().sort(function() { return 0.5 - Math.random(); });
+            var out = [];
+            for (var i = 0; i < n; i++) {
+                var r = (seed + i * 13) % 100;
+                var rating = r < 60 ? 5 : r < 85 ? 4 : r < 95 ? 3 : r < 98 ? 2 : 1;
+                var d = new Date(); d.setDate(d.getDate() - (2 + (seed + i * 31) % 58));
+                out.push({ id: 'm'+pid+'_'+i, produit_id: pid, client_nom: reviewers[i % reviewers.length], name: reviewers[i % reviewers.length], rating: rating, note: rating, comment: pool[(seed + i * 7) % pool.length], commentaire: pool[(seed + i * 7) % pool.length], created_at: d.toISOString(), date: d.toLocaleDateString('fr-FR'), verified_purchase: true });
+            }
+            out.sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+            _mockCache[key] = out;
+            return out;
+        }
+
+        // ==========================================
         // INITIALISATION
         // ==========================================
         // ==========================================
@@ -2380,7 +2750,7 @@
                 console.log('[YARID] supabase disponible:', typeof supabase !== 'undefined');
                 console.log('[YARID] Swiper disponible:', typeof Swiper !== 'undefined');
                 initHeroSwiper();
-                initHeroSwiperAlibaba();
+                initWhyYaridSwiper();
                 console.log('[YARID] Swipers initialises');
                 await loadProducts();
                 console.log('[YARID] Produits charges');
@@ -2427,23 +2797,57 @@
         }
 
         // ==========================================
-        // HERO SWIPER (Parrainage - Conservé)
+        // HERO CARROUSEL PRINCIPAL (YARID + Parrainage + Promo)
         // ==========================================
         function initHeroSwiper() {
-            new Swiper('#hero-swiper', {
-                loop: true,
-                autoplay: { delay: 5000, disableOnInteraction: false },
-                pagination: { el: '.swiper-pagination', clickable: true }
-            });
+            var swiperEl = document.getElementById('hero-main-swiper');
+            if (!swiperEl) { console.log('[YARID] Hero swiper element not found'); return; }
+            // Force slides visible before init
+            var slides = swiperEl.querySelectorAll('.swiper-slide');
+            slides.forEach(function(s, i) { s.style.display = 'block'; s.style.visibility = 'visible'; s.style.opacity = '1'; });
+            try {
+                new Swiper('#hero-main-swiper', {
+    loop: true,
+
+    autoplay: {
+        delay: 4000,
+        disableOnInteraction: false,
+        pauseOnMouseEnter: false
+    },
+
+    speed: 800,
+
+    pagination: {
+        el: '#hero-main-swiper .swiper-pagination',
+        clickable: true
+    },
+
+    touchRatio: 1.5,
+    threshold: 10,
+
+    effect: 'fade',
+
+    fadeEffect: {
+        crossFade: true
+    }
+});
+                console.log('[YARID] Hero swiper initialized');
+            } catch(e) {
+                console.log('[YARID] Swiper init failed, showing static slides');
+                // Fallback: show first slide only
+                slides.forEach(function(s, i) { s.style.display = i === 0 ? 'block' : 'none'; });
+            }
         }
 
         // ==========================================
-        // HERO SWIPER ALIBABA (Nouveau)
+        // CARROUSEL "POURQUOI CHOISIR YARID"
         // ==========================================
-        function initHeroSwiperAlibaba() {
-            new Swiper('#hero-swiper-alibaba', {
+        function initWhyYaridSwiper() {
+            var el = document.getElementById('why-yarid-swiper');
+            if (!el) return;
+            new Swiper('#why-yarid-swiper', {
                 loop: true,
-                autoplay: { delay: 4000, disableOnInteraction: false },
+                autoplay: { delay: 6000, disableOnInteraction: false },
                 pagination: { el: '.swiper-pagination', clickable: true },
                 touchRatio: 1.5,
                 threshold: 10
@@ -2482,37 +2886,7 @@
                 );
             }
 
-            // 3. Animation des catégories
-            var catPills = document.querySelectorAll('.category-pill');
-            if (catPills.length > 0) {
-                gsap.fromTo(catPills,
-                    { y: 20, opacity: 0 },
-                    {
-                        y: 0, opacity: 1,
-                        duration: 0.35,
-                        stagger: 0.05,
-                        ease: 'power2.out',
-                        delay: 0.3
-                    }
-                );
-            }
-
-            // 4. Parallax sur le hero
-            var heroSection = document.querySelector('.hero-alibaba-section');
-            if (heroSection) {
-                gsap.to(heroSection, {
-                    y: -40,
-                    ease: 'none',
-                    scrollTrigger: {
-                        trigger: heroSection,
-                        start: 'top top',
-                        end: 'bottom top',
-                        scrub: 1
-                    }
-                });
-            }
-
-            // NOTE: Les mini-cards s'animent via CSS (transition), pas GSAP
+            // NOTE: Les animations des sections sont gérées par CSS, pas GSAP
 
             // 6. Effet magnétique sur les boutons d'action (desktop uniquement)
             if (window.innerWidth > 768) {
@@ -2555,58 +2929,79 @@
                 renderSingleCarousel(data);
             } else {
                 // Masquer les skeletons si vraiment rien
-                var wrap = document.getElementById('hero-mini-products-wrap');
-                if (wrap) wrap.style.display = 'none';
+                var sg = document.getElementById('stars-grid');
+                if (sg) sg.style.display = 'none';
             }
         }
 
         /**
-         * UN SEUL carrousel horizontal avec tous les produits
-         * Scroll natif CSS, pas de dépendance externe
+         * GRILLE PRODUITS STARS - Scroll horizontal natif
          */
         function renderSingleCarousel(items) {
-            var container = document.getElementById('hero-mini-products');
-            if (!container || !items || items.length === 0) {
-                console.log('[YARID] Pas de produits pour le carrousel');
-                return;
-            }
-            console.log('[YARID] Rendu carrousel avec', items.length, 'produits');
+            var container = document.getElementById('stars-grid');
+            if (!container || !items || items.length === 0) return;
 
-            var allItems = items.slice(0, 10);
-            var duplicated = allItems.concat(allItems);
+            var stars = items.filter(function(p) { return p.is_star || p.featured; });
+            if (stars.length === 0) stars = items.slice(0, 8);
 
             var html = '';
-            for (var i = 0; i < duplicated.length; i++) {
-                var p = duplicated[i];
+            for (var i = 0; i < stars.length; i++) {
+                var p = stars[i];
                 var pid = p.id || 0;
                 var pname = (p.name || 'Produit').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
                 var pprice = (p.price || 0).toLocaleString() + ' FCFA';
                 var pimg = (p.image_url && p.image_url.trim()) ? p.image_url.trim() : 'https://via.placeholder.com/200x200?text=YARID';
-                var discountBadge = '';
+                var discount = '';
                 if (p.old_price && p.old_price > p.price) {
                     var pct = Math.round((1 - p.price / p.old_price) * 100);
-                    discountBadge = '<span style="position:absolute;top:8px;right:8px;background:#ef4444;color:white;font-size:9px;font-weight:800;padding:2px 6px;border-radius:9999px;z-index:5;">-' + pct + '%</span>';
+                    discount = '<span style="position:absolute;top:8px;right:8px;background:linear-gradient(135deg,#b91c1c,#ef4444);color:white;font-size:8px;font-weight:700;padding:3px 7px;border-radius:999px;z-index:5;box-shadow:0 2px 6px rgba(239,68,68,0.3);">-' + pct + '%</span>';
                 }
-                var starBadge = '';
-                if (p.is_star || p.featured) {
-                    starBadge = '<span class="float-badge" style="position:absolute;top:8px;left:8px;font-size:8px;font-weight:800;padding:2px 6px;border-radius:6px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:white;z-index:5;">STAR</span>';
+                var starB = (p.is_star || p.featured) ? '<span style="position:absolute;top:6px;left:6px;font-size:7px;font-weight:800;padding:2px 5px;border-radius:4px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:white;z-index:5;">STAR</span>' : '';
+
+                // Mock rating
+                var seed = pid * 7 + pname.length * 3;
+                var n = 3 + (seed % 10);
+                var avg = (4.2 + (seed % 10) / 10).toFixed(1);
+                var full = Math.round(avg);
+                var starsSvg = '';
+                for (var si = 0; si < 5; si++) {
+                    starsSvg += si < full
+                        ? '<svg width="9" height="9" fill="#fbbf24" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>'
+                        : '<svg width="9" height="9" fill="#e2e8f0" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>';
                 }
-                html += '<div class="mini-card-animated" onclick="window.location.href=\'produit-detail.html?id=' + pid + '\'">';
-                html += '<div class="mini-img-wrap">';
-                html += '<img src="' + pimg + '" alt="' + pname + '" loading="lazy" onerror="this.src=\'https://via.placeholder.com/200x200?text=YARID\';">';
-                html += discountBadge;
-                html += starBadge;
+
+                html += '<div onclick="window.location.href=\'produit-detail.html?id=' + pid + '\'" style="flex-shrink:0;width:145px;scroll-snap-align:start;cursor:pointer;">';
+                html += '<div style="position:relative;width:145px;height:145px;border-radius:14px;overflow:hidden;background:#f1f5f9;">';
+                html += '<img src="' + pimg + '" alt="' + pname + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.src=\'https://via.placeholder.com/200x200?text=YARID\';">';
+                html += discount + starB;
                 html += '</div>';
-                html += '<div class="mini-info">';
-                html += '<p class="mini-title">' + pname + '</p>';
-                html += '<p class="mini-price">' + pprice + '</p>';
-                html += '</div></div>';
+                html += '<p style="font-size:10px;font-weight:600;color:#334155;margin-top:6px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + pname + '</p>';
+                html += '<div style="display:flex;align-items:center;gap:3px;margin-top:2px;">';
+                html += starsSvg;
+                html += '<span style="font-size:8px;font-weight:700;color:#d97706;">' + avg + '</span>';
+                html += '<span style="font-size:7px;color:#94a3b8;">(' + n + ')</span>';
+                html += '</div>';
+                html += '<p style="font-size:11px;font-weight:900;color:#0369a1;margin-top:1px;">' + pprice + '</p>';
+                var views = formatViews(getProductViews(pid));
+                html += '<p style="font-size:8px;color:#94a3b8;margin-top:1px;display:flex;align-items:center;gap:2px;"><svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>' + views + ' vues</p>';
+                html += '</div>';
             }
             container.innerHTML = html;
         }
 
         function scrollToProducts() {
             document.getElementById('products-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function scrollToAbout() {
+            // Find the A Propos section by its distinctive header text
+            const sections = document.querySelectorAll('section');
+            for (const section of sections) {
+                if (section.innerHTML.includes('A propos de') && section.innerHTML.includes('YARID')) {
+                    section.scrollIntoView({ behavior: 'smooth' });
+                    return;
+                }
+            }
         }
 
         // ==========================================
@@ -2705,6 +3100,45 @@
                 renderProducts(filtered);
                 if (sectionTitle) sectionTitle.textContent = 'Resultats pour "' + q + '" (' + filtered.length + ')';
             }
+        }
+
+        // ========== FILTRAGE PAR CATEGÉGIE (Tuiles visuelles) ==========
+        function filterByCategory(cat) {
+            if (!cat) return;
+            var all = window.allProducts || products || [];
+            var q = cat.toLowerCase().trim();
+
+            // Mapping des catégories (tolerance aux variantes)
+            var catMap = {
+                'parfums': ['parfum', 'parfums', 'eau de toilette', 'fragrance'],
+                'tech': ['tech', 'technologie', 'electronique', 'electronique'],
+                'telephone': ['telephone', 'telephone', 'phone', 'smartphone', 'mobile'],
+                'mode': ['mode', 'fashion', 'vetement', 'vetements', 'habillement'],
+                'gaming': ['gaming', 'game', 'jeu', 'jeux video'],
+                'maison': ['maison', 'home', 'electromenager', 'deco']
+            };
+            var aliases = catMap[q] || [q];
+
+            var filtered = all.filter(function(p) {
+                var c = (p.categorie || '').toLowerCase();
+                return aliases.some(function(a) { return c.indexOf(a) !== -1; });
+            });
+
+            // Si aucun résultat avec les alias, essai direct
+            if (filtered.length === 0) {
+                filtered = all.filter(function(p) {
+                    return (p.categorie || '').toLowerCase().indexOf(q) !== -1;
+                });
+            }
+
+            renderProducts(filtered);
+
+            // Mettre à jour le titre
+            var sectionTitle = document.querySelector('#products-section h3');
+            if (sectionTitle) sectionTitle.textContent = cat + ' (' + filtered.length + ' produits)';
+
+            // Scroll vers la section
+            document.getElementById('products-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         // ========== SUGGESTIONS EN TEMPS REEL (AUTOCOMPLETE) ==========
@@ -2888,6 +3322,18 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
+        // Vues simulées — cohérentes avec les avis
+        function getProductViews(productId) {
+            var seed = productId * 9301 + 49297;
+            var t = seed % 8000;
+            return 200 + t; // 200 à 8200 vues
+        }
+
+        function formatViews(n) {
+            if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'k';
+            return String(n);
+        }
+
         function renderProducts(items) {
             const grid = document.getElementById('products-grid');
             if (!grid) return;
@@ -2895,17 +3341,6 @@
             if (!items || items.length === 0) {
                 grid.innerHTML = '<p style="grid-column:span 2;text-align:center;padding:40px;color:#94a3b8;">Aucun produit dans cette catégorie</p>';
                 return;
-            }
-
-            // Diagnostic : log du premier produit pour vérifier la structure
-            if (items[0]) {
-                console.log('[YARID] Premier produit:', JSON.stringify({
-                    id: items[0].id,
-                    name: items[0].name,
-                    price: items[0].price,
-                    image_url: items[0].image_url,
-                    categorie: items[0].categorie
-                }));
             }
 
             var html = '';
@@ -2918,10 +3353,10 @@
                 var pprice = Number(p.price) || 0;
                 var pold   = Number(p.old_price) || 0;
                 var pcat   = p.categorie || '';
-                // URL image directe — pas d'escapeHtml pour ne pas casser les &
                 var pimg = (p.image_url && String(p.image_url).trim().length > 4)
                     ? p.image_url.trim()
                     : '';
+                var views = formatViews(getProductViews(pid));
 
                 var starBadge = p.is_star
                     ? '<div style="position:absolute;top:8px;left:8px;background:#facc15;color:#713f12;font-size:8px;font-weight:900;padding:2px 8px;border-radius:999px;z-index:5;">★ STAR</div>'
@@ -2946,11 +3381,12 @@
                 // Info
                 html += '<div style="padding:10px 12px 12px;flex:1;">';
                 if (pcat) html += '<p style="font-size:8px;font-weight:800;color:#0ea5e9;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 3px;">' + pcat + '</p>';
-                html += '<h4 style="font-size:12px;font-weight:800;color:#0f172a;line-height:1.35;margin:0 0 6px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + pname + '</h4>';
+                html += '<h4 style="font-size:12px;font-weight:800;color:#0369a1;line-height:1.35;margin:0 0 6px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + pname + '</h4>';
                 html += '<div style="display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;">';
-                html += '<span style="font-size:13px;font-weight:900;color:#0f172a;">' + pprice.toLocaleString() + ' FCFA</span>';
+                html += '<span style="font-size:13px;font-weight:900;color:#0369a1;">' + pprice.toLocaleString() + ' FCFA</span>';
                 html += oldPriceStr;
                 html += '</div>';
+                html += '<div style="margin-top:6px;display:flex;align-items:center;gap:6px;font-size:10px;color:#94a3b8;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg><span style="font-weight:600;">' + views + ' vues</span></div>';
                 html += '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9;display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:#94a3b8;">Voir le produit <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></div>';
                 html += '</div>';
                 html += '</div>';
@@ -2967,7 +3403,9 @@
                 const { data, error } = await _supabase.from('avis').select('*').eq('produit_id', productId).order('created_at', { ascending: false });
                 if (!error && data && data.length > 0) return data;
             } catch(e) {}
-            return [];
+            // Avis simules pour le lancement
+            var p = products.find(function(x) { return x.id === productId; });
+            return _getMockReviews(productId, p ? p.categorie : '', p ? p.name : '');
         }
 
         function getProductAverageRatingSync(reviews) {
@@ -3253,7 +3691,8 @@
                     ? words.join(' ') + ' <span>' + lastWord + '</span>'
                     : '<span>' + cat + '</span>';
 
-                html += '<section class="cat-carousel-section">';
+                var bgClass = (idx % 2 === 0) ? 'section-white' : 'section-alt';
+                html += '<section class="cat-carousel-section ' + bgClass + '" style="padding:16px;margin:0 -16px;padding-left:32px;padding-right:32px;">';
                 if (idx > 0) html += '<div class="cc-divider"></div>';
                 html += '<div class="cat-carousel-header">'
                       + '<h3 class="cat-carousel-title">' + titleHtml + '</h3>'
@@ -3273,6 +3712,7 @@
                     var starB    = p.is_star ? '<div class="cc-badge-star">★ STAR</div>' : '';
                     var promoB   = (pold && pold > ppr) ? '<div class="cc-badge-promo">-' + Math.round((1 - ppr/pold)*100) + '%</div>' : '';
 
+                    var views = formatViews(getProductViews(pid));
                     html += '<div class="cc-card" onclick="window.location.href=\'produit-detail.html?id=' + pid + '\'">'
                           + '<div class="cc-img-wrap">'
                           + '<img src="' + pimg + '" alt="' + pname + '" loading="lazy" onerror="this.src=\'https://via.placeholder.com/300?text=YARID\';">'
@@ -3282,6 +3722,7 @@
                           + '<p class="cc-cat">' + pcat + '</p>'
                           + '<h4 class="cc-name">' + pname + '</h4>'
                           + '<div class="cc-price">' + priceStr + oldHtml + '</div>'
+                          + '<p style="font-size:8px;color:#94a3b8;margin-top:3px;display:flex;align-items:center;gap:2px;"><svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>' + views + ' vues</p>'
                           + '</div></div>';
                 });
 
@@ -3311,7 +3752,7 @@
 
                 var html = '';
                 // À Propos
-                html += '<button class="category-pill px-4 py-2.5 rounded-full text-sm font-semibold text-slate-600 flex items-center gap-1.5" onclick="openAboutModal()">'
+                html += '<button class="category-pill px-4 py-2.5 rounded-full text-sm font-semibold text-slate-600 flex items-center gap-1.5" onclick="scrollToAbout()">'
                       + '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
                       + 'À Propos</button>';
                 // Tout
@@ -4202,5 +4643,7 @@
             </div>
         </div>
     </div>
+<script src="yarid-checkout.js"></script>
+
 </body>
 </html>

@@ -9,6 +9,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="cart-global.js"></script>
+<script src="yarid-tracker.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
         * { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -244,7 +246,7 @@
             <div class="flex-1 overflow-y-auto p-4" id="cart-drawer-items"><p class="text-center text-slate-400 py-8">Votre panier est vide</p></div>
             <div class="p-4 border-t border-slate-100 space-y-3">
                 <div class="flex justify-between text-lg font-bold"><span>Total</span><span id="cart-total">0 FCFA</span></div>
-                <button onclick="orderViaWhatsApp()" class="w-full py-3 bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white rounded-xl font-bold text-sm uppercase">Commander sur WhatsApp</button>
+                <<button onclick="submitOrder()"> class="w-full py-3 bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white rounded-xl font-bold text-sm uppercase">Commander sur WhatsApp</button>
             </div>
         </div>
     </div>
@@ -324,7 +326,7 @@
                 html += '  <div class="product-info-v2">';
                 html += '    <p class="product-cat-v2">' + pcat + '</p>';
                 html += '    <h4 class="product-title-v2">' + pname + '</h4>';
-                html += '    <div class="product-price-row-v2">';
+                html += '    <div class="product-price-prow-v2">';
                 html += '      <span class="product-price-v2">' + priceStr + '</span>';
                 html += oldPriceHtml;
                 html += '    </div>';
@@ -339,32 +341,17 @@
         grid.innerHTML = html;
     }
 
-    // Cart integration
     function orderViaWhatsApp() {
-        var items = getCartItems();
-        if (items.length === 0) { alert('Panier vide'); return; }
-        var total = items.reduce(function(s, i) { return s + i.price * i.quantity; }, 0);
-        var msg = 'Bonjour YARID ! Je souhaite commander :\n\n';
-        items.forEach(function(item) { msg += '\u2022 ' + item.name + ' x' + item.quantity + ' = ' + (item.price * item.quantity).toLocaleString() + ' FCFA\n'; });
-        msg += '\n*Total: ' + total.toLocaleString() + ' FCFA*';
-        window.open('https://wa.me/237655959284?text=' + encodeURIComponent(msg), '_blank');
+    if (typeof window.openCheckout === 'function') {
+        window.openCheckout();
+    } else {
+        alert("Le système de commande n'est pas chargé. Vérifiez que yarid-checkout.js est bien présent.");
     }
+}
 
-    function openAccountModal() {
-        window.location.href = 'index.html#compte';
-    }
+loadProducts();
 
-    function updateCartCount() {
-        var items = getCartItems();
-        var count = items.reduce(function(s, i) { return s + i.quantity; }, 0);
-        var badge = document.getElementById('cart-count');
-        if (count > 0) { badge.textContent = count; badge.classList.remove('hidden'); }
-        else badge.classList.add('hidden');
-    }
-
-    // Init
-    loadProducts();
-    updateCartCount();
     </script>
+<script src="yarid-checkout.js"></script>
 </body>
 </html>

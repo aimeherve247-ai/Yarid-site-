@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; frame-src 'none'; object-src 'none'; base-uri 'self';">
+    <title>YARID | Le Journal</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="YARID">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --y-navy: #0B4F8C; --y-navy-light: #0EA5E9; --y-gold: #D4AF37;
+            --y-gold-light: #F0D878; --y-gray-50: #F8FAFC; --y-gray-100: #F1F5F9;
+            --y-gray-200: #E2E8F0; --y-gray-300: #CBD5E1; --y-gray-400: #94A3B8;
+            --y-gray-500: #64748B; --y-gray-600: #475569; --y-gray-700: #334155;
+            --y-gray-800: #1E293B; --y-gray-900: #0369A1;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --safe-top: env(safe-area-inset-top, 0px); --safe-bottom: env(safe-area-inset-bottom, 0px); }
+        body { font-family: 'Inter', sans-serif; background: white; color: var(--y-gray-800); -webkit-font-smoothing: antialiased; padding-top: var(--safe-top); padding-bottom: var(--safe-bottom); }
+        header.fixed { padding-top: var(--safe-top) !important; }
+        main.pt-14 { padding-top: calc(56px + var(--safe-top)) !important; }
+        .share-bar { padding-bottom: calc(12px + var(--safe-bottom)) !important; }
+        /* iOS notch support */
+        @supports (-webkit-touch-callout: none) {
+            header.fixed { padding-top: max(env(safe-area-inset-top), 20px) !important; }
+            main.pt-14 { padding-top: calc(56px + max(env(safe-area-inset-top), 20px)) !important; }
+        }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .fade-in { animation: fadeIn 0.6s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Article typography */
+        .article-body h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--y-navy); margin: 32px 0 16px; line-height: 1.3; }
+        .article-body h3 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--y-navy); margin: 24px 0 12px; }
+        .article-body p { font-size: 15px; line-height: 1.8; color: var(--y-gray-600); margin-bottom: 16px; }
+        .article-body blockquote { border-left: 3px solid var(--y-gold); padding: 16px 20px; margin: 24px 0; background: var(--y-gray-50); border-radius: 0 12px 12px 0; font-style: italic; color: var(--y-gray-700); }
+        .article-body blockquote p { margin: 0; font-size: 15px; }
+        .article-body ul { margin: 16px 0 16px 20px; }
+        .article-body ul li { font-size: 14px; line-height: 1.8; color: var(--y-gray-600); margin-bottom: 8px; position: relative; }
+        .article-body .highlight { background: linear-gradient(180deg, transparent 60%, rgba(212,175,55,0.2) 60%); padding: 0 2px; }
+        .article-body .product-cta { display: flex; align-items: center; gap: 16px; padding: 20px; background: linear-gradient(135deg, var(--y-gray-50), white); border-radius: 16px; border: 1px solid var(--y-gray-200); margin: 24px 0; }
+
+        .gold-line { width: 40px; height: 2px; background: linear-gradient(90deg, var(--y-gold), transparent); }
+
+        /* Sticky share bar */
+        .share-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px 16px; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--y-gray-200); z-index: 100; display: flex; gap: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50" style="background:rgba(11,17,32,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(212,175,55,0.1);">
+        <div class="flex items-center justify-between px-4 h-14">
+            <a href="journal.html" class="flex items-center gap-2 text-slate-400 hover:text-white transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                <span class="text-[11px] font-bold uppercase tracking-wider hidden sm:inline">Journal</span>
+            </a>
+            <a href="index.html" class="text-sm font-black italic uppercase tracking-tighter" style="color:white;">YARID<span style="color:var(--y-gold);">.</span></a>
+            <a href="index.html" class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--y-gold);">Boutique</a>
+        </div>
+    </header>
+
+    <!-- Article Content -->
+    <main class="pt-14">
+        <div id="article-container"></div>
+    </main>
+
+    <!-- Sticky Share Bar -->
+    <div class="share-bar">
+        <button onclick="shareArticle()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;background:var(--y-navy);color:white;border:none;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+            Partager
+        </button>
+        <a href="https://api.whatsapp.com/send?phone=237655959284&text=Bonjour%20YARID%2C%20j'ai%20une%20question%20sur%20un%20article%20du%20journal" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;background:linear-gradient(135deg,#25D366,#128C7E);color:white;border:none;border-radius:12px;font-size:12px;font-weight:700;text-decoration:none;">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            Discuter
+        </a>
+    </div>
+
+    <script>
+    const ARTICLES = {
+        'selection-privee': {
+            title: "La Sélection Privée : Pourquoi nous chassons les pièces en édition limitée",
+            category: "Mode",
+            categoryColor: "#D4AF37",
+            image: "journal-1.jpg",
+            author: "Équipe YARID",
+            date: "14 juin 2026",
+            readTime: "12 min",
+            views: "1 247",
+            content: `
+                <div style="position:relative;height:280px;overflow:hidden;">
+                    <img src="journal-1.jpg" alt="Sélection Privée" style="width:100%;height:100%;object-fit:cover;">
+                    <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.7) 100%);"></div>
+                    <span style="position:absolute;top:16px;left:16px;background:rgba(11,17,32,0.9);color:var(--y-gold);padding:6px 14px;border-radius:999px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;border:1px solid rgba(212,175,55,0.3);">Mode</span>
+                </div>
+
+                <div class="px-5 py-6 article-body">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--y-navy),var(--y-navy-light));display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:800;">Y</div>
+                        <div>
+                            <p style="font-size:12px;font-weight:700;color:var(--y-gray-800);margin:0;">Équipe YARID</p>
+                            <p style="font-size:11px;color:var(--y-gray-400);margin:0;">14 juin 2026 · 12 min · 1 247 vues</p>
+                        </div>
+                    </div>
+
+                    <h2>Le sourcing, notre obsession</h2>
+                    <p>Chaque pièce que vous voyez dans notre <span class="highlight">Sélection Privée</span> raconte une histoire. Ce n'est pas juste un t-shirt ou un polo — c'est le fruit de semaines de recherche, de négociations avec des fournisseurs en Malaisie, en Turquie et en Italie, et d'une obsession pour la qualité.</p>
+                    <p>Quand nous avons lancé YARID, nous avions une mission claire : offrir aux Camerounais l'accès à des produits premium, originaux, sélectionnés avec soin. Pas des contrefaçons. Pas des surplus de stock bas de gamme. Des pièces que nous porterions nous-mêmes.</p>
+
+                    <blockquote>
+                        <p>"La qualité n'est pas un luxe. C'est un choix que chaque consommateur mérite de pouvoir faire, même à Douala."</p>
+                    </blockquote>
+
+                    <h2>Comment naît une Sélection Privée ?</h2>
+                    <p>Le processus commence toujours par une tendance. Nous surveillons les défilés à Paris, les collections capsule à Tokyo, les nouveautés tech à Shenzhen. Mais surtout, nous écoutons <strong>vous</strong>, nos clients.</p>
+                    <p>Vos messages WhatsApp, vos commentaires Instagram, vos demandes en boutique — tout alimente nos choix. Quand plusieurs d'entre vous demandent le même type de produit, c'est le signal que nous cherchons.</p>
+
+                    <h3>1. La recherche</h3>
+                    <p>Nous contactons nos partenaires fabricants dans plus de 12 pays. Chaque fournisseur est vérifié, chaque échantillon est testé en interne pendant plusieurs semaines avant validation.</p>
+
+                    <h3>2. Le test</h3>
+                    <p>Nous portons chaque vêtement. Nous utilisons chaque produit tech. Si le t-shirt ne garde pas sa forme après 5 lavages, il ne rentre pas dans la sélection. Si le casque ne tient pas une journée de batterie, il est écarté.</p>
+
+                    <h3>3. L'édition limitée</h3>
+                    <p>Nous commandons en petites quantités. C'est un choix délibéré : ça garantit l'exclusivité, ça limite le gaspillage, et ça nous permet de renouveler constamment notre offre.</p>
+
+                    <h2>Les pièces du moment</h2>
+                    <p>Notre dernière sélection comprend des pièces en coton peigné malaisien, des jeans confectionnés en Turquie avec des techniques de teinture écologiques, et des polos brodés à la main. Chaque article est disponible en <strong>quantité limitée</strong> — quand c'est parti, c'est parti.</p>
+
+                    <div class="product-cta">
+                        <img src="journal-3.jpg" alt="" style="width:60px;height:60px;border-radius:10px;object-fit:cover;">
+                        <div style="flex:1;">
+                            <p style="font-size:12px;font-weight:800;color:var(--y-navy);margin:0 0 4px;">Découvrir la Sélection Privée</p>
+                            <p style="font-size:11px;color:var(--y-gray-500);margin:0;">Pièces limitées, qualité premium</p>
+                        </div>
+                        <a href="index.html" style="padding:10px 20px;background:var(--y-navy);color:white;border-radius:10px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;">Explorer &rarr;</a>
+                    </div>
+
+                    <h2>Rejoignez le mouvement</h2>
+                    <p>La Sélection Privée, c'est plus qu'une collection. C'est notre vision de ce que le e-commerce camerounais peut être quand on place la qualité et l'authenticité au centre de tout. Rejoignez les <strong>+1 200 clients</strong> qui nous font déjà confiance.</p>
+                </div>
+            `
+        },
+        'guide-drone': {
+            title: "Guide Tech : Comment choisir son premier drone au Cameroun",
+            category: "Tech",
+            categoryColor: "#38bdf8",
+            image: "journal-2.jpg",
+            author: "Tech Team YARID",
+            date: "10 juin 2026",
+            readTime: "8 min",
+            views: "892",
+            content: `
+                <div style="position:relative;height:280px;overflow:hidden;">
+                    <img src="journal-2.jpg" alt="Guide Drone" style="width:100%;height:100%;object-fit:cover;">
+                    <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.7) 100%);"></div>
+                    <span style="position:absolute;top:16px;left:16px;background:rgba(11,17,32,0.9);color:#38bdf8;padding:6px 14px;border-radius:999px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;border:1px solid rgba(56,189,248,0.3);">Tech</span>
+                </div>
+
+                <div class="px-5 py-6 article-body">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#0284c7);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:800;">T</div>
+                        <div>
+                            <p style="font-size:12px;font-weight:700;color:var(--y-gray-800);margin:0;">Tech Team YARID</p>
+                            <p style="font-size:11px;color:var(--y-gray-400);margin:0;">10 juin 2026 · 8 min · 892 vues</p>
+                        </div>
+                    </div>
+
+                    <h2>Pourquoi acheter un drone au Cameroun ?</h2>
+                    <p>Les drones ne sont plus réservés aux professionnels de l'audiovisuel. Aujourd'hui, de plus en plus de Camerounais s'y mettent : <span class="highlight">créateurs de contenu</span>, passionnés de photographie, entreprises immobilières, agriculteurs... Les cas d'usage explosent.</p>
+                    <p>Chez YARID, nous avons vendu plus de <strong>200 drones</strong> en 2025 seulement. Et la question qu'on nous pose le plus souvent est : "Lequel je choisis ?" Ce guide est fait pour vous.</p>
+
+                    <h2>Ce qu'il faut savoir avant d'acheter</h2>
+
+                    <h3>Législation camerounaise</h3>
+                    <p>Contrairement à certains pays, le Cameroun n'impose pas encore d'autorisation spécifique pour les drones de loisir pesant moins de 25kg. Cependant, il est interdit de survoler des zones militaires, des aéroports, ou des rassemblements publics. Restez responsables.</p>
+
+                    <h3>Budget : combien dépenser ?</h3>
+                    <ul>
+                        <li><strong>Entrée de gamme (35 000 - 65 000 FCFA)</strong> : Parfait pour débuter. Le Drone V600 que nous proposons offre une autonomie de 15 minutes et une caméra 4K. Idéal pour apprendre.</li>
+                        <li><strong>Milieu de gamme (150 000 - 300 000 FCFA)</strong> : DJI Mini SE, Ryze Tello. Stabilisation gyroscopique, meilleure qualité d'image, portée augmentée.</li>
+                        <li><strong>Haut de gamme (500 000+ FCFA)</strong> : DJI Air, DJI Mavic. Pour les professionnels. Caméra Hasselblad, suivi de sujet, obstacle avoidance.</li>
+                    </ul>
+
+                    <blockquote>
+                        <p>"Commencez petit. Un drone d'entrée de gamme vous apprendra les bases sans risquer un investissement conséquent."</p>
+                    </blockquote>
+
+                    <h2>Notre recommandation</h2>
+                    <p>Pour un premier drone au Cameroun, nous recommandons le <strong>Drone V600</strong>. À 65 000 FCFA, il offre le meilleur rapport qualité-prix du marché : caméra 4K, 15 minutes d'autonomie, portée de 500m, et une stabilité impressionnante pour son prix.</p>
+
+                    <div class="product-cta">
+                        <img src="journal-2.jpg" alt="" style="width:60px;height:60px;border-radius:10px;object-fit:cover;">
+                        <div style="flex:1;">
+                            <p style="font-size:12px;font-weight:800;color:var(--y-navy);margin:0 0 4px;">Drone V600 — 65 000 FCFA</p>
+                            <p style="font-size:11px;color:var(--y-gray-500);margin:0;">4K · 15min · 500m portée</p>
+                        </div>
+                        <a href="index.html" style="padding:10px 20px;background:var(--y-navy);color:white;border-radius:10px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;">Voir &rarr;</a>
+                    </div>
+
+                    <h2>Conseils de prise en main</h2>
+                    <p><strong>1. Entraînez-vous en mode débutant</strong> — Tous les drones ont un mode limité en vitesse et altitude. Utilisez-le vos 10 premiers vols.</p>
+                    <p><strong>2. Volez par beau temps</strong> — Le vent est l'ennemi n°1 des drones légers. Attendez une journée calme.</p>
+                    <p><strong>3. Chargez vos batteries</strong> — Investissez dans une batterie supplémentaire. 15 minutes passent très vite.</p>
+                    <p><strong>4. Respectez la vie privée</strong> — Ne survolez pas les propriétés privées sans autorisation.</p>
+                </div>
+            `
+        },
+        'essential-edit': {
+            title: "L'Essential Edit : Les 5 accessoires qui changent votre quotidien",
+            category: "Lifestyle",
+            categoryColor: "#a78bfa",
+            image: "journal-3.jpg",
+            author: "Lifestyle Team",
+            date: "5 juin 2026",
+            readTime: "6 min",
+            views: "634",
+            content: `
+                <div style="position:relative;height:280px;overflow:hidden;">
+                    <img src="journal-3.jpg" alt="Essential Edit" style="width:100%;height:100%;object-fit:cover;">
+                    <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.7) 100%);"></div>
+                    <span style="position:absolute;top:16px;left:16px;background:rgba(11,17,32,0.9);color:#a78bfa;padding:6px 14px;border-radius:999px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;border:1px solid rgba(167,139,250,0.3);">Lifestyle</span>
+                </div>
+
+                <div class="px-5 py-6 article-body">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:800;">L</div>
+                        <div>
+                            <p style="font-size:12px;font-weight:700;color:var(--y-gray-800);margin:0;">Lifestyle Team</p>
+                            <p style="font-size:11px;color:var(--y-gray-400);margin:0;">5 juin 2026 · 6 min · 634 vues</p>
+                        </div>
+                    </div>
+
+                    <h2>5 accessoires, un impact</h2>
+                    <p>Certains objets ne changent pas votre vie. D'autres, si. Voici notre sélection des <span class="highlight">5 accessoires indispensables</span> que nous vendons chez YARID et que nos clients ne regrettent jamais d'avoir achetés.</p>
+
+                    <h3>1. Un casque premium</h3>
+                    <p>Que vous travailliez à domicile, fassiez du sport, ou fassiez de longs trajets en bus entre Douala et Yaoundé, un bon casque change tout. Réduction de bruit active, autonomie 30h+, et un son qui vous fait redécouvrir votre playlist.</p>
+                    <p><strong>Notre pick :</strong> Stereo Headphon — 35 000 FCFA</p>
+
+                    <h3>2. Un parfum signature</h3>
+                    <p>Le parfum, c'est l'accessoire invisible. Celui qui marque les esprits sans que personne ne sache pourquoi. Trouvez LE vôtre et ne le changez plus.</p>
+                    <p><strong>Notre pick :</strong> MALE CANADA — 12 000 FCFA</p>
+
+                    <h3>3. Un sweat de qualité</h3>
+                    <p>Un sweat ne devrait pas boulocher après 3 lavages. Investissez dans un vrai, en coton épais, avec une coupe travaillée. Vous le porterez 3 fois par semaine, minimum.</p>
+                    <p><strong>Notre pick :</strong> Sweat Crewneck — 30 700 FCFA</p>
+
+                    <h3>4. Une montre connectée</h3>
+                    <p>Suivi de vos pas, notifications, paiement sans contact... La montre connectée est devenue l'extension naturelle du smartphone. Pratique pour le sport et le quotidien.</p>
+
+                    <h3>5. Une batterie externe</h3>
+                    <p>Les coupures ENEO, les longues journées en déplacement... Une batterie externe 20 000mAh est le meilleur ami de tout Camerounais moderne. Ne partez jamais sans.</p>
+
+                    <blockquote>
+                        <p>"Ce ne sont pas les chères. Ce sont celles qui, ajoutées ensemble, transforment votre quotidien en expérience premium."</p>
+                    </blockquote>
+                </div>
+            `
+        },
+        'culture-237': {
+            title: "Style Made in 237 : L'essor de la mode urbaine à Douala",
+            category: "Culture",
+            categoryColor: "#f472b6",
+            image: "journal-4.jpg",
+            author: "Rédaction YARID",
+            date: "1 juin 2026",
+            readTime: "10 min",
+            views: "1 058",
+            content: `
+                <div style="position:relative;height:280px;overflow:hidden;">
+                    <img src="journal-4.jpg" alt="Culture 237" style="width:100%;height:100%;object-fit:cover;">
+                    <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.7) 100%);"></div>
+                    <span style="position:absolute;top:16px;left:16px;background:rgba(11,17,32,0.9);color:#f472b6;padding:6px 14px;border-radius:999px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;border:1px solid rgba(244,114,182,0.3);">Culture</span>
+                </div>
+
+                <div class="px-5 py-6 article-body">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#ec4899,#db2777);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:800;">R</div>
+                        <div>
+                            <p style="font-size:12px;font-weight:700;color:var(--y-gray-800);margin:0;">Rédaction YARID</p>
+                            <p style="font-size:11px;color:var(--y-gray-400);margin:0;">1 juin 2026 · 10 min · 1 058 vues</p>
+                        </div>
+                    </div>
+
+                    <h2>Douala, nouvel eldorado fashion ?</h2>
+                    <p>Il y a 10 ans, trouver un vêtement stylé à Douala relevait du défi. Aujourd'hui, la ville est en pleine <span class="highlight">révolution mode</span>. Des créateurs locaux émergent, des concepts stores ouvrent, et les jeunes Camerounais affichent un style sans complexe.</p>
+                    <p>Chez YARID, nous sommes témoins de cette transformation chaque jour. Nos clients ne veulent plus juste "un t-shirt". Ils veulent une pièce qui raconte une histoire, qui les distingue, qui reflète qui ils sont.</p>
+
+                    <h2>Les quartiers qui comptent</h2>
+
+                    <h3>Bonapriso — Le chic bohème</h3>
+                    <p>C'est le quartier où les créateurs locaux posent leurs ateliers. Des rues arborées où l'on découvre des pièces uniques, faites main, avec des tissus wax réinventés. C'est ici que naît l'avant-garde de la mode camerounaise.</p>
+
+                    <h3>Akwa — L'effervescence</h3>
+                    <p>Le cœur commercial de Douala. Entre les centres commerciaux modernes et les vendeurs de rue, Akwa offre un condensé de tout ce qui fait la mode 237 : le mélange audacieux entre influences occidentales et identité africaine.</p>
+
+                    <h3>Bali — La scène underground</h3>
+                    <p>C'est dans ce quartier populaire que la jeunesse doualaise exprime le plus librement son style. Streetwear, sneakers, looks inspirés des scènes londoniennes et new-yorkaises... Bali est le laboratoire.</p>
+
+                    <blockquote>
+                        <p>"La mode au Cameroun, ce n'est pas copier. C'est prendre ce qui vient d'ailleurs et le transformer à notre image. C'est ça, le style 237."</p>
+                    </blockquote>
+
+                    <h2>Les créateurs à suivre</h2>
+                    <p>La scène créative camerounaise regorge de talents. Des marques comme <strong>Kokié</strong>, <strong>Maboule</strong> ou <strong>Soleil Diaspora</strong> redéfinissent ce que signifie "s'habiller africain" au 21ème siècle. Mélange de wax contemporain, de coupes streetwear et de messages engagés, leurs collections séduisent bien au-delà des frontières.</p>
+
+                    <h2>YARID dans tout ça</h2>
+                    <p>Nous ne sommes pas juste des vendeurs. Nous sommes des <strong>curateurs</strong>. Notre mission est de vous proposer le meilleur de la mode globale, tout en valorisant les talents locaux. Prochainement, une collection capsule en collaboration avec un créateur camerounais...</p>
+
+                    <p style="font-size:13px;color:var(--y-gray-500);font-style:italic;margin-top:32px;">Restez connectés. Le meilleur reste à venir.</p>
+                </div>
+            `
+        }
+    };
+
+    function renderArticle() {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        const article = ARTICLES[id];
+        const container = document.getElementById('article-container');
+
+        if (!article) {
+            container.innerHTML = `
+                <div class="px-5 py-20 text-center">
+                    <p style="font-size:48px;margin-bottom:16px;">📝</p>
+                    <h1 class="font-display text-xl font-bold mb-2" style="color:var(--y-navy);">Article introuvable</h1>
+                    <p style="font-size:13px;color:var(--y-gray-500);margin-bottom:24px;">Cet article n'existe pas ou a été déplacé.</p>
+                    <a href="journal.html" style="display:inline-block;padding:12px 32px;background:var(--y-navy);color:white;border-radius:999px;font-size:12px;font-weight:700;text-decoration:none;">Retour au Journal</a>
+                </div>
+            `;
+            document.title = 'Article introuvable | YARID';
+            return;
+        }
+
+        document.title = article.title + ' | YARID Journal';
+        container.innerHTML = '<div class="fade-in">' + article.content + '</div>';
+    }
+
+    function shareArticle() {
+        if (navigator.share) {
+            navigator.share({ title: document.title, url: window.location.href });
+        } else {
+            const url = window.location.href;
+            const text = encodeURIComponent(document.title + ' — Lu sur Le Journal YARID');
+            window.open('https://wa.me/?text=' + text + '%0A%0A' + encodeURIComponent(url), '_blank');
+        }
+    }
+
+    renderArticle();
+    </script>
+</body>
+</html>

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://whcpugnkldbmuqzgqxbe.supabase.co https://*.supabase.co; img-src 'self' https: data: blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
     <title>YARID | Facture</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,21 +20,33 @@
         .app-layout { display: flex; flex-direction: column; min-height: 100vh; }
         @media (min-width: 1024px) { .app-layout { flex-direction: row; height: 100vh; overflow: hidden; } }
 
-        .sidebar { width: 100%; background: #0f172a; border-bottom: 1px solid #1e293b; padding: 1.5rem; flex-shrink: 0; }
+        .sidebar { width: 100%; background: #0369a1; border-bottom: 1px solid #1e293b; padding: 1.5rem; flex-shrink: 0; }
         @media (min-width: 1024px) { .sidebar { width: 380px; height: 100vh; border-right: 1px solid #1e293b; padding: 2rem; overflow-y: auto; } }
 
         .preview-area { flex: 1; background: #1e293b; padding: 1rem; display: flex; justify-content: center; align-items: flex-start; overflow: auto; }
 
+        /* Facture PDF - optimise pour A4 */
         #facture-wrapper { transform-origin: top center; transition: transform 0.3s ease; margin-bottom: 50px; }
         #facture-pdf {
-            background: white; color: #0f172a; width: 794px; min-height: 1123px;
-            padding: 4rem; position: relative; overflow: hidden;
+            background: white; color: #0369a1; width: 210mm;
+            min-height: 297mm; padding: 15mm;
+            position: relative; overflow: hidden;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
+            font-size: 11pt;
+            line-height: 1.4;
+        }
+
+        /* A4 print rules */
+        @media print {
+            @page { size: A4 portrait; margin: 10mm; }
+            body { background: white; }
+            #facture-pdf { box-shadow: none; width: 190mm; min-height: 277mm; padding: 0; }
         }
 
         .watermark-bg {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 140px; font-weight: 900; color: rgba(15, 23, 42, 0.03);
+            font-size: 100px; font-weight: 900; color: rgba(15, 23, 42, 0.03);
             pointer-events: none; z-index: 0; white-space: nowrap; font-style: italic;
         }
 
@@ -45,10 +59,10 @@
         .btn-nav:hover { background: rgba(255,255,255,0.1); color: white; }
 
         /* Statut badges */
-        .statut-badge { display: inline-block; padding: 0.4rem 1rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+        .statut-badge { display: inline-block; padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
         .statut-en_attente      { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
         .statut-paye            { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
-        .statut-a_regler        { background: #dbeafe; color: #1e40af; border: 1px solid #60a5fa; }
+        .statut-a_regler_livraison { background: #dbeafe; color: #1e40af; border: 1px solid #60a5fa; }
         .statut-en_preparation  { background: #ede9fe; color: #5b21b6; border: 1px solid #a78bfa; }
         .statut-en_livraison    { background: #ffedd5; color: #9a3412; border: 1px solid #fb923c; }
         .statut-livre           { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
@@ -70,16 +84,20 @@
         }
         .pulse-live { animation: pulse-dot 2s ease-in-out infinite; }
 
-        /* Livreur recap */
-        .livreur-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #0ea5e9, #0284c7); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: white; flex-shrink: 0; }
-        .livreur-status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-        .dot-online { background: #10b981; }
-        .dot-en_course { background: #f59e0b; }
-        .dot-offline { background: #475569; }
+        /* Prevent page break inside critical elements */
+        .no-break { page-break-inside: avoid; break-inside: avoid; }
+        .page-break-before { page-break-before: always; }
 
-        /* Assignment banner */
-        #assignment-banner { display: none; }
-        #assignment-banner.show { display: block; }
+        /* Table styles for PDF */
+        .pdf-table { width: 100%; border-collapse: collapse; }
+        .pdf-table th { text-align: left; padding: 8px 4px; border-bottom: 2px solid #e2e8f0; font-size: 9px; font-weight: 800; text-transform: uppercase; color: #94a3b8; }
+        .pdf-table td { padding: 8px 4px; border-bottom: 1px solid #f1f5f9; font-size: 10px; }
+        .pdf-table td:last-child, .pdf-table th:last-child { text-align: right; }
+        .pdf-table td:nth-child(2), .pdf-table th:nth-child(2) { text-align: center; }
+
+        /* QR code container */
+        .qr-section { display: flex; align-items: center; gap: 12px; padding: 12px; background: #f8fafc; border-radius: 12px; margin-top: 10px; }
+        .qr-img { width: 80px; height: 80px; padding: 4px; border: 1px solid #e2e8f0; border-radius: 8px; background: white; flex-shrink: 0; }
     </style>
 </head>
 <body>
@@ -88,7 +106,7 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="flex gap-2 mb-6">
-                <button onclick="window.location.href='index.html'" class="btn btn-nav flex-1 uppercase">← Boutique</button>
+                <button onclick="window.location.href='index.html'" class="btn btn-nav flex-1 uppercase">&larr; Boutique</button>
                 <button onclick="window.location.href='suivi.html'" class="btn btn-nav flex-1 uppercase">Suivi</button>
                 <button onclick="window.location.href='livreur-app.html'" class="btn btn-nav flex-1 uppercase">Livreur</button>
             </div>
@@ -98,11 +116,11 @@
                 <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Module Facturation</p>
             </div>
 
-            <!-- Info commande chargée -->
+            <!-- Info commande chargee -->
             <div id="order-info" class="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hidden">
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 rounded-full bg-emerald-500 pulse-live"></div>
-                    <p class="text-xs font-bold text-emerald-400 uppercase">Commande chargée</p>
+                    <p class="text-xs font-bold text-emerald-400 uppercase">Commande chargee</p>
                 </div>
                 <p class="text-[10px] text-emerald-300/70 mt-1" id="order-info-text">ID: YRD-0000</p>
             </div>
@@ -116,7 +134,7 @@
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="label-style">N° Commande</label>
+                        <label class="label-style">N&deg; Commande</label>
                         <input type="text" id="in_id" placeholder="YRD-001" class="input-box" oninput="updateUI()">
                     </div>
                     <div>
@@ -147,31 +165,12 @@
                     <label class="label-style">Adresse de livraison</label>
                     <input type="text" id="in_adresse" placeholder="Yaounde, Cameroun" class="input-box" oninput="updateUI()">
                 </div>
-
-                <!-- ===================== ASSIGNATION LIVREUR ===================== -->
                 <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="label-style mb-0">Livreur assigné</label>
-                        <button onclick="loadLivreurs()" type="button" class="text-[9px] font-bold text-sky-400 hover:text-sky-300 uppercase tracking-wider flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                            Actualiser
-                        </button>
-                    </div>
-                    <select id="in_livreur_id" class="input-box" onchange="onLivreurChange()">
-                        <option value="">— Aucun livreur —</option>
+                    <label class="label-style">Attribuer a un livreur</label>
+                    <select id="in_livreur" class="input-box">
+                        <option value="">-- Selectionner un livreur --</option>
                     </select>
-                    <!-- Recap livreur sélectionné -->
-                    <div id="livreur-recap" class="hidden mt-1.5 flex items-center gap-2 px-2 py-1.5 bg-sky-500/10 rounded-lg border border-sky-500/20">
-                        <div id="livreur-recap-avatar" class="livreur-avatar" style="width:22px;height:22px;font-size:9px;flex-shrink:0;">L</div>
-                        <div class="flex-1 min-w-0">
-                            <p id="livreur-recap-name" class="text-[10px] font-black text-sky-400 leading-tight truncate">---</p>
-                            <p id="livreur-recap-detail" class="text-[9px] text-sky-300/50 leading-tight truncate">---</p>
-                        </div>
-                        <div id="livreur-recap-dot" class="livreur-status-dot dot-online"></div>
-                        <span id="livreur-recap-status" class="text-[8px] font-bold text-emerald-400">Dispo</span>
-                    </div>
                 </div>
-                <!-- =============================================================== -->
 
                 <div>
                     <label class="label-style">Articles (un par ligne)</label>
@@ -216,118 +215,110 @@
 
                     <!-- EN-TETE -->
                     <div class="relative z-10">
-                        <div class="flex justify-between items-start border-b-4 border-slate-900 pb-6 mb-6">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #0369a1;padding-bottom:12px;margin-bottom:16px;">
                             <div>
-                                <h2 class="text-5xl font-black italic tracking-tighter uppercase text-slate-900 leading-none">YARID<span class="text-sky-500">.</span></h2>
-                                <p class="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-400 mt-2">Logistics & Technology</p>
-                                <p class="text-[10px] text-slate-400 mt-1">Douala / Yaounde, Cameroun</p>
-                                <p class="text-[10px] font-bold text-slate-900 mt-1">+237 655 959 284</p>
+                                <h2 style="font-size:32px;font-weight:900;font-style:italic;letter-spacing:-0.05em;text-transform:uppercase;color:#0369a1;line-height:1;margin:0;">YARID<span style="color:#0ea5e9;">.</span></h2>
+                                <p style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.3em;color:#94a3b8;margin-top:6px;">Logistics &amp; Technology</p>
+                                <p style="font-size:9px;color:#94a3b8;margin-top:2px;">Douala / Yaounde, Cameroun</p>
+                                <p style="font-size:9px;font-weight:800;color:#0369a1;margin-top:2px;">+237 655 959 284</p>
                             </div>
-                            <div class="text-right">
-                                <div id="out_statut_badge" class="statut-badge statut-en_attente mb-3">EN ATTENTE</div>
-                                <p class="font-black text-slate-900 text-lg">Facture <span id="out_id">---</span></p>
-                                <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase">Date: <span id="out_date" class="text-slate-900"></span></p>
-                                <p class="text-[10px] text-slate-400 mt-1">Mode: <span id="out_paiement" class="text-slate-900 font-bold">Paiement a la livraison</span></p>
+                            <div style="text-align:right;">
+                                <div id="out_statut_badge" class="statut-badge statut-en_attente" style="margin-bottom:8px;">EN ATTENTE</div>
+                                <p style="font-weight:900;color:#0369a1;font-size:16px;margin:0;">Facture <span id="out_id">---</span></p>
+                                <p style="font-size:9px;font-weight:700;color:#94a3b8;margin-top:4px;text-transform:uppercase;">Date: <span id="out_date" style="color:#0369a1;"></span></p>
+                                <p style="font-size:9px;color:#94a3b8;margin-top:2px;">Mode: <span id="out_paiement" style="color:#0369a1;font-weight:700;">Paiement a la livraison</span></p>
                             </div>
                         </div>
 
                         <!-- INFOS CLIENT -->
-                        <div class="grid grid-cols-2 gap-8 mb-8">
-                            <div class="text-[11px] space-y-1">
-                                <p class="font-black text-slate-300 uppercase tracking-widest text-[10px] mb-2">Emetteur</p>
-                                <p class="font-bold text-slate-900 text-sm">YARID GROUP SARL</p>
-                                <p class="text-slate-500">Douala / Yaounde, Cameroun</p>
-                                <p class="text-slate-500">RCCM: CM-DLA-2024-B-XXXX</p>
-                                <p class="font-black text-slate-900">+237 655 959 284</p>
+                        <div style="display:flex;justify-content:space-between;gap:24px;margin-bottom:16px;">
+                            <div style="font-size:10px;">
+                                <p style="font-weight:900;color:#cbd5e1;text-transform:uppercase;letter-spacing:0.15em;font-size:9px;margin-bottom:6px;">EMETTEUR</p>
+                                <p style="font-weight:700;color:#0369a1;font-size:12px;margin:2px 0;">YARID GROUP SARL</p>
+                                <p style="color:#64748b;margin:2px 0;">Yaounde, Cameroun</p>
+                                <p style="color:#64748b;margin:2px 0;">RCCM: M032517629791L</p>
+                                <p style="font-weight:800;color:#0369a1;margin:2px 0;">+237 655 959 284</p>
                             </div>
-                            <div class="text-[11px] text-right space-y-1">
-                                <p class="font-black text-sky-500 uppercase tracking-widest text-[10px] mb-2">Client</p>
-                                <p id="out_nom" class="font-black text-slate-900 text-lg uppercase leading-tight">---</p>
-                                <p id="out_tel" class="font-bold text-slate-500">---</p>
-                                <p id="out_adresse" class="text-slate-400 text-[10px] max-w-[200px] ml-auto">---</p>
+                            <div style="font-size:10px;text-align:right;">
+                                <p style="font-weight:900;color:#0ea5e5;text-transform:uppercase;letter-spacing:0.15em;font-size:9px;margin-bottom:6px;">CLIENT</p>
+                                <p id="out_nom" style="font-weight:900;color:#0369a1;font-size:16px;text-transform:uppercase;line-height:1.2;margin:2px 0;">---</p>
+                                <p id="out_tel" style="font-weight:700;color:#64748b;margin:2px 0;">---</p>
+                                <p id="out_adresse" style="color:#94a3b8;font-size:9px;max-width:180px;margin:2px 0;margin-left:auto;">---</p>
                             </div>
                         </div>
 
                         <!-- TABLEAU DES ARTICLES -->
-                        <div class="mb-8">
-                            <table class="w-full">
+                        <div class="no-break" style="margin-bottom:16px;">
+                            <table class="pdf-table">
                                 <thead>
-                                    <tr class="text-[10px] font-black uppercase text-slate-400 border-b-2 border-slate-200">
-                                        <th class="py-3 text-left w-[60%]">Designation</th>
-                                        <th class="py-3 text-center">Qte</th>
-                                        <th class="py-3 text-right">Prix Unitaire</th>
-                                        <th class="py-3 text-right">Total</th>
+                                    <tr>
+                                        <th style="width:55%;text-align:left;">Designation</th>
+                                        <th style="text-align:center;">Qte</th>
+                                        <th style="text-align:right;">Prix Unitaire</th>
+                                        <th style="text-align:right;">Total</th>
                                     </tr>
                                 </thead>
-                                <tbody id="out_items_body" class="text-xs">
-                                    <tr class="border-b border-slate-100">
-                                        <td class="py-4 text-slate-600">Aucun article</td>
-                                        <td class="py-4 text-center text-slate-400">-</td>
-                                        <td class="py-4 text-right text-slate-400">-</td>
-                                        <td class="py-4 text-right font-bold text-slate-900">-</td>
+                                <tbody id="out_items_body">
+                                    <tr>
+                                        <td style="color:#64748b;">Aucun article</td>
+                                        <td style="text-align:center;color:#94a3b8;">-</td>
+                                        <td style="text-align:right;color:#94a3b8;">-</td>
+                                        <td style="text-align:right;font-weight:700;color:#0369a1;">-</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
 
                         <!-- RECAPITULATIF -->
-                        <div class="flex justify-end mb-8">
-                            <div class="w-72 space-y-2">
-                                <div class="flex justify-between text-xs font-bold text-slate-400">
+                        <div class="no-break" style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+                            <div style="width:260px;">
+                                <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:#94a3b8;margin-bottom:4px;">
                                     <span>SOUS-TOTAL</span>
-                                    <span id="out_sous_total" class="text-slate-900">0 FCFA</span>
+                                    <span id="out_sous_total" style="color:#0369a1;">0 FCFA</span>
                                 </div>
-                                <div class="flex justify-between text-xs font-bold text-slate-400">
+                                <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:#94a3b8;margin-bottom:4px;">
                                     <span>FRAIS DE LIVRAISON</span>
-                                    <span id="out_livraison" class="text-slate-900">0 FCFA</span>
+                                    <span id="out_livraison" style="color:#0369a1;">0 FCFA</span>
                                 </div>
-                                <div id="row_promo" class="hidden flex justify-between text-xs font-bold text-orange-500">
+                                <div id="row_promo" style="display:none;justify-content:space-between;font-size:10px;font-weight:700;color:#f97316;margin-bottom:4px;">
                                     <span>REMISE</span>
                                     <span id="out_promo">- 0 FCFA</span>
                                 </div>
-                                <div class="flex justify-between items-center pt-3 border-t-4 border-slate-900 mt-2">
-                                    <span class="text-[10px] font-black uppercase tracking-wider">NET A PAYER</span>
-                                    <span id="out_total" class="text-2xl font-black italic text-sky-500 tracking-tighter">0 FCFA</span>
+                                <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:3px solid #0369a1;margin-top:6px;">
+                                    <span style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.1em;color:#0369a1;">NET A PAYER</span>
+                                    <span id="out_total" style="font-size:22px;font-weight:900;font-style:italic;color:#0ea5e5;letter-spacing:-0.03em;">0 FCFA</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- QR CODE & VALIDATION -->
-                        <div class="flex justify-between items-end mb-8 p-4 bg-slate-50 rounded-2xl">
-                            <div class="flex items-center gap-4">
-                                <div id="qr_container">
-                                    <img id="out_qr_api" crossorigin="anonymous" class="w-24 h-24 p-1 border border-slate-200 rounded-lg bg-white" src="" alt="QR Code">
-                                </div>
-                                <div>
-                                    <p class="text-[9px] font-bold uppercase text-slate-400 leading-tight">Scannez pour valider<br><span class="text-slate-900 font-black">la livraison</span></p>
-                                    <p class="text-[8px] text-slate-400 mt-1" id="qr_url_text">URL securisee</p>
-                                </div>
+                        <div class="qr-section no-break">
+                            <img id="out_qr_img" class="qr-img" src="" alt="QR Code">
+                            <div>
+                                <p style="font-size:9px;font-weight:700;text-transform:uppercase;color:#94a3b8;line-height:1.4;">Scannez pour valider<br><span style="color:#0369a1;font-weight:900;">la livraison</span></p>
+                                <p style="font-size:8px;color:#94a3b8;margin-top:3px;" id="qr_url_text">URL securisee</p>
                             </div>
-                            <div class="text-right">
-                                <p class="text-[9px] font-bold uppercase text-slate-400">Statut paiement</p>
-                                <p class="text-sm font-black text-slate-900 mt-1" id="out_statut_paiement">A regler a la livraison</p>
+                            <div style="margin-left:auto;text-align:right;">
+                                <p style="font-size:9px;font-weight:700;text-transform:uppercase;color:#94a3b8;">Statut paiement</p>
+                                <p style="font-size:12px;font-weight:900;color:#0369a1;margin-top:3px;" id="out_statut_paiement">A regler a la livraison</p>
                             </div>
                         </div>
 
-                        <!-- CONDITIONS DE RETOUR -->
-                        <div class="border-t-2 border-slate-200 pt-6">
-                            <h4 class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-3">Conditions de retour & Garantie</h4>
-                            <div class="grid grid-cols-2 gap-4 text-[9px] text-slate-500 leading-relaxed">
-                                <div class="space-y-1">
-                                    <p><span class="font-bold text-slate-700">Delai de retour :</span> 7 jours ouvres apres reception de la commande. Le produit doit etre dans son emballage d'origine, non utilise et accompagne de la facture.</p>
-                                    <p><span class="font-bold text-slate-700">Produits exclus :</span> Les articles personnalises, les produits d'hygiene (parfums ouverts, cosmetiques) et les produits en promotion ne sont pas eligibles au retour.</p>
-                                </div>
-                                <div class="space-y-1">
-                                    <p><span class="font-bold text-slate-700">Garantie YARID :</span> Tous nos produits electroniques beneficient d'une garantie de 3 mois contre les defauts de fabrication. Les accessoires de mode ont une garantie de 30 jours.</p>
-                                    <p><span class="font-bold text-slate-700">Contact SAV :</span> +237 655 959 284 (WhatsApp) ou sav@yarid.cm. Traitement sous 48h ouvrees.</p>
-                                </div>
-                            </div>
+                        <!-- CONDITIONS -->
+                        <div style="border-top:1px solid #e2e8f0;padding-top:10px;margin-top:12px;">
+                            <p style="font-size:8px;font-weight:800;text-transform:uppercase;color:#94a3b8;letter-spacing:0.15em;margin-bottom:6px;">Conditions de retour &amp; Garantie</p>
+                            <p style="font-size:7px;color:#94a3b8;line-height:1.5;margin:0;">
+                                <strong style="color:#475569;">Delai de retour:</strong> 7 jours ouvres apres reception. Le produit doit etre dans son emballage d'origine, non utilise et accompagne de la facture. 
+                                <strong style="color:#475569;">Produits exclus:</strong> Articles personnalises, produits d'hygiene (parfums ouverts, cosmetiques) et produits en promotion. 
+                                <strong style="color:#475569;">Garantie YARID:</strong> Produits electroniques: 3 mois. Accessoires mode: 30 jours. 
+                                <strong style="color:#475569;">Contact SAV:</strong> +237 655 959 284 (WhatsApp) - sav@yarid.cm
+                            </p>
                         </div>
 
                         <!-- FOOTER -->
-                        <div class="mt-8 pt-4 border-t border-slate-200 text-center">
-                            <p class="text-[8px] text-slate-400 font-bold uppercase tracking-[0.3em]">YARID GROUP SARL - Yaounde, Cameroun - RC: 24YRD789</p>
-                            <p class="text-[8px] text-slate-300 mt-1">Cette facture est un document contractuel. Conservez-la pour toute reclamation.</p>
+                        <div style="text-align:center;margin-top:12px;padding-top:8px;border-top:1px solid #f1f5f9;">
+                            <p style="font-size:7px;color:#cbd5e1;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;margin:0;">YARID GROUP SARL - Yaounde, Cameroun - RC: 24YRD789</p>
+                            <p style="font-size:7px;color:#e2e8f0;margin-top:2px;">Cette facture est un document contractuel. Conservez-la pour toute reclamation.</p>
                         </div>
                     </div>
                 </div>
@@ -346,116 +337,11 @@
         let currentCommandeId = null;
 
         // ==========================================
-        // LIVREURS - CHARGEMENT & SELECTION
-        // ==========================================
-        let livreursList = [];
-
-        async function loadLivreurs() {
-            const select = document.getElementById('in_livreur_id');
-            const currentVal = select.value;
-            select.innerHTML = '<option value="">Chargement...</option>';
-            select.disabled = true;
-
-            try {
-                const { data, error } = await _supabase
-                    .from('livreurs')
-                    .select('id, nom, prenom, phone, vehicule_type, vehicule_plaque, statut')
-                    .order('nom', { ascending: true });
-
-                select.innerHTML = '<option value="">— Aucun livreur —</option>';
-                select.disabled = false;
-
-                if (error || !data || data.length === 0) {
-                    select.innerHTML += '<option disabled>Aucun livreur enregistré</option>';
-                    return;
-                }
-
-                livreursList = data;
-
-                // Trier : disponibles en premier
-                const order = { online: 0, en_course: 1, offline: 2 };
-                data.sort((a, b) => (order[a.statut] ?? 3) - (order[b.statut] ?? 3));
-
-                const statusLabel = { online: '🟢', en_course: '🟡', offline: '⚫' };
-                data.forEach(l => {
-                    const opt = document.createElement('option');
-                    opt.value = l.id;
-                    const name = `${l.prenom || ''} ${l.nom}`.trim();
-                    const vehicle = `${(l.vehicule_type || 'Moto').toUpperCase()} ${l.vehicule_plaque || ''}`.trim();
-                    opt.textContent = `${statusLabel[l.statut] || '⚫'} ${name} — ${vehicle}`;
-                    if (l.statut === 'offline') opt.style.color = '#64748b';
-                    select.appendChild(opt);
-                });
-
-                // Restaurer la sélection précédente si elle existe
-                if (currentVal) {
-                    select.value = currentVal;
-                    onLivreurChange();
-                }
-
-            } catch (e) {
-                select.innerHTML = '<option value="">Erreur de chargement</option>';
-                select.disabled = false;
-            }
-        }
-
-        function onLivreurChange() {
-            const select = document.getElementById('in_livreur_id');
-            const livreurId = select.value;
-            const recap = document.getElementById('livreur-recap');
-
-            if (!livreurId) {
-                recap.classList.add('hidden');
-                return;
-            }
-
-            const l = livreursList.find(x => x.id === livreurId);
-            if (!l) { recap.classList.add('hidden'); return; }
-
-            const initials = ((l.prenom?.[0] || '') + (l.nom?.[0] || '')).toUpperCase() || 'L';
-            document.getElementById('livreur-recap-avatar').textContent = initials;
-            document.getElementById('livreur-recap-name').textContent = `${l.prenom || ''} ${l.nom}`.trim();
-            document.getElementById('livreur-recap-detail').textContent = `${(l.vehicule_type || 'Moto').toUpperCase()} · ${l.vehicule_plaque || 'N/A'} · ${l.phone || ''}`;
-
-            const dotClass = { online: 'dot-online', en_course: 'dot-en_course', offline: 'dot-offline' };
-            const statusTxt = { online: 'Disponible', en_course: 'En course', offline: 'Hors ligne' };
-            const statusColor = { online: 'text-emerald-400', en_course: 'text-amber-400', offline: 'text-slate-500' };
-
-            const dot = document.getElementById('livreur-recap-dot');
-            dot.className = 'livreur-status-dot ' + (dotClass[l.statut] || 'dot-offline');
-            const statusEl = document.getElementById('livreur-recap-status');
-            statusEl.textContent = statusTxt[l.statut] || l.statut;
-            statusEl.className = 'text-[8px] font-bold ' + (statusColor[l.statut] || 'text-slate-500');
-
-            recap.classList.remove('hidden');
-        }
-
-        function notifyLivreurWhatsApp() {
-            const livreurId = document.getElementById('in_livreur_id').value;
-            const l = livreursList.find(x => x.id === livreurId);
-            if (!l || !l.phone) { alert('Numéro livreur non disponible'); return; }
-
-            const orderId  = document.getElementById('in_id').value;
-            const clientNom = document.getElementById('in_nom').value;
-            const adresse  = document.getElementById('in_adresse').value;
-            const total    = document.getElementById('out_total').textContent;
-            const rawTel   = l.phone.replace(/\D/g, '');
-            const tel      = (rawTel.length === 9 && rawTel.startsWith('6')) ? '237' + rawTel : rawTel;
-            const baseUrl  = window.location.origin + window.location.pathname.replace('facture.html', '');
-
-            const msg = `*YARID - Nouvelle course assignée* 🚀\n\nBonjour *${(l.prenom || '')} ${l.nom}*,\nUne nouvelle commande vous a été assignée :\n\n📦 Commande: *${orderId}*\n👤 Client: ${clientNom}\n📍 Adresse: ${adresse}\n💰 Montant: *${total}*\n\nConnectez-vous à votre espace livreur :\n${baseUrl}livreur-app.html\n\nBonne livraison !`;
-            window.open(`https://api.whatsapp.com/send?phone=${tel}&text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-        // ==========================================
         // CHARGEMENT AUTO VIA URL
         // ==========================================
         document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
             const orderId = params.get('order_id');
-
-            // Charger les livreurs dès le départ
-            loadLivreurs();
 
             if (orderId) {
                 document.getElementById('loader').classList.remove('hidden');
@@ -500,20 +386,6 @@
                     document.getElementById('in_items').value = itemsText;
                 }
 
-                // Pré-sélectionner le livreur si déjà assigné
-                if (commande.livreur_id) {
-                    // Attendre que loadLivreurs() soit terminé puis sélectionner
-                    const trySelect = async () => {
-                        const sel = document.getElementById('in_livreur_id');
-                        if (!sel.querySelector(`option[value="${commande.livreur_id}"]`)) {
-                            await loadLivreurs();
-                        }
-                        sel.value = commande.livreur_id;
-                        onLivreurChange();
-                    };
-                    trySelect();
-                }
-
                 // Info panel
                 document.getElementById('order-info').classList.remove('hidden');
                 document.getElementById('order-info-text').textContent = `ID: ${commande.order_id} | ${(commande.montant_total || 0).toLocaleString()} FCFA`;
@@ -553,22 +425,15 @@
             // Statut badge
             const badge = document.getElementById('out_statut_badge');
             const statutLabels = {
-                en_attente: 'EN ATTENTE',
-                paye: 'PAYE',
-                a_regler_livraison: 'A REGLER LIVRAISON',
-                en_preparation: 'EN PREPARATION',
-                en_livraison: 'EN LIVRAISON',
-                livre: 'LIVRE',
-                annule: 'ANNULE'
+                en_attente: 'EN ATTENTE', paye: 'PAYE', a_regler_livraison: 'A REGLER LIVRAISON',
+                en_preparation: 'EN PREPARATION', en_livraison: 'EN LIVRAISON', livre: 'LIVRE', annule: 'ANNULE'
             };
             badge.textContent = statutLabels[statut] || statut.toUpperCase();
-            badge.className = 'statut-badge mb-3 statut-' + statut;
+            badge.className = 'statut-badge statut-' + statut;
 
             // Statut paiement
             const statutPaiementLabels = {
-                en_attente: 'A regler a la livraison',
-                paye_marchand: 'Paye au marchand',
-                a_regler_livraison: 'A regler a la livraison'
+                en_attente: 'A regler a la livraison', paye_marchand: 'Paye au marchand', a_regler_livraison: 'A regler a la livraison'
             };
             document.getElementById('out_statut_paiement').textContent = statutPaiementLabels[statut] || 'En attente';
 
@@ -580,10 +445,10 @@
             document.getElementById('out_livraison').textContent = livraison.toLocaleString() + ' FCFA';
 
             if (promo > 0) {
-                document.getElementById('row_promo').classList.remove('hidden');
+                document.getElementById('row_promo').style.display = 'flex';
                 document.getElementById('out_promo').textContent = '- ' + promo.toLocaleString() + ' FCFA';
             } else {
-                document.getElementById('row_promo').classList.add('hidden');
+                document.getElementById('row_promo').style.display = 'none';
             }
 
             const total = Math.max(0, sousTotal + livraison - promo);
@@ -596,25 +461,24 @@
             const wrapper = document.getElementById('facture-wrapper');
             const previewArea = document.querySelector('.preview-area');
             const scale = Math.min((previewArea.clientWidth - 20) / 794, 1);
-            wrapper.style.transform = (window.innerWidth < 1024) ? `scale(${scale})` : `scale(0.8)`;
+            wrapper.style.transform = (window.innerWidth < 1024) ? `scale(${scale})` : `scale(0.85)`;
         }
 
         function renderItems(text) {
             const tbody = document.getElementById('out_items_body');
             if (!text.trim()) {
                 tbody.innerHTML = `
-                    <tr class="border-b border-slate-100">
-                        <td class="py-4 text-slate-600">Aucun article</td>
-                        <td class="py-4 text-center text-slate-400">-</td>
-                        <td class="py-4 text-right text-slate-400">-</td>
-                        <td class="py-4 text-right font-bold text-slate-900">-</td>
+                    <tr>
+                        <td style="color:#64748b;">Aucun article</td>
+                        <td style="text-align:center;color:#94a3b8;">-</td>
+                        <td style="text-align:right;color:#94a3b8;">-</td>
+                        <td style="text-align:right;font-weight:700;color:#0369a1;">-</td>
                     </tr>`;
                 return;
             }
 
             const lines = text.split('\n').filter(l => l.trim());
             let html = '';
-            let grandTotal = 0;
 
             lines.forEach((line, idx) => {
                 const parts = line.split(/\s*[x×]\s*|\s+-\s+/);
@@ -624,14 +488,13 @@
                 const qtyMatch = line.match(/x\s*(\d+)/i);
                 const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
                 const total = price * qty;
-                grandTotal += total;
 
                 html += `
-                    <tr class="border-b border-slate-100 ${idx % 2 === 0 ? 'bg-slate-50/50' : ''}">
-                        <td class="py-3 text-slate-700 font-medium">${name}</td>
-                        <td class="py-3 text-center text-slate-500">${qty}</td>
-                        <td class="py-3 text-right text-slate-500">${price.toLocaleString()} FCFA</td>
-                        <td class="py-3 text-right font-bold text-slate-900">${total.toLocaleString()} FCFA</td>
+                    <tr style="${idx % 2 === 0 ? 'background:#f8fafc;' : ''}">
+                        <td style="color:#334155;font-weight:500;">${name}</td>
+                        <td style="text-align:center;color:#64748b;">${qty}</td>
+                        <td style="text-align:right;color:#64748b;">${price.toLocaleString()} FCFA</td>
+                        <td style="text-align:right;font-weight:700;color:#0369a1;">${total.toLocaleString()} FCFA</td>
                     </tr>`;
             });
 
@@ -639,36 +502,24 @@
         }
 
         function generateQRCode(orderId, statut) {
-            const container = document.getElementById('qr_container');
             const baseUrl = window.location.origin + window.location.pathname.replace('facture.html', '');
             const validationUrl = `${baseUrl}livreur-app.html?validate=${orderId}&token=${btoa(orderId + '_YARID_' + new Date().toISOString().slice(0,10)).replace(/=/g,'')}`;
 
-            // Utiliser QRCode.js pour generer un QR local
-            container.innerHTML = '<div id="qr_local"></div>';
-            try {
-                new QRCode(document.getElementById('qr_local'), {
-                    text: validationUrl,
-                    width: 96,
-                    height: 96,
-                    colorDark: '#0f172a',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.M
-                });
-                document.getElementById('qr_url_text').textContent = 'Scan pour validation livreur';
-            } catch (e) {
-                // Fallback API
-                container.innerHTML = `<img id="out_qr_api" crossorigin="anonymous" class="w-24 h-24 p-1 border border-slate-200 rounded-lg bg-white" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(validationUrl)}&color=0f172a" alt="QR">`;
-            }
+            // Generate QR using API with good resolution
+            const qrDataUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(validationUrl)}&color=0f172a&bgcolor=ffffff&margin=4&qzone=2`;
+            document.getElementById('out_qr_img').src = qrDataUrl;
+            document.getElementById('out_qr_img').crossOrigin = 'anonymous';
+            document.getElementById('qr_url_text').textContent = 'Scan pour validation livreur';
         }
 
         // ==========================================
-        // PDF EXPORT
+        // PDF EXPORT - Optimise pour A4 sans coupure
         // ==========================================
         const pdfOptions = {
-            margin: 0,
+            margin: [10, 10, 10, 10], // top, right, bottom, left in mm
             filename: 'Facture_YARID.pdf',
-            image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 3, useCORS: true, logging: false },
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, logging: false, letterRendering: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
@@ -676,6 +527,8 @@
             const element = document.getElementById('facture-pdf');
             const clone = element.cloneNode(true);
             clone.style.boxShadow = 'none';
+            clone.style.width = '190mm';
+            clone.style.minHeight = '277mm';
             const opt = { ...pdfOptions, filename: `Facture_${document.getElementById('in_id').value || 'YARID'}.pdf` };
             html2pdf().set(opt).from(clone).save();
         }
@@ -684,6 +537,8 @@
             const element = document.getElementById('facture-pdf');
             const clone = element.cloneNode(true);
             clone.style.boxShadow = 'none';
+            clone.style.width = '190mm';
+            clone.style.minHeight = '277mm';
             const pdfBlob = await html2pdf().set(pdfOptions).from(clone).output('blob');
             const file = new File([pdfBlob], `Facture_${document.getElementById('in_id').value || 'YARID'}.pdf`, { type: 'application/pdf' });
             if (navigator.share) {
@@ -715,103 +570,37 @@
         async function saveToSupabase(btn) {
             btn.innerText = "EN COURS..."; btn.disabled = true;
 
-            const orderId = document.getElementById('in_id').value.trim();
-            if (!orderId) {
-                alert("ID commande requis");
-                btn.disabled = false; btn.innerText = "Enregistrer Commande";
-                return;
-            }
+            const orderId = document.getElementById('in_id').value;
+            if (!orderId) { alert("ID commande requis"); btn.disabled = false; btn.innerText = "Enregistrer Commande"; return; }
 
-            const sousTotal  = parseInt(document.getElementById('in_sous_total').value) || 0;
-            const livraison  = parseInt(document.getElementById('in_livraison').value) || 0;
-            const promo      = parseInt(document.getElementById('in_promo').value) || 0;
-            const total      = Math.max(0, sousTotal + livraison - promo);
-            const livreurId  = document.getElementById('in_livreur_id').value || null;
+            const sousTotal = parseInt(document.getElementById('in_sous_total').value) || 0;
+            const livraison = parseInt(document.getElementById('in_livraison').value) || 0;
+            const promo     = parseInt(document.getElementById('in_promo').value) || 0;
+            const total     = Math.max(0, sousTotal + livraison - promo);
 
-            // Construction du payload — livreur_id uniquement si renseigné
             const payload = {
-                order_id:        orderId,
-                client_nom:      document.getElementById('in_nom').value,
-                client_phone:    document.getElementById('in_tel').value,
-                client_adresse:  document.getElementById('in_adresse').value,
-                sous_total:      sousTotal,
+                order_id: orderId,
+                client_nom: document.getElementById('in_nom').value,
+                client_phone: document.getElementById('in_tel').value,
+                client_adresse: document.getElementById('in_adresse').value,
+                sous_total: sousTotal,
                 frais_livraison: livraison,
-                remise:          promo,
-                montant_total:   total,
-                statut:          document.getElementById('in_status').value,
-                mode_paiement:   document.getElementById('in_paiement').value
+                remise: promo,
+                montant_total: total,
+                statut: document.getElementById('in_status').value,
+                mode_paiement: document.getElementById('in_paiement').value
             };
-            if (livreurId) payload.livreur_id = livreurId;
 
-            const { data, error } = await _supabase
-                .from('commandes')
-                .upsert([payload], { onConflict: 'order_id' })
-                .select();
+            const { data, error } = await _supabase.from('commandes').upsert([payload], { onConflict: 'order_id' }).select();
 
             if (error) {
-                alert("Erreur enregistrement:\n" + error.message);
-                console.error('Supabase error:', error);
+                alert("Erreur: " + error.message);
             } else {
                 currentCommandeId = data[0].id;
                 await saveItems(data[0].id);
-                showAssignmentBanner(orderId, total, livreurId);
+                alert("Commande synchronisee avec succes !");
             }
-
             btn.innerText = "Enregistrer Commande"; btn.disabled = false;
-        }
-
-        function showAssignmentBanner(orderId, total, livreurId) {
-            const old = document.getElementById('assignment-banner');
-            if (old) old.remove();
-
-            const livreur  = livreurId ? livreursList.find(l => l.id === livreurId) : null;
-            const baseUrl  = window.location.origin + window.location.pathname.replace('facture.html', '');
-            const suiviUrl = baseUrl + 'suivi.html?order_id=' + encodeURIComponent(orderId);
-
-            const banner = document.createElement('div');
-            banner.id = 'assignment-banner';
-            banner.className = 'mt-4 rounded-xl border p-3 space-y-2';
-
-            if (livreur) {
-                const initials = ((livreur.prenom?.[0] || '') + (livreur.nom?.[0] || '')).toUpperCase() || 'L';
-                banner.style.cssText = 'border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.06);';
-                banner.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-emerald-500 pulse-live"></div>
-                        <p class="text-[10px] font-black text-emerald-400 uppercase tracking-wider">Enregistrée · Livreur assigné ✓</p>
-                    </div>
-                    <div class="flex items-center gap-2 p-2 bg-emerald-500/10 rounded-lg">
-                        <div class="livreur-avatar" style="width:26px;height:26px;font-size:10px;">${initials}</div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-[11px] font-black text-white">${(livreur.prenom || '')} ${livreur.nom}</p>
-                            <p class="text-[9px] text-emerald-300/60">${(livreur.vehicule_type || 'Moto').toUpperCase()} · ${livreur.vehicule_plaque || 'N/A'}</p>
-                        </div>
-                        <span class="text-[8px] font-bold text-emerald-400 px-2 py-1 bg-emerald-500/10 rounded-full">ASSIGNÉ</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-1.5">
-                        <button id="btn-notify-livreur" onclick="notifyLivreurWhatsApp()" class="btn btn-nav text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 flex items-center justify-center gap-1">
-                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.067 2.877 1.215 3.076.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                            Notifier livreur
-                        </button>
-                        <a href="${suiviUrl}" target="_blank" class="btn btn-nav text-sky-400 border-sky-500/30 hover:bg-sky-500/10 flex items-center justify-center">
-                            Voir suivi →
-                        </a>
-                    </div>`;
-            } else {
-                banner.style.cssText = 'border-color:rgba(14,165,233,0.2);background:rgba(14,165,233,0.05);';
-                banner.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-sky-500 pulse-live"></div>
-                        <p class="text-[10px] font-black text-sky-400 uppercase tracking-wider">Commande enregistrée ✓</p>
-                    </div>
-                    <p class="text-[10px] text-slate-500">Sélectionnez un livreur dans la liste puis ré-enregistrez pour l'assigner.</p>
-                    <a href="${suiviUrl}" target="_blank" class="btn btn-nav text-sky-400 border-sky-500/30 hover:bg-sky-500/10 flex items-center justify-center">
-                        Voir suivi →
-                    </a>`;
-            }
-
-            const buttonsSection = document.querySelector('.flex.flex-col.gap-2.pt-4');
-            if (buttonsSection) buttonsSection.after(banner);
         }
 
         async function saveItems(commandeId) {
@@ -841,6 +630,30 @@
 
         window.onload = () => updateUI();
         window.onresize = () => updateUI();
+
+        // Load livreurs
+        async function loadLivreurs() {
+            try {
+                const { data: livreurs, error } = await _supabase.from('livreurs').select('id, nom, prenom').order('nom', { ascending: true });
+                if (error) throw error;
+                const selectLivreur = document.getElementById('in_livreur');
+                selectLivreur.innerHTML = '<option value="">-- Selectionner un livreur --</option>';
+                if (livreurs) {
+                    livreurs.forEach(livreur => {
+                        const option = document.createElement('option');
+                        option.value = livreur.id;
+                        option.text = `${livreur.nom} ${livreur.prenom || ''}`;
+                        selectLivreur.appendChild(option);
+                    });
+                }
+            } catch (err) {
+                console.error("Erreur chargement livreurs:", err.message);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadLivreurs();
+        });
     </script>
 </body>
 </html>
