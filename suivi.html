@@ -10,6 +10,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="yarid-tracker.js"></script>
 
+    <!-- Leaflet + OpenStreetMap -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -54,6 +58,8 @@
         .btn { padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s; border: none; }
         .btn-primary { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; }
         .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(14,165,233,0.3); }
+        .btn-whatsapp { background: linear-gradient(135deg, #25d366, #128c7e); color: white; }
+        .btn-whatsapp:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(37,211,102,0.3); }
 
         /* Map markers */
         .map-info-window { color: #0f172a; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -157,6 +163,21 @@
             </div>
         </div>
 
+        <!-- Livreur Card -->
+        <div class="px-4 mb-4">
+            <div class="info-card">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3">Votre livreur</p>
+                <div class="flex items-center gap-3" id="livreur-block">
+                    <div id="livreur-avatar" class="w-12 h-12 rounded-full bg-sky-500 flex items-center justify-center text-sm font-black text-white hidden flex-shrink-0"></div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-black text-white" id="detail-livreur">Non assigne</p>
+                        <p class="text-[11px] text-slate-400 font-semibold" id="detail-livreur-vehicule">--</p>
+                        <p class="text-[11px] text-slate-500 font-semibold" id="detail-livreur-phone">--</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Details -->
         <div class="px-4 mb-4">
             <div class="info-card">
@@ -167,13 +188,6 @@
                 <div class="detail-row">
                     <span class="text-xs text-slate-400 font-semibold">Statut</span>
                     <span class="text-xs font-black" id="detail-status">---</span>
-                </div>
-                <div class="detail-row">
-                    <span class="text-xs text-slate-400 font-semibold">Livreur</span>
-                    <div class="flex items-center gap-2">
-                        <div id="livreur-avatar" class="w-6 h-6 rounded-full bg-sky-500 flex items-center justify-center text-[10px] font-black text-white hidden"></div>
-                        <span class="text-xs font-bold text-white" id="detail-livreur">Non assigne</span>
-                    </div>
                 </div>
                 <div class="detail-row">
                     <span class="text-xs text-slate-400 font-semibold">Distance restante</span>
@@ -188,13 +202,20 @@
 
         <!-- Actions -->
         <div class="px-4 pb-8 flex gap-3">
-            <button onclick="contactLivreur()" class="btn btn-primary flex-1 flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.44-5.15-3.75-6.59-6.59l1.97-1.57a.98.98 0 00.24-1.01c-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
-                Appeler le livreur
+            <button <button
+    type="button"
+    onclick="contactLivreur(); return false;"
+    class="btn btn-primary flex-1 flex items-center justify-center gap-2">
+
+    📞 Appeler
+
+</button>
+            <button onclick="whatsappLivreur()" class="btn btn-whatsapp flex-1 flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 004.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2zm5.83 14.02c-.24.68-1.4 1.3-1.93 1.36-.5.06-1.03.08-1.66-.1-.38-.11-.87-.28-1.5-.55-2.63-1.14-4.35-3.8-4.48-3.98-.13-.17-1.07-1.42-1.07-2.71 0-1.29.68-1.92.92-2.18.24-.26.53-.33.7-.33.18 0 .35 0 .5.01.16.01.38-.06.59.45.22.53.75 1.83.81 1.96.06.13.1.29.02.46-.08.17-.13.28-.25.43-.13.15-.27.34-.39.45-.13.13-.26.27-.11.53.15.26.67 1.11 1.44 1.79.99.88 1.82 1.16 2.08 1.29.26.13.41.11.56-.06.15-.18.65-.75.83-1.01.17-.26.35-.21.58-.13.24.08 1.51.71 1.77.84.26.13.43.19.5.3.06.11.06.63-.18 1.29z"/></svg>
+                WhatsApp
             </button>
             <button onclick="refreshTracking()" class="btn bg-[#1e293b] text-slate-300 hover:text-white flex items-center justify-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                Actualiser
             </button>
         </div>
     </div>
@@ -226,8 +247,25 @@
         let destinationMarker = null;
         let routeLine = null;
         let supabaseChannel = null;
+        let currentDestination = null;
+        let routeRequestId = 0;
         const STEP_MAP = ['commande', 'paye', 'en_preparation', 'en_livraison', 'livre'];
         const STEP_LABELS = ['Commande', 'Paiement', 'Preparation', 'Livraison', 'Livre'];
+
+        // Villes de reference pour le geocodage (limite les faux-positifs Nominatim
+        // qui matchent des homonymes ailleurs au Cameroun, ex: "Ngousso" existe aussi
+        // dans le Noun, en region de l'Ouest, en plus du quartier de Yaounde).
+        const VILLES_REF = {
+            yaounde: { lat: 3.8480, lng: 11.5021, viewbox: [11.35, 3.75, 11.65, 3.98] },
+            douala:  { lat: 4.0511, lng: 9.7679,  viewbox: [9.60, 3.95, 9.85, 4.15] }
+        };
+
+        function detecterVilleRef(commande, address) {
+            const texte = ((commande && commande.ville) || address || '').toLowerCase();
+            if (texte.includes('yaound')) return VILLES_REF.yaounde;
+            if (texte.includes('douala')) return VILLES_REF.douala;
+            return null;
+        }
 
         // ==========================================
         // INIT
@@ -334,6 +372,10 @@
                 const avatar = document.getElementById('livreur-avatar');
                 avatar.classList.remove('hidden');
                 avatar.textContent = ((l.prenom?.[0] || '') + (l.nom?.[0] || '')).toUpperCase();
+                document.getElementById('detail-livreur-vehicule').textContent = l.vehicule_type
+                    ? '🛵 ' + l.vehicule_type
+                    : '';
+                document.getElementById('detail-livreur-phone').textContent = l.phone || '';
 
                 if (l.last_lat && l.last_lng) {
                     initMap(l.last_lat, l.last_lng, commande);
@@ -344,6 +386,8 @@
             } else {
                 document.getElementById('detail-livreur').textContent = 'Non assigne';
                 document.getElementById('livreur-avatar').classList.add('hidden');
+                document.getElementById('detail-livreur-vehicule').textContent = '';
+                document.getElementById('detail-livreur-phone').textContent = '';
                 document.getElementById('livreur-status').textContent = 'En attente';
                 document.getElementById('livreur-status').className = 'text-xs font-bold text-amber-400';
                 document.querySelector('.pulse-dot').style.background = '#fbbf24';
@@ -354,134 +398,239 @@
         }
 
         // ==========================================
-        // GOOGLE MAPS
+        // CARTE - LEAFLET + OPENSTREETMAP
         // ==========================================
-        function initMap(lat, lng, commande) {
+
+        async function geocodeClientAddress(address, commande) {
+            if (!address || !address.trim()) return null;
+
+            try {
+                const villeRef = detecterVilleRef(commande, address);
+                const query = encodeURIComponent(address.trim() + ', Cameroun');
+                let url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&countrycodes=cm&limit=5&q=${query}`;
+
+                // Si on connait la ville (Yaounde/Douala), on borne la recherche a sa
+                // bbox pour eviter qu'un homonyme ailleurs au pays soit selectionne
+                // (ex: "Ngousso" a Yaounde vs "Ngousso" dans le Noun, region Ouest).
+                if (villeRef) {
+                    const [minLon, minLat, maxLon, maxLat] = villeRef.viewbox;
+                    url += `&viewbox=${minLon},${minLat},${maxLon},${maxLat}&bounded=1`;
+                }
+
+                const response = await fetch(url, {
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!response.ok) throw new Error(`Nominatim HTTP ${response.status}`);
+
+                let results = await response.json();
+
+                // Si la recherche bornee ne renvoie rien (adresse mal formulee), on
+                // retente sans bornage plutot que d'echouer silencieusement.
+                if ((!Array.isArray(results) || !results.length) && villeRef) {
+                    const fallback = await fetch(
+                        `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&countrycodes=cm&limit=5&q=${query}`,
+                        { headers: { 'Accept': 'application/json' } }
+                    );
+                    if (fallback.ok) results = await fallback.json();
+                }
+
+                if (!Array.isArray(results) || !results.length) return null;
+
+                return {
+                    lat: parseFloat(results[0].lat),
+                    lng: parseFloat(results[0].lon),
+                    displayName: results[0].display_name || address
+                };
+            } catch (error) {
+                console.error('[YARID] Geocodage adresse client:', error);
+                return null;
+            }
+        }
+
+        function showMapMessage(title, message) {
+            const mapEl = document.getElementById('map');
+            if (!mapEl) return;
+            mapEl.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#0f172a;color:#94a3b8;text-align:center;padding:2rem;">
+                    <div style="font-size:34px;margin-bottom:10px;">📍</div>
+                    <p style="font-size:12px;font-weight:800;text-transform:uppercase;color:#e2e8f0;">${title}</p>
+                    <p style="font-size:10px;margin-top:6px;max-width:320px;">${message}</p>
+                </div>`;
+        }
+
+        async function resolveClientDestination(commande) {
+            // 1) Priorite aux coordonnees deja enregistrees dans Supabase.
+            if (commande.client_lat != null && commande.client_lng != null) {
+                const lat = parseFloat(commande.client_lat);
+                const lng = parseFloat(commande.client_lng);
+                if (Number.isFinite(lat) && Number.isFinite(lng)) {
+                    return { lat, lng, displayName: commande.client_adresse || 'Adresse client' };
+                }
+            }
+
+            // 2) Sinon, geocoder l'adresse client.
+            if (commande.client_adresse) {
+                return await geocodeClientAddress(commande.client_adresse, commande);
+            }
+
+            return null;
+        }
+
+        async function initMap(lat, lng, commande) {
             const mapEl = document.getElementById('map');
             if (!mapEl) return;
 
-            // Check if Google Maps API is loaded
-            if (typeof google === 'undefined' || !google.maps) {
-                mapEl.innerHTML = `
-                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#0f172a;color:#64748b;text-align:center;padding:2rem;">
-                        <svg class="w-10 h-10 mb-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0121 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"/></svg>
-                        <p style="font-size:12px;font-weight:700;text-transform:uppercase;">Google Maps API non configuree</p>
-                        <p style="font-size:10px;margin-top:4px;">Ajoutez votre cle API Google Maps dans les parametres</p>
-                    </div>`;
+            if (typeof L === 'undefined') {
+                showMapMessage('Carte indisponible', 'Leaflet n’a pas pu être chargé.');
                 return;
             }
 
-            const destination = { lat: commande.client_adresse ? 3.8480 : 3.8480, lng: commande.client_adresse ? 11.5021 : 11.5021 };
-            
-            map = new google.maps.Map(mapEl, {
-                center: { lat: (lat + destination.lat) / 2, lng: (lng + destination.lng) / 2 },
-                zoom: 13,
-                mapTypeId: 'roadmap',
-                styles: [
-                    { elementType: 'geometry', stylers: [{ color: '#0f172a' }] },
-                    { elementType: 'labels.text.stroke', stylers: [{ color: '#0f172a' }] },
-                    { elementType: 'labels.text.fill', stylers: [{ color: '#94a3b8' }] },
-                    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1e293b' }] },
-                    { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#0f172a' }] }
-                ],
-                mapTypeControl: false,
-                streetViewControl: false,
-                fullscreenControl: false
-            });
+            const livreurLat = parseFloat(lat);
+            const livreurLng = parseFloat(lng);
+            const hasLivreurPosition = Number.isFinite(livreurLat) && Number.isFinite(livreurLng);
 
-            // Livreur marker
-            livreurMarker = new google.maps.Marker({
-                position: { lat, lng },
-                map,
-                title: 'Livreur',
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 10,
-                    fillColor: '#0ea5e9',
-                    fillOpacity: 1,
-                    strokeColor: '#fff',
-                    strokeWeight: 2
-                },
-                animation: google.maps.Animation.DROP
-            });
+            const destination = await resolveClientDestination(commande);
+            currentDestination = destination;
 
-            // Destination marker
-            destinationMarker = new google.maps.Marker({
-                position: destination,
-                map,
-                title: 'Destination',
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 8,
-                    fillColor: '#10b981',
-                    fillOpacity: 1,
-                    strokeColor: '#fff',
-                    strokeWeight: 2
-                }
-            });
-
-            // Draw route
-            drawRoute({ lat, lng }, destination);
-
-            // Calculate ETA
-            calculateETA({ lat, lng }, destination);
-        }
-
-        function drawRoute(origin, destination) {
-            if (typeof google === 'undefined' || !google.maps) return;
-            
-            const directionsService = new google.maps.DirectionsService();
-            const directionsRenderer = new google.maps.DirectionsRenderer({
-                map,
-                suppressMarkers: true,
-                polylineOptions: {
-                    strokeColor: '#0ea5e9',
-                    strokeWeight: 4,
-                    strokeOpacity: 0.8
-                }
-            });
-
-            directionsService.route({
-                origin,
-                destination,
-                travelMode: google.maps.TravelMode.DRIVING
-            }, (result, status) => {
-                if (status === 'OK') {
-                    directionsRenderer.setDirections(result);
-                    const route = result.routes[0];
-                    if (route && route.legs[0]) {
-                        const distance = route.legs[0].distance;
-                        const duration = route.legs[0].duration;
-                        document.getElementById('detail-distance').textContent = distance.text;
-                        updateETA(duration.value);
+            if (!destination) {
+                if (hasLivreurPosition) {
+                    if (!map) {
+                        map = L.map(mapEl, { zoomControl: false }).setView([livreurLat, livreurLng], 14);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 19,
+                            attribution: '&copy; OpenStreetMap contributors'
+                        }).addTo(map);
+                        L.control.zoom({ position: 'bottomright' }).addTo(map);
                     }
+                    if (livreurMarker) map.removeLayer(livreurMarker);
+                    livreurMarker = L.marker([livreurLat, livreurLng]).addTo(map).bindPopup('<strong>🚚 Livreur</strong>');
                 }
-            });
+                showMapMessage('Adresse client introuvable', commande.client_adresse || 'Aucune adresse client enregistrée.');
+                return;
+            }
+
+            if (!map) {
+                const center = hasLivreurPosition
+                    ? [(livreurLat + destination.lat) / 2, (livreurLng + destination.lng) / 2]
+                    : [destination.lat, destination.lng];
+
+                map = L.map(mapEl, { zoomControl: false }).setView(center, 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+                L.control.zoom({ position: 'bottomright' }).addTo(map);
+            }
+
+            if (livreurMarker) map.removeLayer(livreurMarker);
+            if (destinationMarker) map.removeLayer(destinationMarker);
+            if (routeLine) {
+                map.removeLayer(routeLine);
+                routeLine = null;
+            }
+
+            if (hasLivreurPosition) {
+                livreurMarker = L.marker([livreurLat, livreurLng])
+                    .addTo(map)
+                    .bindPopup('<strong>🚚 Livreur</strong>');
+            }
+
+            destinationMarker = L.marker([destination.lat, destination.lng])
+                .addTo(map)
+                .bindPopup(`<strong>📍 Destination</strong><br>${escapeHtml(destination.displayName || commande.client_adresse || '')}`);
+
+            if (hasLivreurPosition) {
+                await drawRoute({ lat: livreurLat, lng: livreurLng }, destination);
+            } else {
+                document.getElementById('eta-time').textContent = '-- min';
+                document.getElementById('eta-detail').textContent = 'En attente du livreur...';
+                map.setView([destination.lat, destination.lng], 15);
+            }
+
+            const points = hasLivreurPosition
+                ? [[livreurLat, livreurLng], [destination.lat, destination.lng]]
+                : [[destination.lat, destination.lng]];
+
+            map.fitBounds(L.latLngBounds(points), { padding: [40, 40], maxZoom: 15 });
+
+            setTimeout(() => map.invalidateSize(), 150);
         }
 
-        function calculateETA(origin, destination) {
-            if (typeof google === 'undefined' || !google.maps) return;
-            
-            const service = new google.maps.DistanceMatrixService();
-            service.getDistanceMatrix({
-                origins: [origin],
-                destinations: [destination],
-                travelMode: google.maps.TravelMode.DRIVING,
-                unitSystem: google.maps.UnitSystem.METRIC
-            }, (response, status) => {
-                if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
-                    const element = response.rows[0].elements[0];
-                    document.getElementById('detail-distance').textContent = element.distance.text;
-                    updateETA(element.duration.value);
-                }
-            });
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>'"]/g, char => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[char]));
+        }
+
+        async function drawRoute(origin, destination) {
+            if (!map || !destination) return;
+
+            const requestId = ++routeRequestId;
+
+            try {
+                const url = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`OSRM HTTP ${response.status}`);
+
+                const data = await response.json();
+                if (requestId !== routeRequestId) return;
+                if (!data.routes || !data.routes.length) throw new Error('Aucun itinéraire trouvé');
+
+                const route = data.routes[0];
+
+                if (routeLine) map.removeLayer(routeLine);
+
+                routeLine = L.geoJSON(route.geometry, {
+                    style: {
+                        color: '#0ea5e9',
+                        weight: 5,
+                        opacity: 0.85
+                    }
+                }).addTo(map);
+
+                const distanceKm = route.distance / 1000;
+                document.getElementById('detail-distance').textContent =
+                    distanceKm < 1 ? `${Math.round(route.distance)} m` : `${distanceKm.toFixed(1)} km`;
+
+                updateETA(route.duration);
+            } catch (error) {
+                console.error('[YARID] Itineraire OSRM:', error);
+                document.getElementById('detail-distance').textContent = '-- km';
+                document.getElementById('eta-time').textContent = '-- min';
+                document.getElementById('eta-detail').textContent = 'Itinéraire indisponible';
+            }
+        }
+
+        async function calculateETA(origin, destination) {
+            if (!destination) return;
+
+            try {
+                const url = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=false`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`OSRM HTTP ${response.status}`);
+
+                const data = await response.json();
+                if (!data.routes || !data.routes.length) return;
+
+                updateETA(data.routes[0].duration);
+            } catch (error) {
+                console.error('[YARID] ETA OSRM:', error);
+                document.getElementById('eta-time').textContent = '-- min';
+                document.getElementById('eta-detail').textContent = 'Calcul en cours...';
+            }
         }
 
         function updateETA(durationSeconds) {
-            const minutes = Math.ceil(durationSeconds / 60);
-            document.getElementById('eta-time').textContent = minutes + ' min';
-            const arrival = new Date(Date.now() + durationSeconds * 1000);
-            document.getElementById('eta-detail').textContent = 'Arrivee prevue a ' + arrival.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            const minutes = Math.max(1, Math.ceil(Number(durationSeconds) / 60));
+            document.getElementById('eta-time').textContent = `${minutes} min`;
+
+            const arrival = new Date(Date.now() + Number(durationSeconds) * 1000);
+            document.getElementById('eta-detail').textContent =
+                'Arrivee prevue a ' + arrival.toLocaleTimeString('fr-FR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
         }
 
         // ==========================================
@@ -521,60 +670,145 @@
         }
 
         function updateLivreurPosition(lat, lng) {
-            if (livreurMarker && map) {
-                const newPos = new google.maps.LatLng(lat, lng);
-                livreurMarker.setPosition(newPos);
-                map.panTo(newPos);
+            const newLat = parseFloat(lat);
+            const newLng = parseFloat(lng);
 
-                if (currentCommande && currentCommande.livreurs) {
-                    calculateETA(
-                        { lat, lng },
-                        { lat: currentCommande.livreurs.last_lat || 3.8480, lng: currentCommande.livreurs.last_lng || 11.5021 }
-                    );
-                }
+            if (!Number.isFinite(newLat) || !Number.isFinite(newLng)) return;
 
-                document.getElementById('detail-updated').textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-            }
-        }
-
-        // ==========================================
-        // ACTIONS
-        // ==========================================
-        function contactLivreur() {
-            if (!currentCommande || !currentCommande.livreurs || !currentCommande.livreurs.phone) {
-                alert('Aucun livreur assigne');
+            if (!map || !livreurMarker) {
+                if (currentCommande) initMap(newLat, newLng, currentCommande);
                 return;
             }
-            const phone = currentCommande.livreurs.phone;
-            window.location.href = 'tel:' + phone;
-        }
 
-        function refreshTracking() {
-            if (currentOrderId) {
-                trackOrder();
+            livreurMarker.setLatLng([newLat, newLng]);
+            map.panTo([newLat, newLng], { animate: true, duration: 0.8 });
+
+            if (currentDestination) {
+                drawRoute(
+                    { lat: newLat, lng: newLng },
+                    currentDestination
+                );
             }
+
+            document.getElementById('detail-updated').textContent =
+                new Date().toLocaleTimeString('fr-FR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
         }
 
-        // ==========================================
-        // LOAD GOOGLE MAPS (with fallback key input)
-        // ==========================================
-        function loadGoogleMaps() {
-            const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyYOUR_API_KEY&libraries=geometry,places`;
-            script.async = true;
-            script.defer = true;
-            script.onerror = () => {
-                document.getElementById('map').innerHTML = `
-                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#0f172a;color:#64748b;text-align:center;padding:2rem;">
-                        <p style="font-size:12px;font-weight:700;text-transform:uppercase;">Google Maps non disponible</p>
-                        <p style="font-size:10px;margin-top:4px;">Configurez votre cle API dans le code source</p>
-                    </div>`;
-            };
-            document.head.appendChild(script);
-        }
+        // // ==========================================
+// ACTIONS - LIVREUR
+// ==========================================
 
-        // Load Google Maps
-        loadGoogleMaps();
+function getLivreurPhone() {
+    if (!currentCommande) {
+        alert('Commande non chargee');
+        return null;
+    }
+
+    if (!currentCommande.livreurs) {
+        alert('Aucun livreur assigne a cette commande');
+        return null;
+    }
+
+    if (!currentCommande.livreurs.phone) {
+        alert('Le numero du livreur est introuvable');
+        return null;
+    }
+
+    let phone = String(currentCommande.livreurs.phone)
+        .trim()
+        .replace(/\D/g, '');
+
+    // Supprimer l'indicatif 237 s'il existe deja
+    if (phone.startsWith('237')) {
+        phone = phone.substring(3);
+    }
+
+    // Supprimer le 0 national
+    phone = phone.replace(/^0+/, '');
+
+    // Verifier le numero camerounais
+    if (phone.length !== 9) {
+        alert('Numero du livreur invalide : ' + phone);
+        return null;
+    }
+
+    return phone;
+}
+
+
+// APPELER LE LIVREUR
+function contactLivreur() {
+    if (!currentCommande) {
+        alert('Commande non chargée');
+        return;
+    }
+
+    if (!currentCommande.livreurs) {
+        alert('Aucun livreur assigné');
+        return;
+    }
+
+    let phone = currentCommande.livreurs.phone;
+
+    if (!phone) {
+        alert('Numéro du livreur introuvable');
+        return;
+    }
+
+    // Nettoyage du numéro
+    phone = String(phone).replace(/\D/g, '');
+
+    // Ajouter l'indicatif du Cameroun
+    if (phone.startsWith('237')) {
+        phone = '+' + phone;
+    } else {
+        phone = '+237' + phone.replace(/^0+/, '');
+    }
+
+    console.log('Numéro appel :', phone);
+
+    // Appel téléphonique
+    window.location.href = 'tel:' + phone;
+}
+
+
+// WHATSAPP DU LIVREUR
+function whatsappLivreur() {
+
+    const phone = getLivreurPhone();
+
+    if (!phone) return;
+
+    const numero = '237' + phone;
+
+    const orderId = currentCommande.order_id || '';
+
+    const message = encodeURIComponent(
+        'Bonjour, je suis client YARID.\n\n' +
+        'Commande : ' + orderId + '\n\n' +
+        'Je voudrais savoir où en est ma livraison.'
+    );
+
+    const whatsappURL =
+        'https://wa.me/' + numero + '?text=' + message;
+
+    console.log('📱 WhatsApp :', whatsappURL);
+
+    // Navigation directe — plus fiable sur iPhone
+    window.location.href = whatsappURL;
+}
+
+
+// ACTUALISER
+function refreshTracking() {
+
+    if (currentOrderId) {
+        trackOrder();
+    }
+}
     </script>
 </body>
 </html>
