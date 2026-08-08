@@ -579,18 +579,21 @@
             const total     = Math.max(0, sousTotal + livraison - promo);
 
             const payload = {
-                order_id: orderId,
-                client_nom: document.getElementById('in_nom').value,
-                client_phone: document.getElementById('in_tel').value,
-                client_adresse: document.getElementById('in_adresse').value,
-                sous_total: sousTotal,
-                frais_livraison: livraison,
-                remise: promo,
-                montant_total: total,
-                statut: document.getElementById('in_status').value,
-                mode_paiement: document.getElementById('in_paiement').value
-            };
+    order_id: orderId,
+    client_nom: document.getElementById('in_nom').value,
+    client_phone: document.getElementById('in_tel').value,
+    client_adresse: document.getElementById('in_adresse').value,
 
+    // LIVREUR ATTRIBUÉ
+    livreur_id: document.getElementById('in_livreur').value || null,
+
+    sous_total: sousTotal,
+    frais_livraison: livraison,
+    remise: promo,
+    montant_total: total,
+    statut: document.getElementById('in_status').value,
+    mode_paiement: document.getElementById('in_paiement').value
+};
             const { data, error } = await _supabase.from('commandes').upsert([payload], { onConflict: 'order_id' }).select();
 
             if (error) {
