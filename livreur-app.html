@@ -45,6 +45,7 @@
         .badge-en_livraison    { background: #dbeafe; color: #1e40af; }
         .badge-livre           { background: #d1fae5; color: #065f46; }
         .badge-annule          { background: #fee2e2; color: #991b1b; }
+        .badge-attente_accord  { background: #fed7aa; color: #9a3412; }
 
         /* Course card */
         .course-card {
@@ -53,6 +54,7 @@
         }
         .course-card:hover { border-color: #334155; }
         .course-card.active { border-color: #0ea5e9; box-shadow: 0 0 30px rgba(14,165,233,0.1); }
+        .course-card.pending { border-color: #f97316; box-shadow: 0 0 30px rgba(249,115,22,0.15); }
 
         /* Buttons */
         .btn {
@@ -83,10 +85,17 @@
             display: flex; flex-direction: column; align-items: center; gap: 3px;
             padding: 8px 12px; color: #64748b; transition: all 0.2s;
             cursor: pointer; border: none; background: none; flex: 1;
+            position: relative;
         }
         .nav-item.active { color: #0ea5e9; }
         .nav-item span { font-size: 8px; font-weight: 800; text-transform: uppercase; }
         .nav-item svg { width: 20px; height: 20px; }
+        .nav-badge {
+            position: absolute; top: 2px; right: 18px; min-width: 15px; height: 15px;
+            background: #f97316; color: white; border-radius: 9999px; font-size: 8px;
+            font-weight: 900; display: flex; align-items: center; justify-content: center;
+            padding: 0 3px;
+        }
 
         /* Sections */
         .section { display: none; animation: fadeIn 0.3s ease; }
@@ -330,6 +339,7 @@
             <button class="nav-item active" onclick="showSection('dashboard')" id="nav-dashboard">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                 <span>Courses</span>
+                <span id="nav-courses-badge" class="nav-badge hidden">0</span>
             </button>
             <button class="nav-item" onclick="showSection('scanner')" id="nav-scanner">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-2 0h-5m5 0V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2m6 11h2m-2 0h-5m5 0v-5a1 1 0 00-1-1h-2a1 1 0 00-1 1v5"/></svg>
@@ -477,6 +487,7 @@
             updateOnlineStatusUI();
             await loadStats();
             await loadCourses();
+            subscribeToNewAssignments();
         }
 
         async function loadStats() {
@@ -509,6 +520,24 @@
         }
 
         // ==========================================
+        // NOUVELLES ATTRIBUTIONS EN TEMPS REEL
+        // ==========================================
+        function subscribeToNewAssignments() {
+            if (!currentLivreur) return;
+            _supabase.channel('livreur_assignments_' + currentLivreur.id)
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'commandes',
+                    filter: 'livreur_id=eq.' + currentLivreur.id
+                }, () => {
+                    loadCourses();
+                    loadStats();
+                })
+                .subscribe();
+        }
+
+        // ==========================================
         // COURSES
         // ==========================================
         async function loadCourses() {
@@ -517,17 +546,23 @@
             const container = document.getElementById('courses-list');
             container.innerHTML = '<div class="course-card skeleton" style="height:90px;"></div><div class="course-card skeleton" style="height:90px;"></div>';
 
+            // livreur_confirme: null/false = en attente d'acceptation, true = acceptee.
+            // On recupere toutes les commandes qui me sont assignees et pas encore livrees/annulees.
             const { data: courses, error } = await _supabase
                 .from('commandes')
                 .select('*')
                 .eq('livreur_id', currentLivreur.id)
-                .in('statut', ['en_preparation', 'en_livraison', 'paye'])
+                .not('statut', 'in', '(livre,annule)')
                 .order('created_at', { ascending: false });
 
             if (error || !courses || courses.length === 0) {
                 container.innerHTML = '<p style="font-size:12px;color:#334155;text-align:center;padding:24px 0;">Aucune course assignee</p>';
+                updateCoursesBadge(0);
                 return;
             }
+
+            const pendingCount = courses.filter(c => !c.livreur_confirme).length;
+            updateCoursesBadge(pendingCount);
 
             const badgeClass = {
                 en_attente: 'badge-en_attente', paye: 'badge-en_preparation',
@@ -542,22 +577,35 @@
 
             container.innerHTML = courses.map(c => {
                 const isActive = c.statut === 'en_livraison';
+                const needsAcceptance = !c.livreur_confirme;
+
                 return `
-                    <div class="course-card ${isActive ? 'active' : ''}" data-id="${c.id}">
+                    <div class="course-card ${isActive ? 'active' : ''} ${needsAcceptance ? 'pending' : ''}" data-id="${c.id}">
                         <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:8px;">
                             <div style="min-width:0;flex:1;">
                                 <p class="clamp-1" style="font-size:12px;font-weight:900;color:white;margin:0 0 2px;">${c.order_id}</p>
                                 <p class="clamp-1" style="font-size:10px;color:#64748b;margin:0;">${c.client_nom || 'Client'}</p>
                                 <p style="font-size:10px;color:#475569;margin:2px 0 0;">${c.client_phone || ''}</p>
                             </div>
-                            <span class="badge ${badgeClass[c.statut] || 'badge-en_attente'}" style="flex-shrink:0;">${badgeLabel[c.statut] || c.statut}</span>
+                            ${needsAcceptance
+                                ? `<span class="badge badge-attente_accord" style="flex-shrink:0;">Nouvelle course</span>`
+                                : `<span class="badge ${badgeClass[c.statut] || 'badge-en_attente'}" style="flex-shrink:0;">${badgeLabel[c.statut] || c.statut}</span>`
+                            }
                         </div>
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;">
                             <p style="font-size:14px;font-weight:900;color:#0ea5e9;margin:0;white-space:nowrap;">${(c.montant_total || 0).toLocaleString()} FCFA</p>
                             <p class="clamp-1" style="font-size:10px;color:#475569;margin:0;text-align:right;">${c.client_adresse || 'Yaounde'}</p>
                         </div>
                         <div style="display:flex;gap:6px;">
-                            ${c.statut !== 'en_livraison' ? `
+                            ${needsAcceptance ? `
+                                <button onclick="acceptCourse('${c.id}')" class="btn btn-success" style="flex:1;font-size:9px;padding:8px;">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    Accepter
+                                </button>
+                                <button onclick="declineCourse('${c.id}')" class="btn btn-danger" style="flex:1;font-size:9px;padding:8px;">
+                                    Refuser
+                                </button>
+                            ` : c.statut !== 'en_livraison' ? `
                                 <button onclick="startDelivery('${c.id}')" class="btn btn-success" style="flex:1;font-size:9px;padding:8px;">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                     Demarrer
@@ -577,9 +625,52 @@
             }).join('');
         }
 
+        function updateCoursesBadge(count) {
+            const badge = document.getElementById('nav-courses-badge');
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
         function callClient(phone) {
             if (!phone) return alert('Numero non disponible');
             window.location.href = 'tel:' + phone;
+        }
+
+        // ==========================================
+        // ACCEPTATION / REFUS DE COURSE
+        // ==========================================
+        async function acceptCourse(commandeId) {
+            const { error } = await _supabase
+                .from('commandes')
+                .update({ livreur_confirme: true })
+                .eq('id', commandeId);
+
+            if (error) {
+                alert('Erreur lors de l\'acceptation: ' + error.message);
+                return;
+            }
+            loadCourses();
+            loadStats();
+        }
+
+        async function declineCourse(commandeId) {
+            if (!confirm('Refuser cette course ? Elle sera desassignee et devra etre rattribuee.')) return;
+
+            const { error } = await _supabase
+                .from('commandes')
+                .update({ livreur_id: null, livreur_confirme: null })
+                .eq('id', commandeId);
+
+            if (error) {
+                alert('Erreur lors du refus: ' + error.message);
+                return;
+            }
+            loadCourses();
+            loadStats();
         }
 
         // ==========================================
@@ -751,11 +842,25 @@
                 }
 
                 const now = new Date().toISOString();
-                await _supabase.from('commandes').update({
+                const { data: updated, error: updateError } = await _supabase.from('commandes').update({
                     statut: 'livre',
                     livraison_date: now,
                     livraison_eta: now
-                }).eq('id', commande.id);
+                }).eq('id', commande.id).select();
+
+                // Verification stricte : si l'update echoue (RLS, reseau...) ou si
+                // aucune ligne n'est renvoyee, on NE montre PAS le modal de succes.
+                // C'est ce qui causait le "statut ne passe pas a livre" : l'erreur
+                // etait ignoree et le modal s'affichait comme si tout allait bien.
+                if (updateError) {
+                    console.error('[YARID] Echec update statut livre:', updateError);
+                    showScanResult('Erreur: statut non mis a jour (' + updateError.message + ')', 'error');
+                    return;
+                }
+                if (!updated || updated.length === 0) {
+                    showScanResult('Aucune commande mise a jour. Verifiez les droits Supabase (RLS) sur la table commandes.', 'error');
+                    return;
+                }
 
                 await _supabase.from('notifications_push').insert([{
                     commande_id: commande.id,
